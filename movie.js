@@ -8,7 +8,7 @@
 
 }
 
-let movieCache  = []
+
 
 
 function searchMoviebyId(searchId){

@@ -6,7 +6,7 @@ let actor = {
     character : null
 }
 
-let actorCache  = [] //under discussion
+
 
 
 
