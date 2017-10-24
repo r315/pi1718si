@@ -1,16 +1,27 @@
 'use strict'
 
- let movie = {
-    title : null,
-    id : null,
-    releaseDate : null, 
-    voteAverage : null 
-
+ function movie() {
+    this.title = null,
+    this.id = null,
+    this.releaseDate = null, 
+    this.voteAverage = null 
+    
 }
 
-let movieCache  = []
 
 
+
+function createMovie(tocreateMovie){
+    tempobj = JSON.parse(tocreateMovie)
+     mv =  new movie()
+     mv.id = tempobj.id
+     mv.title = tempobj.original_title
+     mv.releaseDate = tempobj.release_date
+     mv.voteAverage = tempobj.vote_average
+    return mv
+}
+
+/*
 function searchMoviebyId(searchId){
     let innerMovie =null
     if(isNaN(searchId)) {
@@ -23,3 +34,4 @@ function searchMoviebyId(searchId){
         throw("Not a movie ID") //confirmar esta sintax 
 
 }
+*/
