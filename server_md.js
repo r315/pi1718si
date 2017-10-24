@@ -10,8 +10,9 @@ function TmdbCreator(){
     return {
         'api' : 'http://api.themoviedb.org/3',
         'key' : 'a05eacfb6a397de0be6aed1a2c4ca73c',
-        'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&${this.query}`},
-        'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`}
+        'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}`},
+        'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
+        'actors' : function () {return `${this.api}/person/${this.id}/movie_credits/?api_key=${this.key}`}
     }
 }
 
@@ -29,6 +30,9 @@ function requestSuccess(req, resp){
     resp.end()
 }
 
+/*
+Handler for client requests
+*/
 function requestResponse(req, resp){
     if(req.method == 'GET'){
         let endpoint = req.url.split('/').splice(1)
@@ -45,10 +49,14 @@ function requestResponse(req, resp){
 
 
 /*
-Request Function
- */
+Request Function, returns data for the given id and path
+if successufull calls the callback with the received data as
+parameter
+on error return error data 
+*/
 function requestFunction(reqParam){
     tmdb.id = reqParam.id
+    tmdb.query = reqParam.query
     let url = tmdb[reqParam.path]()
     
     if(url == undefined){
@@ -56,8 +64,7 @@ function requestFunction(reqParam){
         logger(error)
         reqParam.response(error)
         return
-    }
-    
+    }    
     
     http.get(url, (resp) => {
         let buffer = ''
