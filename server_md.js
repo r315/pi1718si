@@ -6,6 +6,17 @@ const TAG = 'Server'
 
 const logger = (msg) => {console.log(TAG + ': ' + msg)}
 
+function TmdbCreator(){
+    return {
+        'api' : 'http://api.themoviedb.org/3',
+        'key' : 'a05eacfb6a397de0be6aed1a2c4ca73c',
+        'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&${this.query}`},
+        'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`}
+    }
+}
+
+let tmdb = new TmdbCreator()
+
 function requestFail(resp, msg){
     resp.writeHead(404,{'Content-Type': 'text/html'})
     resp.write(msg)
@@ -13,7 +24,8 @@ function requestFail(resp, msg){
 }
 
 function requestSuccess(req, resp){
-    resp.writeHead(200, {'Content-Type': 'text/html'});
+    resp.writeHead(200, {'Content-Type': 'text/html'})
+    // Call dispacher here ??
     resp.end()
 }
 
@@ -26,8 +38,8 @@ function requestResponse(req, resp){
             requestFail(resp,msg)
             return
         }
-        requestSuccess(req, resp)
         logger(endpoint)
+        requestSuccess(req, resp)
     }
 }
 
