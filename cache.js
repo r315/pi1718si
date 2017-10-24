@@ -1,12 +1,14 @@
 'use strict'
 
-const req = require('./requester.js')
+const req = require('./requester')
+const movie = require('./movie')
 let movieCache 
 let actorCache 
-let reqparm = {
-    'Path' : '',
-     'Id'  : ''
+let reqParm = {
+    'path' : '',
+     'id'  : ''
 }
+
 
 
 //let MovieDetails 
@@ -19,7 +21,8 @@ function getMovie(movieId){
         .filter((elem) = elem.id == movieId)[0]
         if(innerMovie == null){ // validar se é null ou undfiend
             reqparm = {'movie':movieId}  
-            innermovie = req.makeRequest(reqparm)
+                req.makeRequest(reqParm)
+
             movieCache.pusd(innerMovie)
         }
     return innerMovie
