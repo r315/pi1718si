@@ -44,6 +44,33 @@ function requestResponse(req, resp){
 }
 
 
+/*
+Request Function
+ */
+function requestFunction(reqParam){
+    tmdb.id = reqParam.id
+    let url = tmdb[reqParam.path]()
+    
+    if(url == undefined){
+        let error = 'Request: Invalid Path' + reqParam.path
+        logger(error)
+        reqParam.response(error)
+        return
+    }
+    
+    
+    http.get(url, (resp) => {
+        let buffer = ''
+        resp.on('data', (data) => buffer += data)
+        resp.on('end', () => reqParam.response(buffer))
+        resp.on('error', (erro) => { logger(error); reqParam.response(error) })
+        logger('Requesting data from ' + url)
+    })
+}  
+
+/*
+    Initialize server to process client requests and do requests
+*/
 module.exports = {    
     'init' : function (port){http.createServer( requestResponse).listen(port); logger(`Started on ${port}`)},
     'get' : function(url, callback){
@@ -52,6 +79,8 @@ module.exports = {
             resp.on('data', (data) => buffer += data)  //TODO: improve this ?
             resp.on('end', () => callback(buffer))
             resp.on('error', (erro) => logger(error))
+            logger('Requesting data from ' + url)
         })
-    }
+    },
+    'request' : requestFunction
 }
