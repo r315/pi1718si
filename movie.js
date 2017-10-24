@@ -1,4 +1,5 @@
 'use strict'
+const fs =  require('fs')
 
  function movie() {
     this.title = null,
@@ -12,14 +13,29 @@
 
 
 function createMovie(tocreateMovie){
-    tempobj = JSON.parse(tocreateMovie)
-     mv =  new movie()
-     mv.id = tempobj.id
-     mv.title = tempobj.original_title
-     mv.releaseDate = tempobj.release_date
-     mv.voteAverage = tempobj.vote_average
-    return mv
+    let arrmov = []
+     JSON.parse(tocreateMovie).results.forEach( function(elem) { 
+           let mv =  new movie()
+            mv.id = elem.id
+            mv.title = elem.original_title
+            mv.releaseDate = elem.release_date
+            mv.voteAverage = elem.vote_average
+            arrmov.push(mv)
+        })
+    return arrmov
+    
 }
+
+/*
+fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
+    if(err) throw err
+    createMovie(data)
+         
+})
+*/
+
+
+
 
 /*
 function searchMoviebyId(searchId){
