@@ -1,44 +1,61 @@
 'use strict'
 
-const req = require('./requester')
-const movie = require('./movie')
+const req = require('./server_md')
+const innerMovie = require('./movie')
 let movieCache 
 let actorCache 
-let reqParm = {
-    'path' : '',
-     'id'  : ''
-}
 
 
 
 //let MovieDetails 
 
-function getMovie(movieId){
+
+
+function getMovieDetails(movieId){
     let innerMovie
     if(movieCache==undefined){
         movieCache = [] 
         innerMovie = movieCache
         .filter((elem) = elem.id == movieId)[0]
         if(innerMovie == null){ // validar se é null ou undfiend
-            reqparm = {'movie':movieId}  
+            reqparm = {'path':'movie','id':movieId}
+
                 req.makeRequest(reqParm)
 
             movieCache.pusd(innerMovie)
         }
     return innerMovie
-        /* request de um movie a web */
-        /* recebe o movie e guarda na cache */
-        /* crio um objecto to tipo moviedetails e crio  */
+      
     }
 
 
 }
 
 
-function getActor(actorId){
+function searchByMovie(searchTerm){
 
-
-
-
+    let reqparm={'path':'search','query':searchTerm,'response':(data)=>reqSearchMovie(data)}
+    req.request(reqparm)
 
 }
+
+
+function reqSearchMovie(data){
+        innerMovie.createMovie(data).forEach((elem) => 
+            console.log(elem))
+        
+}
+
+/*
+function reqMovie(Data){
+
+}
+
+
+
+function getActor(actorId){
+
+}
+*/
+
+searchByMovie("pirates")
