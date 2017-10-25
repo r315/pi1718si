@@ -4,7 +4,7 @@ let http = require('http')
 const endpoints = ['search', 'movies', 'actors']
 const TAG = 'Server'
 
-const logger = (msg) => {console.log(TAG + ': ' + msg)}
+const logger = (msg) => {console.log(TAG + ': ' + msg); return msg;}
 
 function TmdbCreator(){
     return {
@@ -18,16 +18,39 @@ function TmdbCreator(){
 
 let tmdb = new TmdbCreator()
 
+/*
+client request responses
+*/
+function dispatcherMock(endpointReq, endpointReq_cb){
+    endpointReq.data = 'Recieved Data'    
+    endpointReq_cb(endpointReq)   
+}
+
+
 function requestFail(resp, msg){
     resp.writeHead(404,{'Content-Type': 'text/html'})
     resp.write(msg)
     resp.end()
 }
 
-function requestSuccess(req, resp){
+/*
+on success the server has to request data to the dispatcher ans this data could not 
+be available emidiatly, so as solution an object and a callback is used as parametes
+when calling the dispatcher
+*/
+function requestSuccess(req, resp, endpoint){
     resp.writeHead(200, {'Content-Type': 'text/html'})
-    // Call dispacher here ??
-    resp.end()
+    dispatcherMock({
+        'resp' : resp,
+        'req' : req,
+        'endpoint': endpoint,
+        'data' : ''
+    }, 
+    function(epReq){ 
+        epReq.resp.write(epReq.data); 
+        epReq.resp.end();
+        //logger(epReq.data)
+    })
 }
 
 /*
@@ -35,15 +58,33 @@ Handler for client requests
 */
 function requestResponse(req, resp){
     if(req.method == 'GET'){
-        let endpoint = req.url.split('/').splice(1)
-        if(!endpoints.includes(endpoint[0])){
-            let msg = `Endpoint not found \"/${endpoint[0]}\"`
+        let endpoint = {}
+        endpoint.url = req.url;
+        endpoint.path = endpoint.url.split('/').splice(1)
+
+        if(endpoint.path == ''){
+            let msg = 'No endpoint selected'
             logger(msg)
-            requestFail(resp,msg)
+            requestFail(resp, msg)
             return
         }
-        logger(endpoint)
-        requestSuccess(req, resp)
+         
+        // TODO: This MUST Be Fixed
+        if(endpoint.path[0].includes('search')){
+            endpoint.query = endpoint.url.split('=').splice(1)
+            if(endpoint.query == ''){
+                requestFail(resp, logger('Error missing query for search'))
+                return
+            }
+        }else{
+            endpoint.id = endpoint.path[1]
+            if(endpoint.id == undefined || endpoint.id == '' ){
+                requestFail(resp, logger('Error missing id for movie'))
+                return
+            }
+        }
+        logger(endpoint.url)
+        requestSuccess(req, resp, endpoint)
     }
 }
 
@@ -79,7 +120,7 @@ function requestFunction(reqParam){
     Initialize server to process client requests and do requests
 */
 module.exports = {    
-    'init' : function (port){http.createServer( requestResponse).listen(port); logger(`Started on ${port}`)},
+    'init' : function (port){http.createServer( requestResponse ).listen(port); logger(`Started on ${port}`)},
     'get' : function(url, callback){
         http.get(url, (resp) => {
             let buffer = ""
