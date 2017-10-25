@@ -9,9 +9,6 @@ function movie() {
     
 }
 
-
-
-
 function createMovie(tocreateMovie){
     let arrmov = []
      JSON.parse(tocreateMovie).results.forEach( function(elem) { 
@@ -26,7 +23,6 @@ function createMovie(tocreateMovie){
     
 }
 
-
 /*
 fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
     if(err) throw err
@@ -35,8 +31,7 @@ fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
 })
 */
 
-
 module.exports = {
     'movie':movie,
-   'createMovie':createMovie
+    'createMovie':createMovie
 }
