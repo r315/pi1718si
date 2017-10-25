@@ -3,7 +3,7 @@
 const fs = require('fs')
 let castCrew= require('./castCrew')
 
-module.exports=function movieDetails() {
+function movieDetails() {
     this.title = null,
     this.id = null,
     this.releasedate = null,
@@ -44,8 +44,13 @@ function createMovieDetails (movieInfo, movieCredits) {
     
 }
 
-//Run Code//
 
+module.exports = {
+    'createMovieDetails' : createMovieDetails
+}
+
+//Run Code//
+/*
 fs.readFile('GetMovieExample.txt',function (err,movieInfo) {
     if(err) throw err
     fs.readFile('GetMovieCreditsExample.txt',function (err,movieCredits) {
@@ -53,3 +58,6 @@ fs.readFile('GetMovieExample.txt',function (err,movieInfo) {
     createMovieDetails(movieInfo,movieCredits)
     })     
 })
+
+
+*/
