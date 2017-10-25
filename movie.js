@@ -35,4 +35,6 @@ fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
 */
 
 
-module.exports(createMovie)
+module.exports = {
+    'createMovie':createMovie
+}

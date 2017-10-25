@@ -3,7 +3,7 @@
 const fs = require('fs')
 let castCrew= require('./castCrew')
 
-function movieDetails() {
+module.exports=function movieDetails() {
     this.title = null,
     this.id = null,
     this.releasedate = null,
