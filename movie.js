@@ -1,6 +1,7 @@
 'use strict'
 const fs =  require('fs')
- function movie() {
+
+function movie() {
     this.title = null,
     this.id = null,
     this.releaseDate = null, 
@@ -36,5 +37,6 @@ fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
 
 
 module.exports = {
-    'createMovie':createMovie
+    'movie':movie,
+   'createMovie':createMovie
 }
