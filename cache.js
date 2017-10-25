@@ -1,7 +1,8 @@
 'use strict'
 
-const req = require('./server_md')
-const innerMovie = require('./movie')
+const req = require('./requester')
+const Movie = require('./movie')
+const movieDetails = require('./movieDetails')
 let movieCache 
 let actorCache 
 
@@ -18,7 +19,7 @@ function getMovieDetails(movieId){
         innerMovie = movieCache
         .filter((elem) = elem.id == movieId)[0]
         if(innerMovie == null){ // validar se é null ou undfiend
-            reqparm = {'path':'movie','id':movieId}
+            let reqparm = {'path':'movie','id':movieId}
 
                 req.makeRequest(reqParm)
 
@@ -30,21 +31,36 @@ function getMovieDetails(movieId){
 
 
 }
+/** needs test */
+function searchMovieById(id){
+ 
+    req.searchByMovieId(id,reqSearchMovieById)
+
+}
+
+/* needs test */
+function reqSearchMovieById(datamvid){
+        movieDetails.createMovieDetails(datamvid[movie],datamvid[cast])
+}
 
 
 function searchByMovie(searchTerm){
 
-    let reqparm={'path':'search','query':searchTerm,'response':(data)=>reqSearchMovie(data)}
-    req.request(reqparm)
+    req.searchByMovie(searchTerm,reqSearchMovie)
+    //let reqparm={'path':'search','query':searchTerm,'response':(data)=>reqSearchMovie(data)}
+    //req.request(reqparm)
 
 }
+
 
 
 function reqSearchMovie(data){
-        innerMovie.createMovie(data).forEach((elem) => 
+        Movie.createMovie(data).forEach((elem) => 
             console.log(elem))
         
 }
+
+
 
 /*
 function reqMovie(Data){
@@ -58,4 +74,4 @@ function getActor(actorId){
 }
 */
 
-searchByMovie("pirates")
+searchByMovie("Blade Runner")
