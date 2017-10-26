@@ -20,7 +20,9 @@ function TmdbCreator(apikey){
         'key' : apikey,
         'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
-        'actors' : function () {return `${this.api}/person/${this.id}/movie_credits/?api_key=${this.key}`}
+        'actors' : function () {return `${this.api}/person/${this.id}/movie_credits/?api_key=${this.key}`},
+        'configuration' : function () {return `${this.api}/configuration?api_key=${this.key}`},
+        'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`}
     }
 }
 
@@ -103,8 +105,9 @@ on error return error data
 */
 function requestFunction(reqParam){
     checkInitialyzed()
-    tmdb.id = reqParam.id
-    tmdb.query = reqParam.query
+    Object.keys(reqParam)
+        .forEach((prop) => tmdb[prop] = reqParam[prop])
+
     let url = tmdb[reqParam.path]()
     
     if(url == undefined){
@@ -112,7 +115,13 @@ function requestFunction(reqParam){
         logger(error)
         reqParam.response(error)
         return
-    }    
+    }
+    
+    /* for maintain async model set mock callback */
+    if(reqParam.path == 'posterurl'){
+        setTimeout(() => reqParam.response(url),10)
+        return
+    }        
     
     http.get(url, (resp) => {
         let buffer = ''
@@ -131,6 +140,7 @@ function checkInitialyzed(){
 
 /*
 Initialize server to process client requests and do requests
+Create tmdb api object with configurations
 */
 function init(port){    
     try{
@@ -139,14 +149,31 @@ function init(port){
            throw new Error()
         }        
         tmdb = new TmdbCreator(data.key)
+        initialyzed = true
+        /* if no configuration for images get it from api */
+        if (data.base_url == undefined || data.base_url == '') {
+            requestFunction({
+                'path':'configuration', 
+                'response' : function(conf){
+                    let data = JSON.parse(conf).images
+                    tmdb.base_url = data.base_url
+                    tmdb.logo_sizes = data.logo_sizes
+                    fs.writeFile(CONFIG_FILE,JSON.stringify(tmdb))
+                }
+            })
+        }
+        else{
+            tmdb.base_url = data.base_url
+            tmdb.logo_sizes = data.logo_sizes
+        }
+
+        http.createServer( requestResponse ).listen(port)    
+        logger(`Started on ${port}`)    
     }catch(err){
         logger(`Unable to read key from file \"${CONFIG_FILE}\"`)
         logger(`Please add key file, exiting...`)            
         process.exit()
-    }
-    http.createServer( requestResponse ).listen(port)
-    initialyzed = true
-    logger(`Started on ${port}`)    
+    }   
 }
 
 /*

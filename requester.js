@@ -49,8 +49,45 @@ function searchByMovieId(searchId, cb){
     server.request(reqcast)
 }
 
+/*
+    TODO: Test this function
+*/
+function getActorById(id, cb){
+    let respdata = {
+        'actors' : '', 
+        'cast' : '',
+        'count' : MOVIE_DETAILS_SIZE
+    }  
+    
+    let reqactor = {
+        'path':'actors',
+        'id' : id,
+        'response' : function(data) { 
+            respdata.cast = data
+            cb(respdata)           
+        }
+    }
+
+    server.request(reqactor)
+}
+
+/*
+*/
+function imageUrl(path, size, cb){
+    
+    let req = {
+        'path' : 'posterurl',
+        'poster_path' : path,
+        'poster_size' : size,
+        'response' : function(url) { cb(url) }
+    }
+
+    server.request(req)
+}
 
 module.exports = { 
     'searchByMovie' : searchByMovie,
-    'searchByMovieId' : searchByMovieId 
+    'searchByMovieId' : searchByMovieId,
+    'getActorById' : getActorById,
+    'imageUrl' : imageUrl 
 }
