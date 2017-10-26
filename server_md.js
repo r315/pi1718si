@@ -1,22 +1,28 @@
 'use strict'
 
 let http = require('http')
+let fs = require('fs')
+
 const endpoints = ['search', 'movies', 'actors']
-const TAG = 'Server'
+const CONFIG_FILE = 'server.json'
 
-const logger = (msg) => {console.log(TAG + ': ' + msg); return msg;}
+const logger = (msg) => {console.log('Server: ' + msg); return msg;}
 
-function TmdbCreator(){
+let tmdb 
+let initialyzed = false
+
+/*
+Create an object that contains links and key for the api
+*/
+function TmdbCreator(apikey){
     return {
         'api' : 'http://api.themoviedb.org/3',
-        'key' : 'a05eacfb6a397de0be6aed1a2c4ca73c',
+        'key' : apikey,
         'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
         'actors' : function () {return `${this.api}/person/${this.id}/movie_credits/?api_key=${this.key}`}
     }
 }
-
-let tmdb = new TmdbCreator()
 
 /*
 client request responses
@@ -56,7 +62,7 @@ function requestSuccess(req, resp, endpoint){
 /*
 Handler for client requests
 */
-function requestResponse(req, resp){
+function requestResponse(req, resp){    
     if(req.method == 'GET'){
         let endpoint = {}
         endpoint.url = req.url;
@@ -96,6 +102,7 @@ parameter
 on error return error data 
 */
 function requestFunction(reqParam){
+    checkInitialyzed()
     tmdb.id = reqParam.id
     tmdb.query = reqParam.query
     let url = tmdb[reqParam.path]()
@@ -116,12 +123,39 @@ function requestFunction(reqParam){
     })
 }  
 
+function checkInitialyzed(){
+    if(initialyzed == false) 
+        throw new Error("Server Not initialyzed")   
+}
+
+
 /*
-    Initialize server to process client requests and do requests
+Initialize server to process client requests and do requests
+*/
+function init(port){    
+    try{
+        let data = JSON.parse(fs.readFileSync(CONFIG_FILE,'utf8'))
+        if (data.key == undefined || data.key == '') {
+           throw new Error()
+        }        
+        tmdb = new TmdbCreator(data.key)
+    }catch(err){
+        logger(`Unable to read key from file \"${CONFIG_FILE}\"`)
+        logger(`Please add key file, exiting...`)            
+        process.exit()
+    }
+    http.createServer( requestResponse ).listen(port)
+    initialyzed = true
+    logger(`Started on ${port}`)    
+}
+
+/*
+Server Exports
 */
 module.exports = {    
-    'init' : function (port){http.createServer( requestResponse ).listen(port); logger(`Started on ${port}`)},
+    'init' : init,
     'get' : function(url, callback){
+        checkInitialyzed()
         http.get(url, (resp) => {
             let buffer = ""
             resp.on('data', (data) => buffer += data)  //TODO: improve this ?
