@@ -8,7 +8,7 @@ const server = require('./server_md')
 
 function searchByMovie(searchTerm,callbackfunc){
     
-        let reqparm={'path':'search','query':searchTerm,'response':(data)=> callbackfunc(data)}
+        let reqparm={'path':'search','query':searchTerm,'response':(data) => callbackfunc(data)}
         server.request(reqparm)
     
     }
