@@ -23,7 +23,6 @@ function createMovieDetails (movieInfo, movieCredits) {
     md.voteaverage = obj.vote_average
     md.tagline = obj.tagline
     md.originaltitle = obj.original_title
-    //mvd.castItemDto = JSON.parse(movieCredits)
     JSON.parse(movieCredits).crew.forEach( function(elem) { 
         if(elem.job=='Director') { 
             let ac = new castCrew()

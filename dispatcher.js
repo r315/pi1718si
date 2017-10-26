@@ -1,26 +1,11 @@
 'use strict'
 
 const CACHE = require('./cache')
-/*
-TODO: 
-imports dos modulos de criação para os endpoints necessarions 
-*/
 
+let entry = []
 
-// function dispatcher(entry,value){
-
-//         if(entry==="movies")
-//             // chamada ao objecto movies  
-//             console.log("not implemented")
-//         if(entry === "search")
-//             //chamada a funcção de movie .. com parametros de pesquisa == 
-//             console.log("not implemented")
-//         if(entry === "actors")
-
-//          //chamada a funcção actor
-//          console.log("not implemented")
-
-// }
+/* Dispatche Assumes a two position array on entry */
+//:TODO Check with Hugo R.
 
 function dispatcher(entry){
 
@@ -30,11 +15,11 @@ function dispatcher(entry){
         break
         
         case '/movies':
-
+            return CACHE.searchMovieById(entry[1])
         break
 
         case '/actors':
-        
+            return CACHE.searchByActor(entry[1])
         break
     }
 
