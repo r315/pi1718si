@@ -38,7 +38,7 @@ function searchMovieById(id){
 
 }
 
-/* needs test */
+
 function reqSearchMovieById(datamvid){
         movieDetails.createMovieDetails(datamvid[movie],datamvid[cast])
 }
@@ -56,7 +56,7 @@ term to be searched  and calls the requester , passing the function reqSearchMov
 
  */
 
-function searchByMovie(searchTerm){
+function searchByMovieId(searchTerm){
 
     req.searchByMovie(searchTerm,reqSearchMovie)
 
@@ -77,7 +77,7 @@ function reqSearchMovie(data){
 
 // missing get actorbyid
 
-//searchByMovie("Blade Runner")
+searchByMovie("Blade Runner")
 
 
 module.exports = {
