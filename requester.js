@@ -1,10 +1,10 @@
 'use strict'
 
+let server = require('./server_md')
+const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
 
-const server = require('./server_md')
-
-
+server.init(8080)
 
 function searchByMovie(searchTerm,callbackfunc){
     
@@ -14,9 +14,9 @@ function searchByMovie(searchTerm,callbackfunc){
     }
 
 
-function searchByMovieId_joinner(rspdata, cb){
-    if(rspdata.count == MOVIE_DETAILS_SIZE)
-        cp(rspdata)
+function searchByMovieId_colector(rspdata, cb){
+    if(--rspdata.count == 0)
+        cb(rspdata)
 }
 
 
@@ -24,20 +24,29 @@ function searchByMovieId(searchId, cb){
     let respdata = {
         'movie' : '', 
         'cast' : '',
-        'count' : 0
+        'count' : MOVIE_DETAILS_SIZE
     }
-
+    
     let reqmovie = {
         'path':'movies',
         'id' : searchId,
-        'response' : (data) => { respdata.movie = data; rspdata.count++; searchByMovieId_joinner(respdata, cb);}
+        'response' : function(data){ 
+            respdata.movie = data;            
+            searchByMovieId_colector(respdata, cb);          
+        }
     }
 
     let reqcast = {
         'path':'movies',
         'id' : searchId + '/credits',
-        'response' : (data) => { respdata.cast = data; rspdata.count++; searchByMovieId_joinner(respdata, cb);}
+        'response' : function(data) { 
+            respdata.cast = data;            
+            searchByMovieId_colector(respdata, cb);           
+        }
     }
+
+    server.request(reqmovie)
+    server.request(reqcast)
 }
 
 
