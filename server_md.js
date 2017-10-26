@@ -27,13 +27,10 @@ function TmdbCreator(apikey){
 }
 
 /*
-client request responses
+on success the server has to request data to the dispatcher ans this data could not 
+be available emidiatly, so as solution an object and a callback is used as parametes
+when calling the dispatcher
 */
-function dispatcherMock(endpointReq, endpointReq_cb){
-    endpointReq.data = 'Recieved Data'    
-    endpointReq_cb(endpointReq)   
-}
-
 
 function requestFail(resp, msg){
     resp.writeHead(404,{'Content-Type': 'text/html'})
@@ -42,35 +39,15 @@ function requestFail(resp, msg){
 }
 
 /*
-on success the server has to request data to the dispatcher ans this data could not 
-be available emidiatly, so as solution an object and a callback is used as parametes
-when calling the dispatcher
-*/
-function requestSuccess(req, resp, endpoint){
-    resp.writeHead(200, {'Content-Type': 'text/html'})
-    dispatcherMock({
-        'resp' : resp,
-        'req' : req,
-        'endpoint': endpoint,
-        'data' : ''
-    }, 
-    function(epReq){ 
-        epReq.resp.write(epReq.data); 
-        epReq.resp.end();
-        //logger(epReq.data)
-    })
-}
-
-/*
 Handler for client requests
 */
 function requestResponse(req, resp){    
     if(req.method == 'GET'){
-        let endpoint = {}
-        endpoint.url = req.url;
-        endpoint.path = endpoint.url.split('/').splice(1)
+        let wrapper= {}
+        wrapper.url = req.url;
+        wrapper.path = wrapper.url.split('/').splice(1)
 
-        if(endpoint.path == ''){
+        if(wrapper.path == ''){
             let msg = 'No endpoint selected'
             logger(msg)
             requestFail(resp, msg)
@@ -78,21 +55,31 @@ function requestResponse(req, resp){
         }
          
         // TODO: This MUST Be Fixed
-        if(endpoint.path[0].includes('search')){
-            endpoint.query = endpoint.url.split('=').splice(1)
-            if(endpoint.query == ''){
+        if(wrapper.path[0].includes('search')){
+            wrapper.query = wrapper.url.split('=').splice(1)
+            if(wrapper.query == ''){
                 requestFail(resp, logger('Error missing query for search'))
                 return
             }
         }else{
-            endpoint.id = endpoint.path[1]
-            if(endpoint.id == undefined || endpoint.id == '' ){
+            wrapper.id = wrapper.path[1]
+            if(wrapper.id == undefined || wrapper.id == '' ){
                 requestFail(resp, logger('Error missing id for movie'))
                 return
             }
         }
-        logger(endpoint.url)
-        requestSuccess(req, resp, endpoint)
+        wrapper.req = req
+        wrapper.resp = resp
+        wrapper.response = function(epReq){ 
+            epReq.resp.writeHead(200, {'Content-Type': 'text/html'})
+            epReq.resp.write(epReq.url); 
+            epReq.resp.end();
+            //logger(epReq.data)
+        }
+
+        logger(wrapper.url)
+        //dispatcher(wrapper)
+        setTimeout(() => wrapper.response(wrapper),2000)
     }
 }
 
