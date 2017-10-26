@@ -43,7 +43,9 @@ function reqSearchMovieById(datamvid){
         movieDetails.createMovieDetails(datamvid[movie],datamvid[cast])
 }
 
+function searchByActor(id){
 
+}
 
 /**
  * 
@@ -59,6 +61,8 @@ function searchByMovie(searchTerm){
     req.searchByMovie(searchTerm,reqSearchMovie)
 
 }
+
+
 
 /**
  * 
@@ -77,7 +81,9 @@ function reqSearchMovie(data){
 
 
 module.exports = {
-        'searchByMovie' : searchByMovie
+        'searchByMovie' : searchByMovie,
+        'searchByMovieId': searchByMovieId,
+        'searchByActor' : searchByActor
 
 }
 
