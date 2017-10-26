@@ -44,34 +44,40 @@ function reqSearchMovieById(datamvid){
 }
 
 
+
+/**
+ * 
+ * @param {*} searchTerm 
+ * 
+funtion that receives a string 
+term to be searched  and calls the requester , passing the function reqSearchMovie
+
+ */
+
 function searchByMovie(searchTerm){
 
     req.searchByMovie(searchTerm,reqSearchMovie)
-    //let reqparm={'path':'search','query':searchTerm,'response':(data)=>reqSearchMovie(data)}
-    //req.request(reqparm)
 
 }
 
-
-
+/**
+ * 
+ * @param {*} data 
+ * function that creates an array of movies and returns back to 
+ */
 function reqSearchMovie(data){
-        Movie.createMovie(data).forEach((elem) => 
-            console.log(elem))
+        return Movie.createMovie(data)
+                //.forEach((elem) =>console.log(elem)) 
         
 }
 
+// missing get actorbyid
+
+//searchByMovie("Blade Runner")
 
 
-/*
-function reqMovie(Data){
-
-}
-
-
-
-function getActor(actorId){
+module.exports = {
+        'searchByMovie' : searchByMovie
 
 }
-*/
 
-searchByMovie("Blade Runner")
