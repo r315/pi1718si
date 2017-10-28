@@ -1,10 +1,11 @@
 'use strict'
 
-const CACHE = require('./cache')
 let fs = require('fs')
+let search_route = require('./view_test')
+const CACHE = require('./cache')
 
 let routes = {
-    'search': function(){},
+    'search': function(placeholder){ search_route(placeholder)},
     'movies': function(){},
     'actors': function(){},
 }
@@ -57,7 +58,7 @@ module.exports = function(entry){
     let route = routes[entry.path[0]]
     if(route == undefined){
         entry.data = `Invalid path \"${entry.path[0]}\"`
-        entry.error = 400
+        entry.error = 400  //Invalid request
         entry.response(entry)
         return
     }
