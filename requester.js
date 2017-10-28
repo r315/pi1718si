@@ -3,6 +3,7 @@
 let server = require('./server_md')
 const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
+const ACTOR_DETAILS_SIZE = 2
 
 //server.init(8080)
 
@@ -59,9 +60,9 @@ GET /person/{person_id}
 */
 function getActorById(id, cb){
     let respdata = {
-        'actors' : '', 
-        'cast' : '',
-        'count' : MOVIE_DETAILS_SIZE
+        'actorinfo' : '', 
+        'roles' : '',
+        'count' : ACTOR_DETAILS_SIZE
     }  
     
     let reqactor = {
@@ -71,6 +72,10 @@ function getActorById(id, cb){
             respdata.actors = actordetails
             requestsCollector(respdata, cb)           
         }
+        // 'response' : function(data) { 
+        //     respdata.actorinfo = data
+        //     cb(respdata)           
+        // }
     }
     
     let reqactorcredits = {
@@ -80,6 +85,8 @@ function getActorById(id, cb){
             respdata.cast = castdata
             requestsCollector(respdata, cb)           
         }
+    }
+
     }
 
     server.request(reqactor)

@@ -21,7 +21,8 @@ function TmdbCreator(apikey){
         'page' : 1,
         'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}&page=${this.page}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
-        'actors' : function () {return `${this.api}/person/${this.id}/movie_credits?api_key=${this.key}`},
+        'actors' : function () {return `${this.api}/person/${this.id}?api_key=${this.key}`},
+        'roles' : function () {return `${this.api}/person/${this.id}/movie_credits?api_key=${this.key}`},
         'configuration' : function () {return `${this.api}/configuration?api_key=${this.key}`},
         'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`}
     }

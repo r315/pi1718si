@@ -36,6 +36,7 @@ function searchMovieById(id){
 /**
  * auxiliary function that adds a movie to the movie cache before
  * calling the return function 
+ * used locally
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
 function addMovietoCache(mv){
@@ -43,15 +44,17 @@ function addMovietoCache(mv){
          moviecache.push(mv)
 
      /* chamada ao dispatcher para devolver */
-     console.log(mv)
+     //console.log(mv) //test
     // searchMovieById(603) //TEST CODE
  }
  
  /**
   * function used to create a movie object
-  its used externally by the requester 
-  * @param {*} datamvid object with 2 propreties Movie - contains the information about the movie
-  *                                             cast -  contins information about the cast movie
+  
+  * @param {*} datamvid object with 2 propreties
+  *movie:contains the information about the movie
+  *cast:contains information about the cast movie
+  *used externally by the requester
   */
  function reqSearchMovieById(datamvid){
      addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]))
@@ -62,35 +65,47 @@ function addMovietoCache(mv){
 
 
 /**
- * 
- * @param {*} id 
+ * exported function to create an actor 
+ * used externally by the dispatcher
+ * @param {*} id id do actor pretendido
  */
 function searchByActor(id){
     let inneractor 
-    if(moviecache == undefined)
+    if(actorcache == undefined)
         actorcache = []
-        inneractor == actorcache.filter((act) => act.id == id)[0]
+
+        inneractor = actorcache.filter((act) => act.id == id)[0]
     if(inneractor == undefined){
-        req.getActorById(id,reqSearchActorByid)
+        req.getActorById(id,(data) =>reqSearchActorByid(data))
+    }else{
+        /** return function on requester */
+        console.log('cache hit on \n name:'+inneractor.name+"\n"+"id:"+inneractor.id) //teste code
     }
-
-
 }
 
-
+/**
+ * auxiliar function used to add actor object to the cache before returning back
+ * used locally
+ * @param {*} act 
+ */
 function addActortoCache(act){
     actorcache.push(act)
-    console.log(act)
+    /** retunr function on requester */
+    //console.log(act) //test 
+    //searchByActor(224513) //test
 
 }
 
-/** o request de actor precisa de mais um pedido  
- * http://api.themoviedb.org/3/person/224513?api_key=0dc44732a6c4d50f7ffdcccdbc734dd8 para ser passado
- * no parametro Actor
-*/
 
+/**
+ * function used to create a actor object receiving a object with 2 propreties 
+ * actorinfo : brings information relative to the actor 
+ * roles:  information relative to the roles that actor played 
+ * used externally by the requester 
+ * @param {*} dataaid 
+ */
 function  reqSearchActorByid(dataaid){
-    Actor.createActor(dataaid["actors"],dataaid["cast"])
+    addActortoCache(Actor.createActor(dataaid["actorinfo"],dataaid["roles"]))
 
 }
 
@@ -98,7 +113,7 @@ function  reqSearchActorByid(dataaid){
  * 
  * @param {*} searchTerm Search term to be used in the Api search of movies
  * 
-funtion that receives a string 
+function that receives a string 
 term to be searched  and calls the requester , passing the function reqSearchMovie
 
  */
@@ -122,7 +137,7 @@ function searchByMovie(searchTerm){
  * NOT FINISHED  
  */
 function reqSearchMovie(data){
-        return Movie.createMovie(data)
+         Movie.createMovie(data)
           .forEach((elem) =>console.log(elem)) 
         
 }
@@ -130,7 +145,7 @@ function reqSearchMovie(data){
 // missing get actorbyid
 //searchByActor(224513)
 //searchByMovie("Matrix")
-//earchMovieById(603)
+//searchMovieById(603)
 //searchMovieById(604)
 
 

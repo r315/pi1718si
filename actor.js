@@ -12,7 +12,7 @@ function actor() {
     
 }
 
-function createActor (actorInfo, actorMovieCredit) {
+function createActor(actorInfo, actorMovieCredit) {
     
         let obj = JSON.parse(actorInfo)
         let ac = new actor()
@@ -32,7 +32,7 @@ function createActor (actorInfo, actorMovieCredit) {
 }
 
 //Run Code//
-
+/*
 fs.readFile('GetActorExample.txt',function (err,actorInfo) {
     if(err) throw err
     fs.readFile('GetActorCreditsExample.txt',function (err,actorCredits) {
@@ -40,3 +40,8 @@ fs.readFile('GetActorExample.txt',function (err,actorInfo) {
     createActor(actorInfo,actorCredits)
     })     
 })
+
+*/
+module.exports = {
+    'createActor' : createActor
+}
