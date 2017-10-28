@@ -19,7 +19,10 @@ function requestsCollector(rspdata, cb){
         cb(rspdata)
 }
 
-
+/*
+GET /movie/{movie_id}
+GET /movie/{movie_id}/credits
+*/
 function searchByMovieId(searchId, cb){
     let respdata = {
         'movie' : '', 
@@ -50,7 +53,9 @@ function searchByMovieId(searchId, cb){
 }
 
 /*
-    TODO: Test this function
+Request actor deails and casted movies
+GET /person/{person_id}/movie_credits
+GET /person/{person_id}
 */
 function getActorById(id, cb){
     let respdata = {
@@ -82,17 +87,27 @@ function getActorById(id, cb){
 }
 
 /*
+The url for images is composed of 3 pieces of data,
+base_url, a poster_size and a poster_path.
+
+base_url and poster_size can be obtained from /configuration
+{base_url}/{poster_size}/{poster_path}
+ex: https://image.tmdb.org/t/p/ w500/ kqjL17yufvn9OVLyXYpvtyrFfak.jpg
+
+caller must supply the poster_path size[0..n (n can be obtained)], as all data required
+is availabe locally there is no need for callBack
 */
-function imageUrl(path, size, cb){
+function imageUrl(path, size){
     
     let req = {
         'path' : 'posterurl',
         'poster_path' : path,
         'poster_size' : size,
-        'response' : function(url) { cb(url) }
+        'response' : function(url) {}
     }
 
     server.request(req)
+    return req.data
 }
 
 module.exports = { 

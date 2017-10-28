@@ -1,12 +1,13 @@
 'use strict'
 
 let fs = require('fs')
-let search_route = require('./view_test')
+let search_route = require('./search_view_test')
+let movie_route = require('./movie_view_test')
 const CACHE = require('./cache')
 
 let routes = {
     'search': function(placeholder){ search_route(placeholder)},
-    'movies': function(){},
+    'movies': function(placeholder){ movie_route(placeholder)},
     'actors': function(){},
 }
 

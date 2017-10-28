@@ -5,6 +5,7 @@ server.init(8080)
 //server.get('http://www.google.com', (data) => console.log(data))
 //server.get(tmdb_movie_detail, (data) => console.log(data))
 
+if(process.argv[2] != 'client-server'){
 server.request({
     'path': 'movies',
     'id': 550,
@@ -23,5 +24,6 @@ server.request({
     'response': (data) => console.log(data),
     'query' : 'bolt'
 })
+}
 
 

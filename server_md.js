@@ -4,7 +4,6 @@ let http = require('http')
 let fs = require('fs')
 let dispatcher = require('./dispatcher')
 
-const endpoints = ['search', 'movies', 'actors']
 const CONFIG_FILE = 'server.json'
 
 const logger = (msg) => {console.log('Server: ' + msg); return msg;}
@@ -19,12 +18,12 @@ function TmdbCreator(apikey){
     return {
         'api' : 'http://api.themoviedb.org/3',
         'key' : apikey,
+        'page' : 1,
         'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}&page=${this.page}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
         'actors' : function () {return `${this.api}/person/${this.id}/movie_credits?api_key=${this.key}`},
         'configuration' : function () {return `${this.api}/configuration?api_key=${this.key}`},
-        'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`},
-        'page' : 1
+        'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`}
     }
 }
 
@@ -79,9 +78,9 @@ function requestFunction(reqParam){
         return
     }
     
-    /* for maintain async model set mock callback */
+    /* Data required is available locally, so return data immediatly */
     if(reqParam.path == 'posterurl'){
-        setTimeout(() => reqParam.response(url),10)
+        reqParam.data = url
         return
     }        
     
