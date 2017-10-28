@@ -47,10 +47,18 @@ function requestResponse(req, resp){
         wrapper.url = req.url;
         wrapper.path = wrapper.url.split('/').splice(1)
 
-        if(wrapper.path == ''){
-            let msg = 'No endpoint selected'
-            logger(msg)
-            requestFail(resp, msg)
+        /* if no path entered show home page */
+        if(wrapper.path == ''){            
+            fs.readFile('templateviews/index.html',function(error,data){
+                if(error){
+                    logger(error.message)
+                    requestFail(resp,error.message)
+                    return   
+                }
+                resp.writeHead(200,{'Content-Type': 'text/html'})
+                resp.write(data)
+                resp.end()             
+            })
             return
         }
          
@@ -70,16 +78,17 @@ function requestResponse(req, resp){
         }
         wrapper.req = req
         wrapper.resp = resp
-        wrapper.response = function(epReq){ 
-            epReq.resp.writeHead(200, {'Content-Type': 'text/html'})
-            epReq.resp.write(epReq.url); 
-            epReq.resp.end();
-            //logger(epReq.data)
+        wrapper.response = function(respwrapper){ 
+            respwrapper.resp.writeHead(200, {'Content-Type': 'text/html'})
+            respwrapper.resp.write(respwrapper.data); 
+            respwrapper.resp.end();            
         }
 
-        logger(wrapper.url)
+        logger('Client Request ' + wrapper.url)
         //dispatcher(wrapper)
-        setTimeout(() => wrapper.response(wrapper),2000)
+        //setTimeout(() => wrapper.response(wrapper),2000)
+        let view = require('./view_test')
+        view(wrapper)
     }
 }
 
@@ -155,7 +164,7 @@ function init(port){
         }
 
         http.createServer( requestResponse ).listen(port)    
-        logger(`Started on ${port}`)    
+        logger(`Started on port ${port}`)    
     }catch(err){
         logger(`Unable to read key from file \"${CONFIG_FILE}\"`)
         logger(`Please add key file, exiting...`)            
