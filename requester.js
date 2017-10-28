@@ -4,7 +4,7 @@ let server = require('./server_md')
 const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
 
-server.init(8080)
+//server.init(8080)
 
 function searchByMovie(searchTerm,callbackfunc){
     
@@ -14,7 +14,7 @@ function searchByMovie(searchTerm,callbackfunc){
     }
 
 
-function searchByMovieId_colector(rspdata, cb){
+function requestsCollector(rspdata, cb){
     if(--rspdata.count == 0)
         cb(rspdata)
 }
@@ -32,16 +32,16 @@ function searchByMovieId(searchId, cb){
         'id' : searchId,
         'response' : function(data){ 
             respdata.movie = data;            
-            searchByMovieId_colector(respdata, cb);          
+            requestsCollector(respdata, cb);          
         }
     }
 
     let reqcast = {
         'path':'movies',
-        'id' : searchId + '/credits',
+        'id' : `${searchId}/credits`,
         'response' : function(data) { 
             respdata.cast = data;            
-            searchByMovieId_colector(respdata, cb);           
+            requestsCollector(respdata, cb);           
         }
     }
 
@@ -62,13 +62,23 @@ function getActorById(id, cb){
     let reqactor = {
         'path':'actors',
         'id' : id,
-        'response' : function(data) { 
-            respdata.cast = data
-            cb(respdata)           
+        'response' : function(actordetails) { 
+            respdata.actors = actordetails
+            requestsCollector(respdata, cb)           
+        }
+    }
+    
+    let reqactorcredits = {
+        'path':'actors',
+        'id' : `${id}/movie_credits`,
+        'response' : function(castdata) { 
+            respdata.cast = castdata
+            requestsCollector(respdata, cb)           
         }
     }
 
     server.request(reqactor)
+    server.request(reqactorcredits)
 }
 
 /*
