@@ -5,8 +5,8 @@ const Movie = require('./movie')
 const movieDetails = require('./movieDetails')
 const Actor = require('./actor')
 let moviecache 
-let actorcache 
-
+let actorcache  
+let moviereq_queue = []
 
 
 /**
@@ -24,6 +24,7 @@ function searchMovieById(id){
       
         innermovie = moviecache.filter((mv) => mv.id ==id)[0]
     if ( innermovie == undefined) {
+         moviereq_queue.push(id)
          req.searchByMovieId(id,(data)=>reqSearchMovieById(data))     
     }else{
         
@@ -40,8 +41,13 @@ function searchMovieById(id){
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
 function addMovietoCache(mv){
-    if(!moviecache.contains(mv))
+    
+    //if(moviecache.includes(mv)) // need to see if the cpu tradeoff vs space treadeoff is worth it
          moviecache.push(mv)
+    let todispatch = moviereq_queue
+                .filter((elem) => elem == mv.id)
+    moviereq_queue = moviereq_queue.filter((elem) => elem != mv.id)
+    todispatch.forEach((elem)=> console.log(mv.title)) // ao inves de console log chamar função de retorno com objecto
 
      /* chamada ao dispatcher para devolver */
      //console.log(mv) //test
@@ -91,7 +97,7 @@ function searchByActor(id){
 function addActortoCache(act){
     actorcache.push(act)
     /** retunr function on requester */
-    //console.log(act) //test 
+    console.log(act) //test 
     //searchByActor(224513) //test
 
 }
@@ -142,11 +148,13 @@ function reqSearchMovie(data){
         
 }
 
-// missing get actorbyid
+
 //searchByActor(224513)
 //searchByMovie("Matrix")
-//searchMovieById(603)
-//searchMovieById(604)
+searchMovieById(603)
+searchMovieById(604)
+searchMovieById(603)
+searchMovieById(606)
 
 
 
