@@ -2,6 +2,7 @@
 
 let http = require('http')
 let fs = require('fs')
+let dispatcher = require('./dispatcher')
 
 const endpoints = ['search', 'movies', 'actors']
 const CONFIG_FILE = 'server.json'
@@ -18,11 +19,12 @@ function TmdbCreator(apikey){
     return {
         'api' : 'http://api.themoviedb.org/3',
         'key' : apikey,
-        'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}`},
+        'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}&page=${this.page}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
         'actors' : function () {return `${this.api}/person/${this.id}/movie_credits?api_key=${this.key}`},
         'configuration' : function () {return `${this.api}/configuration?api_key=${this.key}`},
-        'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`}
+        'posterurl' : function () {return `${this.base_url}${this.logo_sizes[this.poster_size]}/${this.poster_path}`},
+        'page' : 1
     }
 }
 
@@ -47,7 +49,7 @@ function requestResponse(req, resp){
         wrapper.url = req.url;
         wrapper.path = wrapper.url.split('/').splice(1)
 
-        /* if no path entered show home page */
+        /* if no path entered show home page 
         if(wrapper.path == ''){            
             fs.readFile('templateviews/index.html',function(error,data){
                 if(error){
@@ -75,20 +77,25 @@ function requestResponse(req, resp){
                 requestFail(resp, logger('Error missing id for movie'))
                 return
             }
-        }
+        } */
         wrapper.req = req
         wrapper.resp = resp
-        wrapper.response = function(respwrapper){ 
-            respwrapper.resp.writeHead(200, {'Content-Type': 'text/html'})
+        wrapper.response = function(respwrapper){
+            if(respwrapper.error){
+                //TODO: Set apropriated error
+                respwrapper.resp.writeHead(respwrapper.error, {'Content-Type': 'text/html'})
+            }else{
+                respwrapper.resp.writeHead(200, {'Content-Type': 'text/html'})
+            } 
             respwrapper.resp.write(respwrapper.data); 
             respwrapper.resp.end();            
         }
 
         logger('Client Request ' + wrapper.url)
-        //dispatcher(wrapper)
+        dispatcher(wrapper)
         //setTimeout(() => wrapper.response(wrapper),2000)
-        let view = require('./view_test')
-        view(wrapper)
+        //let view = require('./view_test')
+        //view(wrapper)
     }
 }
 

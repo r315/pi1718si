@@ -1,6 +1,7 @@
 'use strict'
 
 const CACHE = require('./cache')
+let fs = require('fs')
 
 let entry = []
 
@@ -33,9 +34,8 @@ router[entry.path](entry)
 
 as we must use async model the call to dispatcher returns immediatly and has no return value  
 */
-
-function dispatcher(entry){
-
+module.exports = function(entry){
+/*
     switch (entry[0]) {
         case '/search?q=':
             return CACHE.searchByMovie(entry[1])
@@ -48,6 +48,22 @@ function dispatcher(entry){
         case '/actors':
             return CACHE.searchByActor(entry[1])
         break
+    }
+*/
+
+    /* if no path entered show home page */
+    if(entry.path == '') {
+        fs.readFile('templateviews/index.html',function(error,readdata){
+            if(error){
+                entry.data = error.toString()
+                entry.error = 500 // server error
+            }
+            else{
+                entry.data = readdata
+            }
+            entry.response(entry)
+        })
+        return
     }
 
 }
