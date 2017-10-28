@@ -3,7 +3,11 @@
 const CACHE = require('./cache')
 let fs = require('fs')
 
-let entry = []
+let routes = {
+    'search': function(){},
+    'movies': function(){},
+    'actors': function(){},
+}
 
 /* Dispatche Assumes a two position array on entry */
 //:TODO Check with Hugo R.
@@ -35,22 +39,6 @@ router[entry.path](entry)
 as we must use async model the call to dispatcher returns immediatly and has no return value  
 */
 module.exports = function(entry){
-/*
-    switch (entry[0]) {
-        case '/search?q=':
-            return CACHE.searchByMovie(entry[1])
-        break
-        
-        case '/movies':
-            return CACHE.searchMovieById(entry[1])
-        break
-
-        case '/actors':
-            return CACHE.searchByActor(entry[1])
-        break
-    }
-*/
-
     /* if no path entered show home page */
     if(entry.path == '') {
         fs.readFile('templateviews/index.html',function(error,readdata){
@@ -66,4 +54,13 @@ module.exports = function(entry){
         return
     }
 
+    let route = routes[entry.path[0]]
+    if(route == undefined){
+        entry.data = `Invalid path \"${entry.path[0]}\"`
+        entry.error = 400
+        entry.response(entry)
+        return
+    }
+
+    route(entry)
 }

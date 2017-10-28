@@ -29,61 +29,24 @@ function TmdbCreator(apikey){
 }
 
 /*
-on success the server has to request data to the dispatcher ans this data could not 
-be available emidiatly, so as solution an object and a callback is used as parametes
+on success the server has to request data to the dispatcher and this data could not 
+be available immediatly, so as solution an object containing a callback is used as parameter
 when calling the dispatcher
-*/
 
-function requestFail(resp, msg){
-    resp.writeHead(404,{'Content-Type': 'text/html'})
-    resp.write(msg)
-    resp.end()
-}
-
-/*
 Handler for client requests
 */
-function requestResponse(req, resp){    
+function clientRequestsHandler(req, resp){    
     if(req.method == 'GET'){
         let wrapper= {}
-        wrapper.url = req.url;
-        wrapper.path = wrapper.url.split('/').splice(1)
 
-        /* if no path entered show home page 
-        if(wrapper.path == ''){            
-            fs.readFile('templateviews/index.html',function(error,data){
-                if(error){
-                    logger(error.message)
-                    requestFail(resp,error.message)
-                    return   
-                }
-                resp.writeHead(200,{'Content-Type': 'text/html'})
-                resp.write(data)
-                resp.end()             
-            })
-            return
-        }
-         
-        // TODO: This MUST Be Fixed
-        if(wrapper.path[0].includes('search')){
-            wrapper.query = wrapper.url.split('=').splice(1)
-            if(wrapper.query == ''){
-                requestFail(resp, logger('Error missing query for search'))
-                return
-            }
-        }else{
-            wrapper.id = wrapper.path[1]
-            if(wrapper.id == undefined || wrapper.id == '' ){
-                requestFail(resp, logger('Error missing id for movie'))
-                return
-            }
-        } */
+        wrapper.url = req.url;
+        wrapper.path = wrapper.url.split(/[/?]/).splice(1)       
         wrapper.req = req
         wrapper.resp = resp
         wrapper.response = function(respwrapper){
             if(respwrapper.error){
                 //TODO: Set apropriated error
-                respwrapper.resp.writeHead(respwrapper.error, {'Content-Type': 'text/html'})
+                respwrapper.resp.writeHead(respwrapper.error, {'Content-Type': 'text/html'})                
             }else{
                 respwrapper.resp.writeHead(200, {'Content-Type': 'text/html'})
             } 
@@ -92,13 +55,9 @@ function requestResponse(req, resp){
         }
 
         logger('Client Request ' + wrapper.url)
-        dispatcher(wrapper)
-        //setTimeout(() => wrapper.response(wrapper),2000)
-        //let view = require('./view_test')
-        //view(wrapper)
+        dispatcher(wrapper)       
     }
 }
-
 
 /*
 Request Function, returns data for the given id and path
@@ -170,7 +129,7 @@ function init(port){
             tmdb.logo_sizes = data.logo_sizes
         }
 
-        http.createServer( requestResponse ).listen(port)    
+        http.createServer( clientRequestsHandler ).listen(port)    
         logger(`Started on port ${port}`)    
     }catch(err){
         logger(`Unable to read key from file \"${CONFIG_FILE}\"`)
