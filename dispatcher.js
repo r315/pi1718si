@@ -1,13 +1,16 @@
 'use strict'
 
 let fs = require('fs')
-let search_route = require('./search_view_test')
-let movie_route = require('./movie_view_test')
+let cache = require('./cache')
+let hb = require('handlebars')
+
+const RESULT_SIZE = 10
+const TEMPLATE_PATH = 'templateviews/search.html'
 const CACHE = require('./cache')
 
 let routes = {
-    'search': function(placeholder){ search_route(placeholder)},
-    'movies': function(placeholder){ movie_route(placeholder)},
+    'search': searchRoute,
+    'movies': function(){},
     'actors': function(){},
 }
 
@@ -65,4 +68,54 @@ module.exports = function(entry){
     }
 
     route(entry)
+}
+
+
+
+
+
+
+/**
+ * Get the html template for search results page and
+ * fill it with the results
+ * 
+ * this function is called when cach make requested data available
+ * @param {data, cb} data
+ */
+function createSearchView(wapper, searchresults){
+    fs.readFile(TEMPLATE_PATH, function(error,data){
+        let source = data.toString()
+        let template = hb.compile(source)
+        let dataobj = { 
+            'search_term' : 'Query: ...',
+            'search_results': []
+        }
+        
+        for(let i = 0; i < RESULT_SIZE; i++){
+            dataobj.search_results.push(
+                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
+            )
+        }
+        param.data = template(dataobj)
+        //fs.writeFile('templateviews/out.html',template(data));    
+        param.response(param)
+    })    
+}
+
+/**
+ * Get an array of object containing search results from cache, 
+ * for cache returns an object the necessary data 
+ * must be supplied, this data is obtained from entry object
+ * 
+ * a wrapper object is created with the necessary data and callback
+ * at on data ready cache calls this callback and search results
+ * 
+ * @param {*} entry {path:[endpoint, query]}
+ */
+function searchRoute(entry){
+    let wrapper = {}
+    wrapper.query = entry.path[1].split('=')[1] // get search term
+    wrapper.entry = entry
+    wrapper.response = createSearchView
+    cache.searchByMovie(wrapper)
 }
