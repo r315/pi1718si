@@ -64,7 +64,7 @@ function getActorById(id, cb){
         'path':'actors',
         'id' : id,
         'response' : function(actordetails) { 
-            respdata.actors = actordetails
+            respdata.actorinfo = actordetails
             requestsCollector(respdata, cb)           
         }
         // 'response' : function(data) { 
@@ -77,12 +77,12 @@ function getActorById(id, cb){
         'path':'actors',
         'id' : `${id}/movie_credits`,
         'response' : function(castdata) { 
-            respdata.cast = castdata
+            respdata.roles = castdata
             requestsCollector(respdata, cb)           
         }
     }
 
-    }
+    
 
     server.request(reqactor)
     server.request(reqactorcredits)
