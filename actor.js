@@ -42,3 +42,6 @@ fs.readFile('GetActorExample.txt',function (err,actorInfo) {
 })
 
 */
+module.exports = {
+    'createActor' : createActor
+}
