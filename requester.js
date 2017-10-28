@@ -3,6 +3,7 @@
 let server = require('./server_md')
 const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
+const ACTOR_DETAILS_SIZE = 2
 
 server.init(8080)
 
@@ -54,21 +55,36 @@ function searchByMovieId(searchId, cb){
 */
 function getActorById(id, cb){
     let respdata = {
-        'actors' : '', 
-        'cast' : '',
-        'count' : MOVIE_DETAILS_SIZE
+        'actorinfo' : '', 
+        'roles' : '',
+        'count' : ACTOR_DETAILS_SIZE
     }  
     
     let reqactor = {
         'path':'actors',
         'id' : id,
-        'response' : function(data) { 
-            respdata.cast = data
-            cb(respdata)           
+        response : function(data) {
+            respdata.actorinfo = data;
+            searchByMovieId_colector(respdata,cb)
         }
+        // 'response' : function(data) { 
+        //     respdata.actorinfo = data
+        //     cb(respdata)           
+        // }
+    }
+    
+    let reqroles = {
+        'path':'roles',
+        'id'  : id,
+        'response' : function(data) {
+            respdata.roles = data;
+            searchByMovieId_colector(respdata,cb)
+        }
+
     }
 
     server.request(reqactor)
+    server.request(reqroles)
 }
 
 /*
