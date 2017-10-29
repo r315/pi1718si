@@ -5,13 +5,15 @@ let cache = require('./cache')
 let hb = require('handlebars')
 
 const RESULT_SIZE = 10
-const TEMPLATE_PATH = 'templateviews/search.html'
-const CACHE = require('./cache')
+const TEMPLATE_SEARCH_PATH = 'templateviews/search.html'
+const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.html'
+const TEMPLATE_INDEX_PATH = 'templateviews/index.html'
+
 
 let routes = {
     'search': searchRoute,
-    'movies': function(){},
-    'actors': function(){},
+    'movies': movieRoute,
+    'actors': actorRoute,
 }
 
 /* Dispatche Assumes a two position array on entry */
@@ -46,7 +48,7 @@ as we must use async model the call to dispatcher returns immediatly and has no 
 module.exports = function(entry){
     /* if no path entered show home page */
     if(entry.path == '') {
-        fs.readFile('templateviews/index.html',function(error,readdata){
+        fs.readFile(TEMPLATE_INDEX_PATH, function(error,readdata){
             if(error){
                 entry.data = error.toString()
                 entry.error = 500 // server error
@@ -79,11 +81,11 @@ module.exports = function(entry){
  * Get the html template for search results page and
  * fill it with the results
  * 
- * this function is called when cach make requested data available
+ * this function is called when cache make requested data available
  * @param {data, cb} data
  */
 function createSearchView(wapper, searchresults){
-    fs.readFile(TEMPLATE_PATH, function(error,data){
+    fs.readFile(TEMPLATE_SEARCH_PATH, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = { 
@@ -118,4 +120,39 @@ function searchRoute(entry){
     wrapper.entry = entry
     wrapper.response = createSearchView
     cache.searchByMovie(wrapper)
+}
+
+/**
+ * 
+ * @param {*} wrapper 
+ * @param {*} movie 
+ */
+function createMovieView(wrapper, movie){
+
+}
+
+/**
+ * 
+ * @param {*} entry 
+ */
+function movieRoute(entry){
+
+}
+
+
+/**
+ * 
+ * @param {*} wrapper 
+ * @param {*} movie 
+ */
+function createActorView(wrapper, movie){
+    
+    }
+    
+/**
+ * 
+ * @param {*} entry 
+ */
+function actorRoute(entry){
+
 }

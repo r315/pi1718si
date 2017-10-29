@@ -1,11 +1,11 @@
 'use strict'
 
-let server = require('./server_md')
+const server = require('./server_md')
 const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
 const ACTOR_DETAILS_SIZE = 2
 
-//server.init(8080)
+server.init()
 
 function searchByMovie(searchTerm,callbackfunc){
     

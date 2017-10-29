@@ -14,10 +14,10 @@ let initialyzed = false
 /*
 Create an object that contains links and key for the api
 */
-function TmdbCreator(apikey){
+function TmdbCreator(){
     return {
-        'api' : 'http://api.themoviedb.org/3',
-        'key' : apikey,
+        'api' : '',
+        'key' : '',
         'page' : 1,
         'search' : function () {return `${this.api}/search/movie?api_key=${this.key}&query=${this.query}&page=${this.page}`},
         'movies' : function () {return `${this.api}/movie/${this.id}?api_key=${this.key}`},
@@ -29,41 +29,10 @@ function TmdbCreator(apikey){
 }
 
 /*
-on success the server has to request data to the dispatcher and this data could not 
-be available immediatly, so as solution an object containing a callback is used as parameter
-when calling the dispatcher
-
-Handler for client requests
-*/
-function clientRequestsHandler(req, resp){    
-    if(req.method == 'GET'){
-        let wrapper= {}
-
-        wrapper.url = req.url;
-        wrapper.path = wrapper.url.split(/[/?]/).splice(1)       
-        wrapper.req = req
-        wrapper.resp = resp
-        wrapper.response = function(respwrapper){
-            if(respwrapper.error){
-                //TODO: Set apropriated error
-                respwrapper.resp.writeHead(respwrapper.error, {'Content-Type': 'text/html'})                
-            }else{
-                respwrapper.resp.writeHead(200, {'Content-Type': 'text/html'})
-            } 
-            respwrapper.resp.write(respwrapper.data); 
-            respwrapper.resp.end();            
-        }
-
-        logger('Client Request ' + wrapper.url)
-        dispatcher(wrapper)       
-    }
-}
-
-/*
-Request Function, returns data for the given id and path
-if successufull calls the callback with the received data as
+Request Function, returns confdata for the given id and path
+if successufull calls the callback with the received confdata as
 parameter
-on error return error data 
+on error return error confdata 
 */
 function requestFunction(reqParam){
     checkInitialyzed()
@@ -79,7 +48,7 @@ function requestFunction(reqParam){
         return
     }
     
-    /* Data required is available locally, so return data immediatly */
+    /* confData required is available locally, so return confdata immediatly */
     if(reqParam.path == 'posterurl'){
         reqParam.data = url
         return
@@ -104,33 +73,36 @@ function checkInitialyzed(){
 Initialize server to process client requests and do requests
 Create tmdb api object with configurations
 */
-function init(port){    
+function init(){    
     try{
-        let data = JSON.parse(fs.readFileSync(CONFIG_FILE,'utf8'))
-        if (data.key == undefined || data.key == '') {
+
+        let confdata = JSON.parse(fs.readFileSync(CONFIG_FILE,'utf8'))
+        if (confdata.key == undefined || confdata.key == '' ||
+            confdata.api == undefined || confdata.api == '') {
            throw new Error()
-        }        
-        tmdb = new TmdbCreator(data.key)
+        } 
+
+        tmdb = new TmdbCreator()
+        tmdb.api = confdata.api
+        tmdb.key = confdata.key
+
         initialyzed = true
         /* if no configuration for images get it from api */
-        if (data.base_url == undefined || data.base_url == '') {
+        if (confdata.base_url == undefined || confdata.base_url == '') {
             requestFunction({
                 'path':'configuration', 
                 'response' : function(conf){
                     let data = JSON.parse(conf).images
                     tmdb.base_url = data.base_url
                     tmdb.logo_sizes = data.logo_sizes
-                    fs.writeFile(CONFIG_FILE,JSON.stringify(tmdb))
+                    fs.writeFile(CONFIG_FILE,JSON.stringify(tmdb),()=> logger(`Configuration Saved to \"${CONFIG_FILE}\"`))                    
                 }
             })
         }
         else{
-            tmdb.base_url = data.base_url
-            tmdb.logo_sizes = data.logo_sizes
+            tmdb.base_url = confdata.base_url
+            tmdb.logo_sizes = confdata.logo_sizes
         }
-
-        http.createServer( clientRequestsHandler ).listen(port)    
-        logger(`Started on port ${port}`)    
     }catch(err){
         logger(`Unable to read key from file \"${CONFIG_FILE}\"`)
         logger(`Please add key file, exiting...`)            
@@ -147,7 +119,7 @@ module.exports = {
         checkInitialyzed()
         http.get(url, (resp) => {
             let buffer = ""
-            resp.on('data', (data) => buffer += data)  //TODO: improve this ?
+            resp.on('data', (data) => buffer += data)
             resp.on('end', () => callback(buffer))
             resp.on('error', (erro) => logger(error))
             logger('Requesting data from ' + url)

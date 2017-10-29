@@ -1,7 +1,7 @@
-var server = require('./server_md')
+let server = require('./serverClient')
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 
 
 logger('Application started!')
-server.init(8080)
+server.init()
