@@ -156,7 +156,7 @@ function movieRoute(entry){
     wrapper.id = entry.path[1]
     wrapper.entry = entry
     wrapper.response = createMovieView
-    //cache.searchByMovie(wrapper)
+   // cache.searchByMovieId(wrapper)
     setTimeout(()=>wrapper.response(wrapper,null),50)
 }
 
@@ -194,6 +194,6 @@ function actorRoute(entry){
     wrapper.id = entry.path[1]
     wrapper.entry = entry
     wrapper.response = createActorView
-    //cache.searchByMovie(wrapper)
+    //cache.searchByActorID(wrapper)
     setTimeout(()=>wrapper.response(wrapper,null),50)
 }
