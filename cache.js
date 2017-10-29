@@ -1,5 +1,5 @@
 'use strict'
-
+const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const req = require('./requester')
 const Movie = require('./movie')
 const movieDetails = require('./movieDetails')
@@ -7,6 +7,7 @@ const Actor = require('./actor')
 let moviecache 
 let actorcache  
 let moviereq_queue = []
+let actorreq_queue =[]
 
 
 /**
@@ -16,20 +17,21 @@ let moviereq_queue = []
  * @param {*} id id of the movie to be searched
  */
 
-function searchMovieById(id){
+function searchMovieById(entry){
     let innermovie
         
     if ( moviecache == undefined)
             moviecache = []
       
-        innermovie = moviecache.filter((mv) => mv.id ==id)[0]
+        innermovie = moviecache.filter((mv) => mv.id ==entry.query)[0]
     if ( innermovie == undefined) {
-         moviereq_queue.push(id)
-         req.searchByMovieId(id,(data)=>reqSearchMovieById(data))     
+         moviereq_queue.push(entry)
+         
+         req.searchByMovieId(entry.id,(data)=>reqSearchMovieById(data))     
     }else{
-        
-    /* chamada ao dispatcher para devolver */
-    console.log("Movie cache hit for movie:\n"+innermovie.id+"\n"+innermovie.title ) //TEST
+        logger("Movie cache hit:"+innermovie.id)
+        entry.response(innermovie)
+    
     }
 }
 
@@ -44,14 +46,13 @@ function addMovietoCache(mv){
     
     //if(moviecache.includes(mv)) // need to see if the cpu tradeoff vs space treadeoff is worth it
          moviecache.push(mv)
+         logger("Added to movie cache id:"+mv.id)
     let todispatch = moviereq_queue
-                .filter((elem) => elem == mv.id)
-    moviereq_queue = moviereq_queue.filter((elem) => elem != mv.id)
-    todispatch.forEach((elem)=> console.log(mv.title)) // ao inves de console log chamar função de retorno com objecto
+                .filter((elem) => elem.id == mv.id)
+    moviereq_queue = moviereq_queue.filter((elem) => elem.id != mv.id)
+    todispatch.forEach((elem) => 
+            elem.response(mv)) // ao inves de console log chamar função de retorno com objecto
 
-     /* chamada ao dispatcher para devolver */
-     //console.log(mv) //test
-    // searchMovieById(603) //TEST CODE
  }
  
  /**
@@ -75,17 +76,19 @@ function addMovietoCache(mv){
  * used externally by the dispatcher
  * @param {*} id id do actor pretendido
  */
-function searchByActor(id){
+function searchByActorID(entry){
     let inneractor 
     if(actorcache == undefined)
         actorcache = []
 
-        inneractor = actorcache.filter((act) => act.id == id)[0]
+        inneractor = actorcache.filter((act) => act.id == entry.id)[0]
     if(inneractor == undefined){
-        req.getActorById(id,(data) =>reqSearchActorByid(data))
+        actorreq_queue.push(entry)
+        req.getActorById(entry.id,(data) =>reqSearchActorByid(data))
     }else{
         /** return function on requester */
-        console.log('cache hit on \n name:'+inneractor.name+"\n"+"id:"+inneractor.id) //teste code
+        logger ("cache hit on actor id:"+inneractor.id)
+       entry.response(inneractor)
     }
 }
 
@@ -95,13 +98,17 @@ function searchByActor(id){
  * @param {*} act 
  */
 function addActortoCache(act){
+    
     actorcache.push(act)
-    /** retunr function on requester */
-    console.log(act) //test 
-    //searchByActor(224513) //test
+    logger("Added to actor cache id:"+act.id)
+    let todispatch = actorreq_queue
+                    .filter((elem) => elem.id == act.id)
+    actorreq_queue = actorreq_queue.filter((elem) => elem.id != act.id)    
+    todispatch.forEach((elem) => 
+            elem.response(act))
+    
 
 }
-
 
 /**
  * function used to create a actor object receiving a object with 2 propreties 
@@ -151,10 +158,10 @@ function reqSearchMovie(data){
 
 //searchByActor(224513)
 //searchByMovie("Matrix")
-searchMovieById(603)
-searchMovieById(604)
-searchMovieById(603)
-searchMovieById(606)
+//searchMovieById(603)
+//searchMovieById(604)
+//searchMovieById(603)
+//searchMovieById(606)
 
 
 
@@ -162,7 +169,7 @@ searchMovieById(606)
 module.exports = {
         'searchByMovie' : searchByMovie,
         'searchByMovieId': searchMovieById,
-        'searchByActor' : searchByActor
+        'searchByActorID' : searchByActorID
 
 }
 
