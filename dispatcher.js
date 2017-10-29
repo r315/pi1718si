@@ -7,6 +7,7 @@ let hb = require('handlebars')
 const RESULT_SIZE = 10
 const TEMPLATE_SEARCH_PATH = 'templateviews/search.html'
 const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.html'
+const TEMPLATE_ACTOR_PATH = 'templateviews/actor.html'
 const TEMPLATE_INDEX_PATH = 'templateviews/index.html'
 
 
@@ -166,13 +167,33 @@ function movieRoute(entry){
  * @param {*} movie 
  */
 function createActorView(wrapper, movie){
-    
-    }
+    fs.readFile(TEMPLATE_ACTOR_PATH, function(error,data){
+        let source = data.toString()
+        let template = hb.compile(source)        
+        let dataobj = { 
+            'profile_url' : 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/9nI9GsV1HZS3YKvMqrGuuEYWr8v.jpg',
+            'casted_movies': []           
+        }
+        
+        for(let i = 0; i < RESULT_SIZE; i++){
+            dataobj.casted_movies.push(
+                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
+            )
+        }
+        wrapper.entry.data = template(dataobj)
+        wrapper.entry.response(wrapper.entry)
+    })  
+}
     
 /**
  * 
  * @param {*} entry 
  */
 function actorRoute(entry){
-
+    let wrapper = {}
+    wrapper.id = entry.path[1]
+    wrapper.entry = entry
+    wrapper.response = createActorView
+    //cache.searchByMovie(wrapper)
+    setTimeout(()=>wrapper.response(wrapper,null),50)
 }

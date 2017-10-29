@@ -101,7 +101,7 @@ base_url and poster_size can be obtained from /configuration
 {base_url}/{poster_size}/{poster_path}
 ex: https://image.tmdb.org/t/p/ w500/ kqjL17yufvn9OVLyXYpvtyrFfak.jpg
 
-caller must supply the poster_path size[0..n (n can be obtained)], as all data required
+caller must supply the poster_path and optionaly the size[0..n (n can be obtained)], as all data required
 is availabe locally there is no need for callBack
 */
 function imageUrl(path, size){

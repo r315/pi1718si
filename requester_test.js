@@ -4,4 +4,10 @@ let requester = require('./requester')
 
 //requester.searchByMovie('Movie Title', (result) => console.log(result))
 
-requester.imageUrl('kqjL17yufvn9OVLyXYpvtyrFfak.jpg',3, (url) => console.log(url))
+
+let url = requester.imageUrl('9nI9GsV1HZS3YKvMqrGuuEYWr8v.jpg')
+console.log(url)
+
+
+url = requester.imageUrl('9nI9GsV1HZS3YKvMqrGuuEYWr8v.jpg',0)
+console.log(url)
