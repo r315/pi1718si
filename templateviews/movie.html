@@ -36,7 +36,7 @@
               <section class="images inner">
                 <div class="poster">
                   <div class="image_content">
-                    <img class="poster" src="https://image.tmdb.org/t/p/w300_and_h450_bestv2/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg">
+                    <img class="poster" src="{{poster_url}}">
                   </div>
                 </div>
                 </section>   
@@ -51,12 +51,12 @@
               </tr>
             </thead>
             <tbody>
-                {{#search_results}}
+                {{#movie_cast}}
                 <tr>
                   <th scope="row">{{result_index}}</th>
                   <td>{{result_title}}</td>
                 </tr>               
-                {{/search_results}}
+                {{/movie_cast}}
             </tbody>
           </table>
           

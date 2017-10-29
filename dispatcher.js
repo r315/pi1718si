@@ -84,7 +84,7 @@ module.exports = function(entry){
  * this function is called when cache make requested data available
  * @param {data, cb} data
  */
-function createSearchView(wapper, searchresults){
+function createSearchView(wrapper, searchresults){
     fs.readFile(TEMPLATE_SEARCH_PATH, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
@@ -98,9 +98,8 @@ function createSearchView(wapper, searchresults){
                 {'result_index' : i+1, 'result_title': `Result ${i+1}`}
             )
         }
-        param.data = template(dataobj)
-        //fs.writeFile('templateviews/out.html',template(data));    
-        param.response(param)
+        wrapper.entry.data = template(dataobj)
+        wrapper.entry.response(wrapper.entry)
     })    
 }
 
@@ -119,7 +118,8 @@ function searchRoute(entry){
     wrapper.query = entry.path[1].split('=')[1] // get search term
     wrapper.entry = entry
     wrapper.response = createSearchView
-    cache.searchByMovie(wrapper)
+    //cache.searchByMovie(wrapper)
+    setTimeout(()=>wrapper.response(wrapper,null),50)
 }
 
 /**
@@ -128,7 +128,22 @@ function searchRoute(entry){
  * @param {*} movie 
  */
 function createMovieView(wrapper, movie){
-
+    fs.readFile(TEMPLATE_MOVIE_PATH, function(error,data){
+        let source = data.toString()
+        let template = hb.compile(source)
+        let dataobj = { 
+            'poster_url' : ' https://image.tmdb.org/t/p/w300_and_h450_bestv2/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg',
+            'movie_cast': []           
+        }
+        
+        for(let i = 0; i < RESULT_SIZE; i++){
+            dataobj.movie_cast.push(
+                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
+            )
+        }
+        wrapper.entry.data = template(dataobj)
+        wrapper.entry.response(wrapper.entry)
+    })    
 }
 
 /**
@@ -136,7 +151,12 @@ function createMovieView(wrapper, movie){
  * @param {*} entry 
  */
 function movieRoute(entry){
-
+    let wrapper = {}
+    wrapper.id = entry.path[1]
+    wrapper.entry = entry
+    wrapper.response = createMovieView
+    //cache.searchByMovie(wrapper)
+    setTimeout(()=>wrapper.response(wrapper,null),50)
 }
 
 
