@@ -1,5 +1,5 @@
 'use strict'
-const logger = (msg) => {console.log('App: ' + msg); return msg;}
+const logger = (msg) => {console.log('Cache: ' + msg); return msg;}
 const req = require('./requester')
 const Movie = require('./movie')
 const movieDetails = require('./movieDetails')
