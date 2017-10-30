@@ -45,15 +45,17 @@ function searchMovieById(ctx){
  */
 function addMovietoCache(mv){
     mv.posterurl = req.getPosterUrl(mv.poster_path)
-    //if(moviecache.includes(mv)) // need to see if the cpu tradeoff vs space treadeoff is worth it
+    if(moviecache.filter((dt) => dt.id == mv.id).length <1){
          moviecache.push(mv)
          logger("Added to movie cache id:"+mv.id)
+    }
     let todispatch = moviereq_queue
                 .filter((elem) => elem.id == mv.id)
     moviereq_queue = moviereq_queue.filter((elem) => elem.id != mv.id)
+    
     todispatch.forEach((elem) => 
             elem.response(elem,mv)) // ao inves de console log chamar função de retorno com objecto
-
+    
  }
  
  /**
@@ -99,8 +101,8 @@ function searchByActorID(ctx){
  * @param {*} act 
  */
 function addActortoCache(act){
-    
-    actorcache.push(act)
+    if(moviecache.filter((dt) => dt.id == act.id).length <1)
+        actorcache.push(act)
     logger("Added to actor cache id:"+act.id)
     let todispatch = actorreq_queue
                     .filter((elem) => elem.id == act.id)
@@ -157,19 +159,21 @@ function reqSearchMovie(data,rquery){
     todispatch.forEach((elem) => elem.response(elem,innermoviearr))
         
 }
-/*
+
 let mokMovie = {} 
 mokMovie.id =603
-
+let moviemok = {}
+moviemok.id =603
 let mokSearch = {}
 mokSearch.query ="Matrix"
 //searchByActor(224513)
 //searchByMovie(mokSearch)
-//searchMovieById(mokMovie)
+searchMovieById(mokMovie)
+
 //searchMovieById(604)
 //searchMovieById(603)
 //searchMovieById(606)
-*/
+
 
 
 
