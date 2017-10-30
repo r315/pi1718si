@@ -158,7 +158,23 @@ function createMovieView(wrapper, movie){
  */
 function movieRoute(entry){
     let wrapper = {}
+    
     wrapper.id = entry.path[1]
+
+    if(wrapper.id == ''){
+        entry.error = 404 // not found
+        entry.data = 'No Valid ID for /movies/{movie-id}'
+        entry.response(entry)        
+        return
+    }
+
+    if(isNaN(wrapper.id)){
+        entry.error = 404 // not found
+        entry.data = 'Given Id is not a number'
+        entry.response(entry)        
+        return
+    }
+
     wrapper.entry = entry
     wrapper.response = createMovieView
     cache.searchByMovieId(wrapper)
