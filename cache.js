@@ -164,7 +164,7 @@ mokMovie.id =603
 let mokSearch = {}
 mokSearch.query ="Matrix"
 //searchByActor(224513)
-searchByMovie(mokSearch)
+//searchByMovie(mokSearch)
 //searchMovieById(mokMovie)
 //searchMovieById(604)
 //searchMovieById(603)
