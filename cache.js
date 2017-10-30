@@ -45,6 +45,7 @@ function searchMovieById(ctx){
  */
 function addMovietoCache(mv){
     mv.posterurl = req.getPosterUrl(mv.poster_path)
+
     if(moviecache.filter((dt) => dt.id == mv.id).length <1){
          moviecache.push(mv)
          logger("Added to movie cache id:"+mv.id)
