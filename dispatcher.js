@@ -132,16 +132,21 @@ function createMovieView(wrapper, movie){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = {
-
-            'poster_url' : 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg',             
+            'movie_title' : movie.title,
+            'movie_director' : movie.directordto.map((elem) => elem.name).join(', '),
+            'poster_url' : movie.posterurl,             
             'movie_cast': []           
         }
         
-        for(let i = 0; i < RESULT_SIZE; i++){
+        movie.castitemdto.forEach((elem, i)=>{
             dataobj.movie_cast.push(
-                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
-            )
-        }
+                {
+                    'cast_index' : i+1, 
+                    'cast_name': elem.name,
+                    'cast_link' : `/actors/${elem.id}`
+                })
+        })
+
         wrapper.entry.data = template(dataobj)
         wrapper.entry.response(wrapper.entry)
     })    

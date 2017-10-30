@@ -30,42 +30,36 @@
     </nav>
     <div class="container" align="center">
       <div class="starter-template">
-         <br>
-
-     
-	
-	<div class="row">
-		
+         <br>	
+	<div class="row">		
 			  <section class="images inner">
                 <div class="poster">
                   <div class="image_content">
                     <img class="poster" src="{{poster_url}}">                    
                   </div>
                 </div>
-              </section>   
-		
+              </section> 	
 		  
-			<h3>Hello World</h3>
-			<p style="font-size:10px; color:#03225C;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed hendrerit adipiscing blandit. Aliquam placerat, velit a fermentum fermentum, mi felis vehicula justo, a dapibus quam augue non massa.</p>
-		
+      <section class="col">
+			<p style="font-size:20px; color:#03225C;" align="left">
+        Nome: {{movie_title}} <br>
+        Realizador: {{movie_director}}<br>
+        </p>
+		</section>
 	</div>
-
-
-
-
         <p class="lead">Cast</p>
         <table class="table table-dark table-bordered">
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">Result for {{search_term}}</th>                
+                <th scope="col">Role{{search_term}}</th>                
               </tr>
             </thead>
             <tbody>
                 {{#movie_cast}}
                 <tr>
-                  <th scope="row">{{result_index}}</th>
-                  <td>{{result_title}}</td>
+                  <th scope="row">{{cast_index}}</th>
+                  <td><a href="{{cast_link}}">{{cast_name}}</a></td>
                 </tr>               
                 {{/movie_cast}}
             </tbody>

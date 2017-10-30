@@ -10,7 +10,8 @@ function movieDetails() {
     this.voteaverage = null,
     this.tagline = null,
     this.originaltitle= null,
-    this.castitemdto = []
+    this.castitemdto = [],
+    this.directordto = []
 }
 
 function createMovieDetails (movieInfo, movieCredits) {
@@ -31,7 +32,7 @@ function createMovieDetails (movieInfo, movieCredits) {
             ac.name = elem.name
             ac.id = elem.id
             ac.job = elem.job
-            md.castitemdto.push(ac) 
+            md.directordto.push(ac) 
         }
      })
     JSON.parse(movieCredits).cast.forEach( function(elem) { 
