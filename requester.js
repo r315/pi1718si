@@ -9,7 +9,7 @@ server.init()
 
 function searchByMovie(searchTerm,callbackfunc){
     
-        let reqparm={'path':'search','query':searchTerm,'response':(data) => callbackfunc(data)}
+        let reqparm={'path':'search','query':searchTerm,'response':(data) => callbackfunc(data,searchTerm)}
         server.request(reqparm)
     
     }
