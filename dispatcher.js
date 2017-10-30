@@ -92,8 +92,8 @@ function createSearchView(wrapper, searchresults){
         searchresults.forEach( (mv, i) => {
             dataobj.search_results.push({
                 'result_index' : i+1, 
-                'result_title': `Result ${i+1}`,
-                'result_link' : `/movies/${i}`
+                'result_title': mv.title,
+                'result_link' : `/movies/${mv.id}`
             })
 
         })
@@ -118,8 +118,8 @@ function searchRoute(entry){
     wrapper.query = entry.path[1].split('=')[1] // get search term
     wrapper.entry = entry
     wrapper.response = createSearchView
-    //cache.searchByMovie(wrapper)
-    setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
+    cache.searchByMovie(wrapper)
+    //setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
 }
 
 /**
@@ -147,19 +147,6 @@ function createMovieView(wrapper, movie){
     })    
 }
 
-let mock_search_results = []
-function genMockResults(){
-    for(let i = 0; i< 10 ; i++){
-        mock_search_results.push(
-            {
-                'title': `Title ${i}`,
-                'id' : `${i}`
-            }
-        )
-    }
-    return mock_search_results
-}
-
 /**
  * 
  * @param {*} entry 
@@ -169,8 +156,8 @@ function movieRoute(entry){
     wrapper.id = entry.path[1]
     wrapper.entry = entry
     wrapper.response = createMovieView
-    //cache.searchByMovieId(wrapper)
-    setTimeout( ()=>wrapper.response(wrapper,null),50)
+    cache.searchByMovieId(wrapper)
+    //setTimeout( ()=>wrapper.response(wrapper,null),50)
 }
 
 
