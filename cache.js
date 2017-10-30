@@ -157,7 +157,7 @@ function reqSearchMovie(data,rquery){
     todispatch.forEach((elem) => elem.response(elem,innermoviearr))
         
 }
-
+/*
 let mokMovie = {} 
 mokMovie.id =603
 
@@ -169,7 +169,7 @@ mokSearch.query ="Matrix"
 //searchMovieById(604)
 //searchMovieById(603)
 //searchMovieById(606)
-
+*/
 
 
 
