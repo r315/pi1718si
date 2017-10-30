@@ -23,7 +23,7 @@ function createMovieDetails (movieInfo, movieCredits) {
     md.voteaverage = obj.vote_average
     md.tagline = obj.tagline
     md.originaltitle = obj.original_title
-    md.poster_path = elem.poster_path
+    md.poster_path = obj.poster_path
     md.posterurl = ""
     JSON.parse(movieCredits).crew.forEach( function(elem) { 
         if(elem.job=='Director') { 
