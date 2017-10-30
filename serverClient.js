@@ -2,7 +2,7 @@ let http = require('http')
 let dispatcher = require('./dispatcher')
 
 const logger = (msg) => {console.log('ServerClient: ' + msg); return msg;}
-
+let server
 
 /*
 on success the server has to request data to the dispatcher and this data could not 
@@ -37,13 +37,17 @@ function clientRequestsHandler(req, resp){
 
 
 function init(port = 8080){
-
-    http.createServer( clientRequestsHandler ).listen(port)    
-    logger(`Started on port ${port}`)    
-
+    server = http.createServer( clientRequestsHandler )
+    server.listen(port)
+    logger(`Started on port ${port}`)
 }
 
+function close(cb){
+    logger('Closing..')
+    server.close(cb)
+}
 
 module.exports = {
-    'init' : init
+    'init' : init,
+    'close' : close
 }
