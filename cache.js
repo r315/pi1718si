@@ -8,6 +8,7 @@ let moviecache
 let actorcache  
 let moviereq_queue = []
 let actorreq_queue =[]
+let searchmovie_queue = []
 
 
 /**
@@ -17,20 +18,20 @@ let actorreq_queue =[]
  * @param {*} id id of the movie to be searched
  */
 
-function searchMovieById(entry){
+function searchMovieById(ctx){
     let innermovie
         
     if ( moviecache == undefined)
             moviecache = []
       
-        innermovie = moviecache.filter((mv) => mv.id ==entry.query)[0]
+        innermovie = moviecache.filter((mv) => mv.id ==ctx.id)[0]
     if ( innermovie == undefined) {
-         moviereq_queue.push(entry)
+         moviereq_queue.push(ctx)
          
-         req.searchByMovieId(entry.id,(data)=>reqSearchMovieById(data))     
+         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data))     
     }else{
         logger("Movie cache hit:"+innermovie.id)
-        entry.response(innermovie)
+        ctx.response(ctx,innermovie)
     
     }
 }
@@ -43,7 +44,7 @@ function searchMovieById(entry){
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
 function addMovietoCache(mv){
-    
+    mv.posterurl = req.getPosterUrl(mv.poster_path)
     //if(moviecache.includes(mv)) // need to see if the cpu tradeoff vs space treadeoff is worth it
          moviecache.push(mv)
          logger("Added to movie cache id:"+mv.id)
@@ -51,7 +52,7 @@ function addMovietoCache(mv){
                 .filter((elem) => elem.id == mv.id)
     moviereq_queue = moviereq_queue.filter((elem) => elem.id != mv.id)
     todispatch.forEach((elem) => 
-            elem.response(mv)) // ao inves de console log chamar função de retorno com objecto
+            elem.response(elem,mv)) // ao inves de console log chamar função de retorno com objecto
 
  }
  
@@ -76,19 +77,19 @@ function addMovietoCache(mv){
  * used externally by the dispatcher
  * @param {*} id id do actor pretendido
  */
-function searchByActorID(entry){
+function searchByActorID(ctx){
     let inneractor 
     if(actorcache == undefined)
         actorcache = []
 
-        inneractor = actorcache.filter((act) => act.id == entry.id)[0]
+        inneractor = actorcache.filter((act) => act.id == ctx.id)[0]
     if(inneractor == undefined){
         actorreq_queue.push(entry)
-        req.getActorById(entry.id,(data) =>reqSearchActorByid(data))
+        req.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
     }else{
         /** return function on requester */
         logger ("cache hit on actor id:"+inneractor.id)
-       entry.response(inneractor)
+       entry.response(ctx,inneractor)
     }
 }
 
@@ -105,7 +106,7 @@ function addActortoCache(act){
                     .filter((elem) => elem.id == act.id)
     actorreq_queue = actorreq_queue.filter((elem) => elem.id != act.id)    
     todispatch.forEach((elem) => 
-            elem.response(act))
+            elem.response(elem,act))
     
 
 }
@@ -135,9 +136,9 @@ term to be searched  and calls the requester , passing the function reqSearchMov
  * fucntion used to search by a moviename in the Api 
  * direct passthrough no cache 
  */
-function searchByMovie(searchTerm){
-
-    req.searchByMovie(searchTerm,reqSearchMovie)
+function searchByMovie(ctx){
+    searchmovie_queue.push(ctx)
+    req.searchByMovie(ctx.query,(search,rquery)=> reqSearchMovie(search,rquery))
 
 }
 
@@ -147,18 +148,24 @@ function searchByMovie(searchTerm){
  * 
  * @param {*} data Jason string with the output of the Api search
  * function that creates an array of movies and returns
- * NOT FINISHED  
+ * 
  */
-function reqSearchMovie(data){
-         Movie.createMovie(data)
-          .forEach((elem) =>console.log(elem)) 
+function reqSearchMovie(data,rquery){
+    let innermoviearr = Movie.createMovie(data)
+    let todispatch = searchmovie_queue.filter((selem) => selem.query = rquery)
+    searchmovie_queue = searchmovie_queue.filter((selem)=> selem.query != rquery)
+    todispatch.forEach((elem) => elem.response(elem,innermoviearr))
         
 }
 
+let mokMovie = {} 
+mokMovie.id =603
 
+let mokSearch = {}
+mokSearch.query ="Matrix"
 //searchByActor(224513)
-//searchByMovie("Matrix")
-//searchMovieById(603)
+searchByMovie(mokSearch)
+//searchMovieById(mokMovie)
 //searchMovieById(604)
 //searchMovieById(603)
 //searchMovieById(606)
