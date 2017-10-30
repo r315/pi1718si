@@ -104,7 +104,7 @@ ex: https://image.tmdb.org/t/p/ w500/ kqjL17yufvn9OVLyXYpvtyrFfak.jpg
 caller must supply the poster_path and optionaly the size[0..n (n can be obtained)], as all data required
 is availabe locally there is no need for callBack
 */
-function imageUrl(path, size){
+function getPosterUrl(path, size){
     
     let req = {
         'path' : 'posterurl',
@@ -120,6 +120,6 @@ function imageUrl(path, size){
 module.exports = { 
     'searchByMovie' : searchByMovie,
     'searchByMovieId' : searchByMovieId,
-    'getActorById' : getActorById,
-    'imageUrl' : imageUrl 
+    'getActorById' : getActorById, 
+    'getPosterUrl' : getPosterUrl
 }

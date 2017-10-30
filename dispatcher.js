@@ -128,12 +128,13 @@ function searchRoute(entry){
  * @param {*} wrapper 
  * @param {*} movie 
  */
-function createMovieView(wrapper, movie){
+function createMovieView(movie){
     fs.readFile(TEMPLATE_MOVIE_PATH, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
-        let dataobj = { 
-            'poster_url' : ' https://image.tmdb.org/t/p/w300_and_h450_bestv2/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg',
+        let dataobj = {
+
+            'poster_url' : movie.posterurl, 
             'movie_cast': []           
         }
         
@@ -156,8 +157,8 @@ function movieRoute(entry){
     wrapper.id = entry.path[1]
     wrapper.entry = entry
     wrapper.response = createMovieView
-   // cache.searchByMovieId(wrapper)
-    setTimeout(()=>wrapper.response(wrapper,null),50)
+    cache.searchByMovieId(wrapper)
+    //setTimeout(()=>wrapper.response(wrapper,null),50)
 }
 
 
