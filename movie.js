@@ -5,7 +5,8 @@ function movie() {
     this.title = null,
     this.id = null,
     this.releaseDate = null, 
-    this.voteAverage = null 
+    this.voteAverage = null,
+    this.poster_path = null
     
 }
 
