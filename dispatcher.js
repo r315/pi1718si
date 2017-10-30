@@ -73,11 +73,6 @@ module.exports = function(entry){
     route(entry)
 }
 
-
-
-
-
-
 /**
  * Get the html template for search results page and
  * fill it with the results
@@ -90,15 +85,19 @@ function createSearchView(wrapper, searchresults){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = { 
-            'search_term' : 'Query: ...',
+            'search_term' : wrapper.query,
             'search_results': []
-        }
-        
-        for(let i = 0; i < RESULT_SIZE; i++){
-            dataobj.search_results.push(
-                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
-            )
-        }
+        }      
+
+        searchresults.forEach( (mv, i) => {
+            dataobj.search_results.push({
+                'result_index' : i+1, 
+                'result_title': `Result ${i+1}`,
+                'result_link' : `/movies/${i}`
+            })
+
+        })
+
         wrapper.entry.data = template(dataobj)
         wrapper.entry.response(wrapper.entry)
     })    
@@ -120,7 +119,7 @@ function searchRoute(entry){
     wrapper.entry = entry
     wrapper.response = createSearchView
     //cache.searchByMovie(wrapper)
-    setTimeout(()=>wrapper.response(wrapper,null),50)
+    setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
 }
 
 /**
@@ -128,13 +127,13 @@ function searchRoute(entry){
  * @param {*} wrapper 
  * @param {*} movie 
  */
-function createMovieView(movie){
+function createMovieView(wrapper, movie){
     fs.readFile(TEMPLATE_MOVIE_PATH, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = {
 
-            'poster_url' : movie.posterurl, 
+            'poster_url' : 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg',             
             'movie_cast': []           
         }
         
@@ -148,6 +147,19 @@ function createMovieView(movie){
     })    
 }
 
+let mock_search_results = []
+function genMockResults(){
+    for(let i = 0; i< 10 ; i++){
+        mock_search_results.push(
+            {
+                'title': `Title ${i}`,
+                'id' : `${i}`
+            }
+        )
+    }
+    return mock_search_results
+}
+
 /**
  * 
  * @param {*} entry 
@@ -157,8 +169,8 @@ function movieRoute(entry){
     wrapper.id = entry.path[1]
     wrapper.entry = entry
     wrapper.response = createMovieView
-    cache.searchByMovieId(wrapper)
-    //setTimeout(()=>wrapper.response(wrapper,null),50)
+    //cache.searchByMovieId(wrapper)
+    setTimeout( ()=>wrapper.response(wrapper,null),50)
 }
 
 
