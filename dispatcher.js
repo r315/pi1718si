@@ -5,10 +5,10 @@ let cache = require('./cache')
 let hb = require('handlebars')
 
 const RESULT_SIZE = 10
-const TEMPLATE_SEARCH_PATH = 'templateviews/search.html'
-const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.html'
-const TEMPLATE_ACTOR_PATH = 'templateviews/actor.html'
-const TEMPLATE_INDEX_PATH = 'templateviews/index.html'
+const TEMPLATE_SEARCH_PATH = 'templateviews/search.hbs'
+const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.hbs'
+const TEMPLATE_ACTOR_PATH = 'templateviews/actor.hbs'
+const TEMPLATE_INDEX_PATH = 'templateviews/index.hbs'
 
 
 let routes = {
