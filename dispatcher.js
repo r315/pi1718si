@@ -18,6 +18,13 @@ let routes = {
     'actors': {'go' : commonRoute, 'template': TEMPLATE_ACTOR_PATH, 'cb':createActorView, 'supplier': cache.searchByActorID}
 }
 
+function extractValue(source, pattern, key){
+    let t = source
+        .filter((p) => p.split(pattern)[0] == key)
+        .map( p => p.split(pattern)[1])[0]
+        return t
+}
+
 /* Dispatche Assumes a two position array on entry */
 //:TODO Check with Hugo R.
 
@@ -125,8 +132,15 @@ function searchRoute(entry, route){
         return
     }
 
-    wrapper.query = entry.path[1].split('=')[1] // get search term
+    let parameters =  entry.path[1].split('&')
 
+    wrapper.query = extractValue(parameters, '=', 'name')
+    let page = extractValue(parameters, '=', 'page')
+
+    if(page == undefined || page <= 0 || isNaN(page)    )
+        page = '1'
+
+    wrapper.page = page    
     wrapper.entry = entry
     wrapper.template = route.template
     wrapper.response = route.cb
@@ -148,8 +162,8 @@ function createSearchView(wrapper, searchresults){
         let dataobj = { 
             'search_term' : wrapper.query,
             'search_results': [],
-            'search_previous_page' : `/search?name=${wrapper.query}` ,
-            'search_next_page' : '#'
+            'search_previous_page' : `/search?name=${wrapper.query}&page=${(wrapper.page > 1)? parseInt(wrapper.page) - 1: wrapper.page}` ,
+            'search_next_page' :  `/search?name=${wrapper.query}&page=${(wrapper.page < wrapper.totalpage)? parseInt(wrapper.page) + 1: wrapper.page}` 
         }      
 
         searchresults.forEach( (mv, i) => {
