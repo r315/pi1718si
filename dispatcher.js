@@ -1,7 +1,8 @@
 'use strict'
 
 let fs = require('fs')
-let cache = require('./cache')
+//let cache = require('./cache')
+let cache = require('./dispatcher_test')
 let hb = require('handlebars')
 
 const RESULT_SIZE = 10
@@ -12,9 +13,9 @@ const TEMPLATE_INDEX_PATH = 'templateviews/index.hbs'
 
 
 let routes = {
-    'search': searchRoute,
-    'movies': movieRoute,
-    'actors': actorRoute,
+    'search': {'go' : searchRoute, 'template': TEMPLATE_SEARCH_PATH, 'cb':createSearchView, 'supplier': cache.searchByMovie},
+    'movies': {'go' : commonRoute, 'template': TEMPLATE_MOVIE_PATH, 'cb':createMovieView, 'supplier': cache.searchByMovieId},
+    'actors': {'go' : commonRoute, 'template': TEMPLATE_ACTOR_PATH, 'cb':createActorView, 'supplier': cache.searchByActorID}
 }
 
 /* Dispatche Assumes a two position array on entry */
@@ -70,7 +71,67 @@ module.exports = function(entry){
         return
     }
 
-    route(entry)
+    route.go(entry,route)
+}
+
+/**
+ * 
+ * @param {*} entry 
+ * @param {*} route 
+ */
+function commonRoute(entry, route){
+    let wrapper = {}
+    
+    wrapper.id = entry.path[1]
+
+    if(wrapper.id == ''){
+        entry.error = 404 // not found
+        entry.data = `No Valid ID for /${entry.path[0]}/{id}`
+        entry.response(entry)        
+        return
+    }
+
+    if(isNaN(wrapper.id)){
+        entry.error = 404 // not found
+        entry.data = `"${wrapper.id}" is not valid as id`
+        entry.response(entry)        
+        return
+    }
+
+    wrapper.entry = entry
+    wrapper.template = route.template
+    wrapper.response = route.cb
+    route.supplier(wrapper)
+    //setTimeout( ()=>wrapper.response(wrapper,null),50)
+}
+
+/**
+ * Get an array of object containing search results from cache, 
+ * for cache returns an object the necessary data 
+ * must be supplied, this data is obtained from entry object
+ * 
+ * a wrapper object is created with the necessary data and callback
+ * at on data ready cache calls this callback and search results
+ * 
+ * @param {*} 
+ */
+function searchRoute(entry, route){
+    let wrapper = {}    
+    //wrapper.page = entry.page     
+    if(entry.path[1] == '' || entry.path[1] == undefined){
+        entry.error = 404 // not found
+        entry.data = `No keyword entered`
+        entry.response(entry)        
+        return
+    }
+
+    wrapper.query = entry.path[1].split('=')[1] // get search term
+
+    wrapper.entry = entry
+    wrapper.template = route.template
+    wrapper.response = route.cb
+    route.supplier(wrapper)
+    //setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
 }
 
 /**
@@ -81,12 +142,14 @@ module.exports = function(entry){
  * @param {data, cb} data
  */
 function createSearchView(wrapper, searchresults){
-    fs.readFile(TEMPLATE_SEARCH_PATH, function(error,data){
+    fs.readFile(wrapper.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = { 
             'search_term' : wrapper.query,
-            'search_results': []
+            'search_results': [],
+            'search_previous_page' : `/search?name=${wrapper.query}` ,
+            'search_next_page' : '#'
         }      
 
         searchresults.forEach( (mv, i) => {
@@ -104,31 +167,12 @@ function createSearchView(wrapper, searchresults){
 }
 
 /**
- * Get an array of object containing search results from cache, 
- * for cache returns an object the necessary data 
- * must be supplied, this data is obtained from entry object
- * 
- * a wrapper object is created with the necessary data and callback
- * at on data ready cache calls this callback and search results
- * 
- * @param {*} entry {path:[endpoint, query]}
- */
-function searchRoute(entry){
-    let wrapper = {}
-    wrapper.query = entry.path[1].split('=')[1] // get search term
-    wrapper.entry = entry
-    wrapper.response = createSearchView
-    cache.searchByMovie(wrapper)
-    //setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
-}
-
-/**
  * 
  * @param {*} wrapper 
  * @param {*} movie 
  */
 function createMovieView(wrapper, movie){
-    fs.readFile(TEMPLATE_MOVIE_PATH, function(error,data){
+    fs.readFile(wrapper.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = {
@@ -154,67 +198,30 @@ function createMovieView(wrapper, movie){
 
 /**
  * 
- * @param {*} entry 
- */
-function movieRoute(entry){
-    let wrapper = {}
-    
-    wrapper.id = entry.path[1]
-
-    if(wrapper.id == ''){
-        entry.error = 404 // not found
-        entry.data = 'No Valid ID for /movies/{movie-id}'
-        entry.response(entry)        
-        return
-    }
-
-    if(isNaN(wrapper.id)){
-        entry.error = 404 // not found
-        entry.data = 'Given Id is not a number'
-        entry.response(entry)        
-        return
-    }
-
-    wrapper.entry = entry
-    wrapper.response = createMovieView
-    cache.searchByMovieId(wrapper)
-    //setTimeout( ()=>wrapper.response(wrapper,null),50)
-}
-
-
-/**
- * 
  * @param {*} wrapper 
  * @param {*} movie 
  */
-function createActorView(wrapper, movie){
-    fs.readFile(TEMPLATE_ACTOR_PATH, function(error,data){
+function createActorView(wrapper, actor){
+    fs.readFile(wrapper.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)        
         let dataobj = { 
-            'profile_url' : 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/9nI9GsV1HZS3YKvMqrGuuEYWr8v.jpg',
-            'casted_movies': []           
+            'name' : actor.name,
+            'biography': actor.biography,
+            //'profile_url' : actor.posterurl, 
+            'casted_movies' : []           
         }
         
-        for(let i = 0; i < RESULT_SIZE; i++){
+        actor.mov.forEach((elem, i)=>{
             dataobj.casted_movies.push(
-                {'result_index' : i+1, 'result_title': `Result ${i+1}`}
-            )
-        }
+                {
+                    'casted_index' : i+1, 
+                    'casted_movie': elem.title,
+                    'casted_link' : `/movies/${elem.id}`
+                })
+        })
+
         wrapper.entry.data = template(dataobj)
         wrapper.entry.response(wrapper.entry)
     })  
-}
-    
-/**
- * 
- * @param {*} entry 
- */
-function actorRoute(entry){
-    let wrapper = {}
-    wrapper.id = entry.path[1]
-    wrapper.entry = entry
-    wrapper.response = createActorView
-    //cache.searchByActorID(wrapper)
-    setTimeout(()=>wrapper.response(wrapper,null),50)
 }
