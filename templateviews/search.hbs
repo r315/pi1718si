@@ -28,7 +28,7 @@
           </li>        
         </ul>
         <form class="form-inline my-2 my-lg-0" action="/search">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="query">
+          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
       </div>
@@ -55,11 +55,8 @@
             </tbody>
           </table>
           <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            <li class="page-item"><a class="page-link" href="{{search_previous_page}}">Previous</a></li>           
+            <li class="page-item"><a class="page-link" href="{{search_next_page}}">Next</a></li>
           </ul>
       </div>      
     </main><!-- /.container -->   
