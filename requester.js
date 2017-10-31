@@ -7,12 +7,16 @@ const ACTOR_DETAILS_SIZE = 2
 
 server.init()
 
-function searchByMovie(searchTerm,callbackfunc){
+function searchByMovie(searchTerm, page, callbackfunc){
     
-        let reqparm={'path':'search','query':searchTerm,'response':(data) => callbackfunc(data,searchTerm)}
-        server.request(reqparm)
-    
-    }
+        let reqparm={
+            'path':'search',
+            'query':searchTerm,
+            'page' : page,
+            'response':(data) => callbackfunc(data,searchTerm)
+        }
+        server.request(reqparm)    
+}
 
 
 function requestsCollector(rspdata, cb){

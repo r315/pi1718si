@@ -6,7 +6,20 @@ module.exports = {
 }
 
 function searchMovieById(wrapper){
-    setTimeout(() => wrapper.response(wrapper, {}), 50)
+    let mv =  {
+        'title': `Title `,
+        'id' : `23421`,
+        'directordto' : [],
+        'poster_url' : ' ',
+        'castitemdto' : [
+            {
+                'name' : 'none',
+                'id' : 321,
+                'character': 'someone'
+            }
+        ]
+    }       
+    setTimeout(() => wrapper.response(wrapper, mv), 50)
 }
 
 function searchByMovie(wrapper){
@@ -15,10 +28,14 @@ function searchByMovie(wrapper){
         mock_search_results.push(
             {
                 'title': `Title ${i}`,
-                'id' : `${i}`
-            }
+                'id' : `${i}`,
+                'directordto' : [],
+                'poster_url' : ' ',
+                'castitemdto' : []
+            }            
         )
     }
+    wrapper.totalpage = 5
     setTimeout(() => wrapper.response(wrapper, mock_search_results), 50)
 }
 
