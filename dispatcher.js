@@ -1,8 +1,8 @@
 'use strict'
 
 let fs = require('fs')
-//let cache = require('./cache')
-let cache = require('./dispatcher_test')
+let cache = require('./cache')
+//let cache = require('./dispatcher_test')
 let hb = require('handlebars')
 
 const RESULT_SIZE = 10
