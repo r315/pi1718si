@@ -9,7 +9,7 @@ let actorcache
 let moviereq_queue = []
 let actorreq_queue =[]
 let searchmovie_queue = []
-
+let cachelimit =100
 
 /**
  * Function that searchs for a movie in the cache, and if 
@@ -17,6 +17,25 @@ let searchmovie_queue = []
  * used externally by the dispatcher
  * @param {*} id id of the movie to be searched
  */
+
+// function cacheEviction(cacheobj){
+//     let oldest = Number.MAX_SAFE_INTEGER
+//     let current_timeStamp = Math.floor(+new Date() / 1000)
+    
+//     cacheobj.reduce(function (elem){
+//             let idx
+//             let toremoveidx
+//             idx++
+//         if(current_timestamp-elem.timestamp > oldest) {
+//             oldest = current_timestamp-elem.timestamp
+//             toremoveidx = idx
+//         }
+
+//     }
+
+
+
+// }
 
 function searchMovieById(ctx){
     let innermovie
@@ -26,7 +45,7 @@ function searchMovieById(ctx){
       
         innermovie = moviecache.filter((mv) => mv.id ==ctx.id)[0]
     if ( innermovie == undefined) {
-         moviereq_queue.push(ctx)
+         moviereq_queue.push(ctx) //TODO check context on request ../movie/
          
          req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data))     
     }else{
@@ -44,10 +63,21 @@ function searchMovieById(ctx){
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
 function addMovietoCache(mv){
+
+    let cache_obj ={ 
+        'obj' : obj,
+        'timestamp' :timestamp
+    }
+    
     mv.posterurl = req.getPosterUrl(mv.poster_path)
 
     if(moviecache.filter((dt) => dt.id == mv.id).length <1){
-         moviecache.push(mv)
+        if(cache_obj.length >= cachelimit){
+            cacheEviction(cache_obj)
+        }
+        cache_obj.obj =mv
+        cache_obj.timestamp = Math.floor(+new Date() / 1000)
+         moviecache.push(cache_obj)
          logger("Added to movie cache id:"+mv.id)
     }
     let todispatch = moviereq_queue
@@ -68,8 +98,9 @@ function addMovietoCache(mv){
   *used externally by the requester
   */
  function reqSearchMovieById(datamvid){
-     addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]))
      
+        addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]))    
+         
 
  }
  
@@ -87,12 +118,12 @@ function searchByActorID(ctx){
 
         inneractor = actorcache.filter((act) => act.id == ctx.id)[0]
     if(inneractor == undefined){
-        actorreq_queue.push(entry)
+        actorreq_queue.push(ctx)
         req.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
     }else{
         /** return function on requester */
         logger ("cache hit on actor id:"+inneractor.id)
-       entry.response(ctx,inneractor)
+       ctx.response(ctx,inneractor)
     }
 }
 
@@ -102,6 +133,7 @@ function searchByActorID(ctx){
  * @param {*} act 
  */
 function addActortoCache(act){
+    
     if(moviecache.filter((dt) => dt.id == act.id).length <1)
         actorcache.push(act)
     logger("Added to actor cache id:"+act.id)
@@ -141,7 +173,7 @@ term to be searched  and calls the requester , passing the function reqSearchMov
  */
 function searchByMovie(ctx){
     searchmovie_queue.push(ctx)
-    req.searchByMovie(ctx.query,(search,rquery)=> reqSearchMovie(search,rquery))
+    req.searchByMovie(ctx.query,ctx.page,(search,rquery)=> reqSearchMovie(search,rquery))
 
 }
 
@@ -169,7 +201,7 @@ let mokSearch = {}
 mokSearch.query ="Matrix"
 //searchByActor(224513)
 //searchByMovie(mokSearch)
-searchMovieById(mokMovie)
+//searchMovieById(mokMovie)
 
 //searchMovieById(604)
 //searchMovieById(603)
