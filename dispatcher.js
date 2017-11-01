@@ -223,7 +223,7 @@ function createActorView(wrapper, actor){
         let dataobj = { 
             'name' : actor.name,
             'biography': actor.biography,
-            //'profile_url' : actor.posterurl, 
+            'profile_url' : actor.profileurl, 
             'casted_movies' : []           
         }
         
