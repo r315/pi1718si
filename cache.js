@@ -208,10 +208,10 @@ function searchByMovie(ctx){
  */
 function reqSearchMovie(data,rquery){
     let innermoviearr = Movie.createMovie(data)
+    let totalpages = JSON.parse(data).total_pages
     let todispatch = searchmovie_queue.filter((selem) => selem.query = rquery)
     searchmovie_queue = searchmovie_queue.filter((selem)=> selem.query != rquery)
-    todispatch.forEach((elem) => elem.response(elem,innermoviearr))
-        
+    todispatch.forEach((elem) => {elem.totalpages = totalpages; elem.response(elem,innermoviearr)})
 }
 
 

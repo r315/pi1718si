@@ -19,11 +19,9 @@ function createMovie(tocreateMovie){
             mv.title = elem.original_title
             mv.releaseDate = elem.release_date
             mv.voteAverage = elem.vote_average
-            mv.totalpage = elem.total_pages   //TODO killing a mosquito with a bazuca
             arrmov.push(mv)
         })
     return arrmov
-    
 }
 
 /*

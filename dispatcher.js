@@ -159,12 +159,13 @@ function createSearchView(wrapper, searchresults){
     fs.readFile(wrapper.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
-        let total_pages = searchresults[0].totalpage // TODO: remove this propertie from each result
+        let total_pages = wrapper.totalpages
         let dataobj = { 
             'search_term' : wrapper.query,
             'search_results': [],
             'search_previous_page' : `/search?name=${wrapper.query}&page=${(wrapper.page > 1)? parseInt(wrapper.page) - 1: wrapper.page}` ,
-            'search_next_page' :  `/search?name=${wrapper.query}&page=${(wrapper.page < total_pages)? parseInt(wrapper.page) + 1: wrapper.page}` 
+            'search_next_page' :  `/search?name=${wrapper.query}&page=${(wrapper.page < total_pages)? parseInt(wrapper.page) + 1: wrapper.page}`,
+            'search_page' :  wrapper.page
         }      
 
         searchresults.forEach( (mv, i) => {
