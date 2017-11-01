@@ -9,6 +9,8 @@ function actor() {
     this.id = null,
     this.biography = null,
     this.mov = []
+    this.profile_path =null
+    this.profileurl =null
     
 }
 
@@ -19,6 +21,7 @@ function createActor(actorInfo, actorMovieCredit) {
         ac.name = obj.name
         ac.id = obj.id
         ac.biography = obj.biography
+        ac.profile_path = obj.profile_path
         JSON.parse(actorMovieCredit).cast.forEach( function(elem) { 
             let mv = new myMovie()
             mv.id = elem.id
