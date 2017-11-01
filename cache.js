@@ -10,7 +10,8 @@ let moviereq_queue = []
 let actorreq_queue =[]
 let searchmovie_queue = []
 let cachelimit =100
-
+let to_return_ctx =null
+let to_return_call=null
 /**
  * Function that searchs for a movie in the cache, and if 
  * the movie it's not in the cache it will make a request to Api
@@ -18,24 +19,24 @@ let cachelimit =100
  * @param {*} id id of the movie to be searched
  */
 
-// function cacheEviction(cacheobj){
-//     let oldest = Number.MAX_SAFE_INTEGER
-//     let current_timeStamp = Math.floor(+new Date() / 1000)
+function cacheEviction(cacheobj){
+    let oldest = Number.MIN_SAFE_INTEGER
+    let current_timestamp = Math.floor(+new Date() / 1000)
+    let toremoveidx =-5
+    let idx=0
+    cacheobj.forEach(function (elem){
+
+        if(current_timestamp-elem.timestamp > oldest) {
+            oldest = current_timestamp-elem.timestamp
+            toremoveidx = idx
+        }
+         idx++
+    })
+    cacheobj.splice(toremoveidx,1)
+
     
-//     cacheobj.reduce(function (elem){
-//             let idx
-//             let toremoveidx
-//             idx++
-//         if(current_timestamp-elem.timestamp > oldest) {
-//             oldest = current_timestamp-elem.timestamp
-//             toremoveidx = idx
-//         }
 
-//     }
-
-
-
-// }
+}
 
 function searchMovieById(ctx){
     let innermovie
@@ -43,14 +44,16 @@ function searchMovieById(ctx){
     if ( moviecache == undefined)
             moviecache = []
       
-        innermovie = moviecache.filter((mv) => mv.id ==ctx.id)[0]
+        innermovie = moviecache.filter((mv) => mv.obj.id ==ctx.id)[0]
     if ( innermovie == undefined) {
          moviereq_queue.push(ctx) //TODO check context on request ../movie/
-         
-         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data))     
+      //   to_return_ctx =ctx
+        // to_return_call = ctx.response
+         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data))     //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
-        logger("Movie cache hit:"+innermovie.id)
-        ctx.response(ctx,innermovie)
+        logger("Movie cache hit:"+innermovie.obj.id)
+            innermovie.timestamp = Math.floor(+new Date() / 1000)
+        ctx.response(ctx,innermovie.obj)
     
     }
 }
@@ -62,31 +65,32 @@ function searchMovieById(ctx){
  * used locally
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
-function addMovietoCache(mv){
+function addMovietoCache(mv,back_to){
 
-    let cache_obj ={ 
-        'obj' : obj,
-        'timestamp' :timestamp
+    let cache_obj = { 
+        'obj' : null,
+        'timestamp' :null,
     }
-    
     mv.posterurl = req.getPosterUrl(mv.poster_path)
 
-    if(moviecache.filter((dt) => dt.id == mv.id).length <1){
-        if(cache_obj.length >= cachelimit){
-            cacheEviction(cache_obj)
+    if(moviecache.filter((dt) => dt.obj.id == mv.id).length <1){
+        if(moviecache.length >= cachelimit){
+            cacheEviction(moviecache)
         }
         cache_obj.obj =mv
         cache_obj.timestamp = Math.floor(+new Date() / 1000)
          moviecache.push(cache_obj)
          logger("Added to movie cache id:"+mv.id)
     }
+    
     let todispatch = moviereq_queue
                 .filter((elem) => elem.id == mv.id)
     moviereq_queue = moviereq_queue.filter((elem) => elem.id != mv.id)
     
     todispatch.forEach((elem) => 
-            elem.response(elem,mv)) // ao inves de console log chamar função de retorno com objecto
-    
+            elem.response(elem,mv)) 
+
+   // to_return_call(to_return_ctx,mv)   
  }
  
  /**
@@ -133,7 +137,7 @@ function searchByActorID(ctx){
  * @param {*} act 
  */
 function addActortoCache(act){
-    
+    mv.profileurl = req.getPosterUrl(act.profile_path)
     if(moviecache.filter((dt) => dt.id == act.id).length <1)
         actorcache.push(act)
     logger("Added to actor cache id:"+act.id)
