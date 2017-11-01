@@ -9,16 +9,14 @@ let actorcache
 let moviereq_queue = []
 let actorreq_queue =[]
 let searchmovie_queue = []
-let cachelimit =100
+let cachelimit =1000
 let to_return_ctx =null
 let to_return_call=null
-/**
- * Function that searchs for a movie in the cache, and if 
- * the movie it's not in the cache it will make a request to Api
- * used externally by the dispatcher
- * @param {*} id id of the movie to be searched
- */
 
+/**
+ * function to empty the object taht it's in the oldest object in the cache 
+ * @param {*} cacheobj 
+ */
 function cacheEviction(cacheobj){
     let oldest = Number.MIN_SAFE_INTEGER
     let current_timestamp = Math.floor(+new Date() / 1000)
@@ -37,7 +35,12 @@ function cacheEviction(cacheobj){
     
 
 }
-
+/**
+ * Function that searchs for a movie in the cache, and if 
+ * the movie it's not in the cache it will make a request to Api
+ * used externally by the dispatcher
+ * @param {*} id id of the movie to be searched
+ */
 function searchMovieById(ctx){
     let innermovie
         
@@ -69,7 +72,7 @@ function addMovietoCache(mv,back_to){
 
     let cache_obj = { 
         'obj' : null,
-        'timestamp' :null,
+        'timestamp' :null
     }
     mv.posterurl = req.getPosterUrl(mv.poster_path)
 
@@ -120,14 +123,15 @@ function searchByActorID(ctx){
     if(actorcache == undefined)
         actorcache = []
 
-        inneractor = actorcache.filter((act) => act.id == ctx.id)[0]
+        inneractor = actorcache.filter((act) => act.obj.id == ctx.id)[0]
     if(inneractor == undefined){
         actorreq_queue.push(ctx)
         req.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
     }else{
         /** return function on requester */
-        logger ("cache hit on actor id:"+inneractor.id)
-       ctx.response(ctx,inneractor)
+        logger ("cache hit on actor id:"+inneractor.obj.id)
+        inneractor.timestamp = Math.floor(+new Date() / 1000)
+       ctx.response(ctx,inneractor.obj)
     }
 }
 
@@ -137,10 +141,23 @@ function searchByActorID(ctx){
  * @param {*} act 
  */
 function addActortoCache(act){
-    mv.profileurl = req.getPosterUrl(act.profile_path)
-    if(moviecache.filter((dt) => dt.id == act.id).length <1)
-        actorcache.push(act)
+    
+    let cache_obj = {
+        'obj':null,
+        'timestamp' : null
+    }
+
+    act.profileurl = req.getPosterUrl(act.profile_path)
+
+    if(actorcache.filter((dt) => dt.obj.id == act.id).length <1){
+        if(actorcache.length >= cachelimit){
+            cacheEviction(actorcache)
+        }
+        cache_obj.obj = act
+        cache_obj.timestamp = Math.floor(+new Date() / 1000)
+        actorcache.push(cache_obj)
     logger("Added to actor cache id:"+act.id)
+    }
     let todispatch = actorreq_queue
                     .filter((elem) => elem.id == act.id)
     actorreq_queue = actorreq_queue.filter((elem) => elem.id != act.id)    
@@ -196,21 +213,6 @@ function reqSearchMovie(data,rquery){
     todispatch.forEach((elem) => elem.response(elem,innermoviearr))
         
 }
-
-let mokMovie = {} 
-mokMovie.id =603
-let moviemok = {}
-moviemok.id =603
-let mokSearch = {}
-mokSearch.query ="Matrix"
-//searchByActor(224513)
-//searchByMovie(mokSearch)
-//searchMovieById(mokMovie)
-
-//searchMovieById(604)
-//searchMovieById(603)
-//searchMovieById(606)
-
 
 
 
