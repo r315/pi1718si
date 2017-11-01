@@ -1,6 +1,6 @@
 'use strict'
 
-const server = require('./server_md')
+const server = require('./tmdbService')
 const logger = (msg) => {console.log('Requester: ' + msg); return msg;}
 const MOVIE_DETAILS_SIZE = 2 
 const ACTOR_DETAILS_SIZE = 2
