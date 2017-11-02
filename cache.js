@@ -50,9 +50,9 @@ function searchMovieById(ctx){
         innermovie = moviecache.filter((mv) => mv.obj.id ==ctx.id)[0]
     if ( innermovie == undefined) {
          moviereq_queue.push(ctx) //TODO check context on request ../movie/
-      //   to_return_ctx =ctx
-        // to_return_call = ctx.response
-         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data))     //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
+      //to_return_ctx =ctx
+        //to_return_call = ctx.response
+         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
         logger("Movie cache hit:"+innermovie.obj.id)
             innermovie.timestamp = Math.floor(+new Date() / 1000)
@@ -68,7 +68,7 @@ function searchMovieById(ctx){
  * used locally
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
-function addMovietoCache(mv,back_to){
+function addMovietoCache(mv ){
 
     let cache_obj = { 
         'obj' : null,
