@@ -18,6 +18,7 @@ let routes = {
     'actors': {'go' : commonRoute, 'template': TEMPLATE_ACTOR_PATH, 'cb':createActorView, 'supplier': cache.searchByActorID}
 }
 
+//TODO: FIX undefined query from movie details
 function extractValue(source, pattern, key){
     let t = source
         .filter((p) => p.split(pattern)[0] == key)
