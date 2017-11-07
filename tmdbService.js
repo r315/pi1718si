@@ -2,7 +2,6 @@
 
 let http = require('http')
 let fs = require('fs')
-let dispatcher = require('./dispatcher')
 
 const CONFIG_FILE = 'server.json'
 
