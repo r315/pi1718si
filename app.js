@@ -1,4 +1,8 @@
-let server = require('./serverClient')
+'use strict'
+
+let dispatcher = require('./dispatcher')
+let express = require('express')
+let app = express()
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -27,5 +31,7 @@ function commandInputInit(){
 
 
 logger('Application started!')
-server.init()
+app.get('/', (req, resp) => dispatcher.createHomeView(req,resp))
+//app.use('/cenas', (req, res, next) => {res.send('Hello from cenas'); next();} )
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
 commandInputInit()
