@@ -35,6 +35,13 @@ function cacheEviction(cacheobj){
     
 
 }
+
+
+
+function getObjectFromCache(req,res,next){
+    
+}
+
 /**
  * Function that searchs for a movie in the cache, and if 
  * the movie it's not in the cache it will make a request to Api
