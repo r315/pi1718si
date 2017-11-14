@@ -5,7 +5,7 @@ let cache = require('./cache')
 //let cache = require('./dispatcher_test')
 let hb = require('handlebars')
 
-const RESULT_SIZE = 10
+
 const TEMPLATE_SEARCH_PATH = 'templateviews/search.hbs'
 const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.hbs'
 const TEMPLATE_ACTOR_PATH = 'templateviews/actor.hbs'
@@ -13,13 +13,6 @@ const TEMPLATE_INDEX_PATH = 'templateviews/index.hbs'
 
 const logger = (msg) => {console.log('Dispatcher: ' + msg); return msg;}
 
-let routes = {
-    'search': {'go' : searchRoute, 'template': TEMPLATE_SEARCH_PATH, 'cb':createSearchView, 'supplier': cache.searchByMovie},
-    'movies': {'go' : commonRoute, 'template': TEMPLATE_MOVIE_PATH, 'cb':createMovieView, 'supplier': cache.searchByMovieId},
-    'actors': {'go' : commonRoute, 'template': TEMPLATE_ACTOR_PATH, 'cb':createActorView, 'supplier': cache.searchByActorID}
-}
-
-//TODO: FIX undefined query from movie details
 function extractValue(source, pattern, key){
     let t = source
         .filter((p) => p.split(pattern)[0] == key)
@@ -28,34 +21,27 @@ function extractValue(source, pattern, key){
 }
 
 /**
- * 
+ * /movies/{id}
+ * /actors/{id}
  * @param {*} entry 
  * @param {*} route 
  */
-function commonRoute(entry, route){
+function commonRoute(req, resp, next){
     let wrapper = {}
     
-    wrapper.id = entry.path[1]
+    let path = req.url.split('/')
+    wrapper.id = path[1]
 
-    if(wrapper.id == ''){
-        entry.error = 404 // not found
-        entry.data = `No Valid ID for /${entry.path[0]}/{id}`
-        entry.response(entry)        
+    if(wrapper.id == ''){        
+        resp.status(404).send(`No Valid ID for ${req.baseUrl}/{id}`)     
         return
     }
 
-    if(isNaN(wrapper.id)){
-        entry.error = 404 // not found
-        entry.data = `"${wrapper.id}" is not valid as id`
-        entry.response(entry)        
+    if(isNaN(wrapper.id)){        
+        resp.status(404).send(`"${wrapper.id}" is not valid as id`)         
         return
     }
-
-    wrapper.entry = entry
-    wrapper.template = route.template
-    wrapper.response = route.cb
-    route.supplier(wrapper)
-    //setTimeout( ()=>wrapper.response(wrapper,null),50)
+    next()
 }
 
 /**
@@ -68,50 +54,51 @@ function commonRoute(entry, route){
  * 
  * @param {*} 
  */
-function searchRoute(entry, route){
-    let wrapper = {}    
-    //wrapper.page = entry.page     
-    if(entry.path[1] == '' || entry.path[1] == undefined){
-        entry.error = 404 // not found
-        entry.data = `No keyword entered`
-        entry.response(entry)        
-        return
-    }
+function searchRoute(req, resp, next){
 
-    let parameters =  entry.path[1].split('&')
+    let wrapper = {}   
 
-    wrapper.query = extractValue(parameters, '=', 'name')
+    let parameters =  req.url.split('?')[1].split('&')
+    let query = extractValue(parameters, '=', 'name')
     let page = extractValue(parameters, '=', 'page')
 
-    if(page == undefined || page <= 0 || isNaN(page)    )
+    if(page == undefined || page <= 0 || isNaN(page))
         page = '1'
+   
+    req.coimapage = page
+    req.coimarouter = req.baseUrl
+    req.coimaterm = query
 
-    wrapper.page = page    
-    wrapper.entry = entry
-    wrapper.template = route.template
-    wrapper.response = route.cb
-    route.supplier(wrapper)
-    //setTimeout(()=>wrapper.response(wrapper, genMockResults()),50)
+    //using decorator pattern for calling view
+    const ori_send = resp.send
+    resp.send = (...args) => {
+        resp.send = ori_send
+        resp.template = TEMPLATE_SEARCH_PATH
+        createSearchView(req, resp, ...args)
+    }
+    next()
 }
 
 /**
+ * 
  * Get the html template for search results page and
  * fill it with the results
  * 
  * this function is called when cache make requested data available
- * @param {data, cb} data
+ * @param {*} req 
+ * @param {*} resp 
+ * @param {*} searchresults 
  */
-function createSearchView(wrapper, searchresults){
-    fs.readFile(wrapper.template, function(error,data){
+function createSearchView(req, resp, searchresults){
+    fs.readFile(resp.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
-        let total_pages = wrapper.totalpages
         let dataobj = { 
-            'search_term' : wrapper.query,
+            'search_term' : req.coimaterm,
             'search_results': [],
-            'search_previous_page' : `/search?name=${wrapper.query}&page=${(wrapper.page > 1)? parseInt(wrapper.page) - 1: wrapper.page}` ,
-            'search_next_page' :  `/search?name=${wrapper.query}&page=${(wrapper.page < total_pages)? parseInt(wrapper.page) + 1: wrapper.page}`,
-            'search_page' :  wrapper.page
+            'search_previous_page' : `/search?name=${req.coimaterm}&page=${(req.coimapage > 1)? parseInt(req.coimapage) - 1: req.coimapage}` ,
+            'search_next_page' :  `/search?name=${req.coimaterm}&page=${(req.coimapage < resp.coimatotalpages)? parseInt(req.coimapage) + 1: req.comimapage}`,
+            'search_page' :  req.coimapage
         }      
 
         searchresults.forEach( (mv, i) => {
@@ -122,9 +109,7 @@ function createSearchView(wrapper, searchresults){
             })
 
         })
-
-        wrapper.entry.data = template(dataobj)
-        wrapper.entry.response(wrapper.entry)
+        resp.send(template(dataobj))
     })    
 }
 
@@ -200,7 +185,6 @@ function createHomeView(req, resp){
             logger(error.toString())
         }
         else{
-            //TODO FIX for firefox???
             let data = readdata.toString()
             resp.status(200).send(data)
             }            
@@ -209,5 +193,10 @@ function createHomeView(req, resp){
 
 
 module.exports = {
-    'createHomeView' : createHomeView
+    'createHomeView' : createHomeView,
+    'searchRoute' : searchRoute,
+    'commonRoute' : commonRoute,
+    'test' : (req, resp, next) => {
+        setTimeout(() => resp.send("Response Data"),3000)
+    }
 }

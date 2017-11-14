@@ -2,6 +2,7 @@
 
 let dispatcher = require('./dispatcher')
 let express = require('express')
+let cache = require('./cache')
 let app = express()
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
@@ -25,13 +26,19 @@ function commandInputHandler(buffer){
 }
 
 function commandInputInit(){
-    process.openStdin().addListener("data",commandInputHandler)
+    process.openStdin().addListener("data", commandInputHandler)
     commandOut(prompt)
 }
 
 
 logger('Application started!')
-app.get('/', (req, resp) => dispatcher.createHomeView(req,resp))
-//app.use('/cenas', (req, res, next) => {res.send('Hello from cenas'); next();} )
+app.get('/', (req, res) => dispatcher.createHomeView(req, res))
+app.use('/search', (req, res, next) => dispatcher.searchRoute(req, res, next) )
+app.use(['/movies','/actors'], (req, res, next) => dispatcher.commonRoute(req, res, next) )
+//app.use((req, resp, next) => dispatcher.test(req, resp, next))
+app.use((req, resp, next) => cache(req, resp, next))
+
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
 commandInputInit()
+
+
