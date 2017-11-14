@@ -40,6 +40,10 @@ function cacheRouter (req, res, next) {
     switch (req.coimarouter) {
         case '/search' : searchByMovie(req)
         break;
+        case '/movies' : searchMovieById(req)
+        break;
+        case '/actor' : searchByActorID(req)
+        break;
     }
 }
 
@@ -60,12 +64,12 @@ function searchMovieById(ctx){
     if ( moviecache == undefined)
             moviecache = []
       
-        innermovie = moviecache.filter((mv) => mv.obj.id ==ctx.id)[0]
+        innermovie = moviecache.filter((mv) => mv.obj.id ==ctx.coimaterm)[0]
     if ( innermovie == undefined) {
          moviereq_queue.push(ctx) //TODO check context on request ../movie/
       //to_return_ctx =ctx
         //to_return_call = ctx.response
-         req_.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
+         req_.searchByMovieId(ctx.coimaterm,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
         logger("Movie cache hit:"+innermovie.obj.id)
             innermovie.timestamp = Math.floor(+new Date() / 1000)
