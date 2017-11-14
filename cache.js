@@ -1,6 +1,6 @@
 'use strict'
 const logger = (msg) => {console.log('Cache: ' + msg); return msg;}
-const req = require('./requester')
+const req_ = require('./requester')
 const Movie = require('./movie')
 const movieDetails = require('./movieDetails')
 const Actor = require('./actor')
@@ -38,8 +38,8 @@ function cacheEviction(cacheobj){
 function cacheRouter (req, res, next) {
     coimares = res
     switch (req.coimarouter) {
-        case '/search' :
-        searchByMovie(req)
+        case '/search' : searchByMovie(req)
+        break;
     }
 }
 
@@ -65,7 +65,7 @@ function searchMovieById(ctx){
          moviereq_queue.push(ctx) //TODO check context on request ../movie/
       //to_return_ctx =ctx
         //to_return_call = ctx.response
-         req.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
+         req_.searchByMovieId(ctx.id,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
         logger("Movie cache hit:"+innermovie.obj.id)
             innermovie.timestamp = Math.floor(+new Date() / 1000)
@@ -87,7 +87,7 @@ function addMovietoCache(mv ){
         'obj' : null,
         'timestamp' :null
     }
-    mv.posterurl = req.getPosterUrl(mv.poster_path)
+    mv.posterurl = req_.getPosterUrl(mv.poster_path)
 
     if(moviecache.filter((dt) => dt.obj.id == mv.id).length <1){
         if(moviecache.length >= cachelimit){
@@ -139,7 +139,7 @@ function searchByActorID(ctx){
         inneractor = actorcache.filter((act) => act.obj.id == ctx.id)[0]
     if(inneractor == undefined){
         actorreq_queue.push(ctx)
-        req.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
+        req_.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
     }else{
         /** return function on requester */
         logger ("cache hit on actor id:"+inneractor.obj.id)
@@ -160,7 +160,7 @@ function addActortoCache(act){
         'timestamp' : null
     }
 
-    act.profileurl = req.getPosterUrl(act.profile_path)
+    act.profileurl = req_.getPosterUrl(act.profile_path)
 
     if(actorcache.filter((dt) => dt.obj.id == act.id).length <1){
         if(actorcache.length >= cachelimit){
@@ -208,7 +208,7 @@ term to be searched  and calls the requester , passing the function reqSearchMov
 function searchByMovie(req){
     //searchmovie_queue.push(ctx)
     //req.searchByMovie(ctx.query,ctx.page,(search,rquery)=> reqSearchMovie(search,rquery))
-    req.searchByMovie(req.coimaterm,req.coimapage,(search,rquery)=> reqSearchMovie(search,rquery))
+    req_.searchByMovie(req.coimaterm,req.coimapage,(search,rquery)=> reqSearchMovie(search,rquery))
 }
 
 
