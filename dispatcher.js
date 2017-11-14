@@ -27,19 +27,36 @@ function extractValue(source, pattern, key){
  * @param {*} route 
  */
 function commonRoute(req, resp, next){
-    let wrapper = {}
     
     let path = req.url.split('/')
-    wrapper.id = path[1]
 
-    if(wrapper.id == ''){        
+    req.coimarouter = req.baseUrl
+    req.coimaterm = path[1]
+
+    if(req.coimaterm == ''){        
         resp.status(404).send(`No Valid ID for ${req.baseUrl}/{id}`)     
         return
     }
 
-    if(isNaN(wrapper.id)){        
+    if(isNaN(req.coimaterm)){        
         resp.status(404).send(`"${wrapper.id}" is not valid as id`)         
         return
+    }
+
+    //using decorator pattern for calling view
+    const ori_send = resp.send
+    resp.send = (...args) => {
+        resp.send = ori_send
+
+        if('req.coimarouter' == '/movies'){
+            resp.template = TEMPLATE_SEARCH_PATH
+            createMovieView(req, resp, ...args)
+        }
+
+        if('req.coimarouter' == '/actors'){
+            resp.template = TEMPLATE_ACTORS_PATH
+            createActorView(req, resp, ...args)
+        }        
     }
     next()
 }
@@ -69,13 +86,15 @@ function searchRoute(req, resp, next){
     req.coimarouter = req.baseUrl
     req.coimaterm = query
 
-    //using decorator pattern for calling view
-    const ori_send = resp.send
-    resp.send = (...args) => {
-        resp.send = ori_send
-        resp.template = TEMPLATE_SEARCH_PATH
-        createSearchView(req, resp, ...args)
-    }
+   
+
+     //using decorator pattern for calling view
+     const ori_send = resp.send
+     resp.send = (...args) => {
+         resp.send = ori_send
+         resp.template = TEMPLATE_SEARCH_PATH
+         createSearchView(req, resp, ...args)
+     }
     next()
 }
 
@@ -118,8 +137,8 @@ function createSearchView(req, resp, searchresults){
  * @param {*} wrapper 
  * @param {*} movie 
  */
-function createMovieView(wrapper, movie){
-    fs.readFile(wrapper.template, function(error,data){
+function createMovieView(req, resp, movie){
+    fs.readFile(resp.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = {
@@ -137,9 +156,7 @@ function createMovieView(wrapper, movie){
                     'cast_link' : `/actors/${elem.id}`
                 })
         })
-
-        wrapper.entry.data = template(dataobj)
-        wrapper.entry.response(wrapper.entry)
+        resp.send(template(dataobj))        
     })    
 }
 
@@ -148,8 +165,8 @@ function createMovieView(wrapper, movie){
  * @param {*} wrapper 
  * @param {*} movie 
  */
-function createActorView(wrapper, actor){
-    fs.readFile(wrapper.template, function(error,data){
+function createActorView(req, resp, actor){
+    fs.readFile(resp.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)        
         let dataobj = { 
@@ -167,9 +184,7 @@ function createActorView(wrapper, actor){
                     'casted_link' : `/movies/${elem.id}`
                 })
         })
-
-        wrapper.entry.data = template(dataobj)
-        wrapper.entry.response(wrapper.entry)
+        resp.send(template(dataobj))
     })  
 }
 
