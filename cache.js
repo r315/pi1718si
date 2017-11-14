@@ -12,6 +12,7 @@ let searchmovie_queue = []
 let cachelimit =1000
 let to_return_ctx =null
 let to_return_call=null
+let coimares
 
 /**
  * function to empty the object taht it's in the oldest object in the cache 
@@ -32,10 +33,15 @@ function cacheEviction(cacheobj){
     })
     cacheobj.splice(toremoveidx,1)
 
-    
-
 }
 
+function cacheRouter (req, res, next) {
+    coimares = res
+    switch (req.coimarouter) {
+        case '/search' :
+        searchByMovie(req)
+    }
+}
 
 
 function getObjectFromCache(req,res,next){
@@ -199,10 +205,10 @@ term to be searched  and calls the requester , passing the function reqSearchMov
  * fucntion used to search by a moviename in the Api 
  * direct passthrough no cache 
  */
-function searchByMovie(ctx){
-    searchmovie_queue.push(ctx)
-    req.searchByMovie(ctx.query,ctx.page,(search,rquery)=> reqSearchMovie(search,rquery))
-
+function searchByMovie(req){
+    //searchmovie_queue.push(ctx)
+    //req.searchByMovie(ctx.query,ctx.page,(search,rquery)=> reqSearchMovie(search,rquery))
+    req.searchByMovie(req.coimaterm,req.coimapage,(search,rquery)=> reqSearchMovie(search,rquery))
 }
 
 
@@ -215,18 +221,11 @@ function searchByMovie(ctx){
  */
 function reqSearchMovie(data,rquery){
     let innermoviearr = Movie.createMovie(data)
-    let totalpages = JSON.parse(data).total_pages
-    let todispatch = searchmovie_queue.filter((selem) => selem.query = rquery)
-    searchmovie_queue = searchmovie_queue.filter((selem)=> selem.query != rquery)
-    todispatch.forEach((elem) => {elem.totalpages = totalpages; elem.response(elem,innermoviearr)})
+    coimares.coimatotalpages = JSON.parse(data).total_pages
+    //let todispatch = searchmovie_queue.filter((selem) => selem.query = rquery)
+    //searchmovie_queue = searchmovie_queue.filter((selem)=> selem.query != rquery)
+    //todispatch.forEach((elem) => {elem.totalpages = totalpages; elem.response(elem,innermoviearr)})
+    coimares.send(innermoviearr)
 }
 
-
-
-module.exports = {
-        'searchByMovie' : searchByMovie,
-        'searchByMovieId': searchMovieById,
-        'searchByActorID' : searchByActorID
-
-}
-
+module.exports = cacheRouter
