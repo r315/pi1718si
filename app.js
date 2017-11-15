@@ -1,9 +1,9 @@
 'use strict'
 
-let dispatcher = require('./dispatcher')
 let express = require('express')
+let dispatcher = require('./dispatcher')
+let dpt = require('./dispatcher_test')
 let cache = require('./cache')
-let app = express()
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -11,7 +11,7 @@ const prompt = 'COIMA > '
 
 const commands = {
     'quit' : function () {server.close(); logger('Exiting...'); process.exit()},
-    'help' : function(){ console.log('\nhelp\tthis message\nquit\tquit application\n') }
+    'help' : function() { console.log('\nhelp\tthis message\nquit\tquit application\n') }
 }
 
 function commandInputHandler(buffer){    
@@ -30,15 +30,17 @@ function commandInputInit(){
     commandOut(prompt)
 }
 
+let app = express()
 
 logger('Application started!')
-app.get('/', (req, res) => dispatcher.createHomeView(req, res))
-app.use('/search', (req, res, next) => dispatcher.searchRoute(req, res, next) )
-app.use(['/movies','/actors'], (req, res, next) => dispatcher.commonRoute(req, res, next) )
-//app.use((req, resp, next) => dispatcher.test(req, resp, next))
-app.use((req, resp, next) => cache(req, resp, next))
+
+app.get('/',  dispatcher.createHomeView)
+app.use('/search', dispatcher.searchRoute )
+app.use(['/movies','/actors'], dispatcher.commonRoute)
+app.use(dpt,cache)
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
+
 commandInputInit()
 
 
