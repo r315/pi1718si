@@ -2,7 +2,7 @@
 
 let express = require('express')
 let dispatcher = require('./dispatcher')
-let dpt = require('./dispatcher_test')
+//let dpt = require('./dispatcher_test')
 let cache = require('./cache')
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
@@ -37,7 +37,7 @@ logger('Application started!')
 app.get('/',  dispatcher.createHomeView)
 app.use('/search', dispatcher.searchRoute )
 app.use(['/movies','/actors'], dispatcher.commonRoute)
-app.use(dpt,cache)
+app.use(cache)
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
 
