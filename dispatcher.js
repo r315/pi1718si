@@ -1,37 +1,33 @@
 'use strict'
 
 let fs = require('fs')
-let cache = require('./cache')
-//let cache = require('./dispatcher_test')
 let hb = require('handlebars')
-
-
-const TEMPLATE_SEARCH_PATH = 'templateviews/search.hbs'
-const TEMPLATE_MOVIE_PATH  = 'templateviews/movie.hbs'
-const TEMPLATE_ACTOR_PATH = 'templateviews/actor.hbs'
-const TEMPLATE_INDEX_PATH = 'templateviews/index.hbs'
 
 const logger = (msg) => {console.log('Dispatcher: ' + msg); return msg;}
 
-function extractValue(source, pattern, key){
-    let t = source
-        .filter((p) => p.split(pattern)[0] == key)
-        .map( p => p.split(pattern)[1])[0]
-        return t
+const TEMPLATE_FILE_SEARCH = 'templateviews/search.hbs'
+const TEMPLATE_FILE_MOVIE  = 'templateviews/movie.hbs'
+const TEMPLATE_FILE_ACTOR = 'templateviews/actor.hbs'
+const TEMPLATE_FILE_INDEX = 'templateviews/index.hbs'
+
+//costum data for diferent endpoints
+const routes = {
+    '/movies' : { 'template' : TEMPLATE_FILE_MOVIE, 'view' : createMovieView },
+    '/actors' : { 'template' : TEMPLATE_FILE_ACTOR, 'view' : createActorView }
 }
 
 /**
+ * midleware for endpoints with identical format
  * /movies/{id}
  * /actors/{id}
- * @param {*} entry 
- * @param {*} route 
+ * @param {obj} req         represents a http request
+ * @param {obj} resp        represents a http response
+ * @param {function} next   
  */
 function commonRoute(req, resp, next){
-    
-    let path = req.url.split('/')
 
-    req.coimarouter = req.baseUrl
-    req.coimaterm = path[1]
+    req.coimarouter = req.baseUrl;          //required, on calling next() this is trimmed to "".
+    [,req.coimaterm] = req.url.split('/')
 
     if(req.coimaterm == ''){        
         resp.status(404).send(`No Valid ID for ${req.baseUrl}/{id}`)     
@@ -39,7 +35,7 @@ function commonRoute(req, resp, next){
     }
 
     if(isNaN(req.coimaterm)){        
-        resp.status(404).send(`"${wrapper.id}" is not valid as id`)         
+        resp.status(404).send(`"${req.coimaterm}" is not valid as id`)         
         return
     }
 
@@ -47,52 +43,35 @@ function commonRoute(req, resp, next){
     const ori_send = resp.send
     resp.send = (...args) => {
         resp.send = ori_send
-
-        if('req.coimarouter' == '/movies'){
-            resp.template = TEMPLATE_SEARCH_PATH
-            createMovieView(req, resp, ...args)
-        }
-
-        if('req.coimarouter' == '/actors'){
-            resp.template = TEMPLATE_ACTORS_PATH
-            createActorView(req, resp, ...args)
-        }        
+        resp.template = routes[req.coimarouter].template
+        routes[req.coimarouter].view(req, resp, ...args)        
     }
-    next()
+    next()    
 }
 
 /**
- * Get an array of object containing search results from cache, 
- * for cache returns an object the necessary data 
- * must be supplied, this data is obtained from entry object
- * 
- * a wrapper object is created with the necessary data and callback
- * at on data ready cache calls this callback and search results
- * 
- * @param {*} 
+ * Midleware for search endpoint
+ * /search?name={query}
+ * @param {*} req 
+ * @param {*} resp 
+ * @param {*} next 
  */
-function searchRoute(req, resp, next){
-
-    let wrapper = {}   
-
-    let parameters =  req.url.split('?')[1].split('&')
-    let query = extractValue(parameters, '=', 'name')
-    let page = extractValue(parameters, '=', 'page')
+function searchRoute(req, resp, next){    
+    let query = req.param('name')
+    let page = req.param('page') 
 
     if(page == undefined || page <= 0 || isNaN(page))
         page = '1'
    
     req.coimapage = page
     req.coimarouter = req.baseUrl
-    req.coimaterm = query
-
-   
+    req.coimaterm = query   
 
      //using decorator pattern for calling view
      const ori_send = resp.send
      resp.send = (...args) => {
          resp.send = ori_send
-         resp.template = TEMPLATE_SEARCH_PATH
+         resp.template = TEMPLATE_FILE_SEARCH
          createSearchView(req, resp, ...args)
      }
     next()
@@ -194,7 +173,7 @@ function createActorView(req, resp, actor){
  * @param {*} resp 
  */
 function createHomeView(req, resp){
-    fs.readFile(TEMPLATE_INDEX_PATH, function(error,readdata){
+    fs.readFile(TEMPLATE_FILE_INDEX, function(error,readdata){
         if(error){
             resp.status(500).send(error.toString())           
             logger(error.toString())
@@ -210,8 +189,5 @@ function createHomeView(req, resp){
 module.exports = {
     'createHomeView' : createHomeView,
     'searchRoute' : searchRoute,
-    'commonRoute' : commonRoute,
-    'test' : (req, resp, next) => {
-        setTimeout(() => resp.send("Response Data"),3000)
-    }
+    'commonRoute' : commonRoute,   
 }
