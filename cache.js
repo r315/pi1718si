@@ -66,14 +66,15 @@ function searchMovieById(ctx){
       
         innermovie = moviecache.filter((mv) => mv.obj.id ==ctx.coimaterm)[0]
     if ( innermovie == undefined) {
-         moviereq_queue.push(ctx) //TODO check context on request ../movie/
+        //moviereq_queue.push(ctx) //TODO check context on request ../movie/
       //to_return_ctx =ctx
         //to_return_call = ctx.response
          req_.searchByMovieId(ctx.coimaterm,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
         logger("Movie cache hit:"+innermovie.obj.id)
             innermovie.timestamp = Math.floor(+new Date() / 1000)
-        ctx.response(ctx,innermovie.obj)
+        //ctx.response(ctx,innermovie.obj)
+        coimares.send(innermovie.obj)
     
     }
 }
@@ -85,7 +86,7 @@ function searchMovieById(ctx){
  * used locally
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
-function addMovietoCache(mv ){
+function addMovietoCache(mv){
 
     let cache_obj = { 
         'obj' : null,
@@ -103,13 +104,15 @@ function addMovietoCache(mv ){
          logger("Added to movie cache id:"+mv.id)
     }
     
+    coimares.send(mv)
+    /*
     let todispatch = moviereq_queue
                 .filter((elem) => elem.id == mv.id)
     moviereq_queue = moviereq_queue.filter((elem) => elem.id != mv.id)
     
     todispatch.forEach((elem) => 
             elem.response(elem,mv)) 
-
+    */
    // to_return_call(to_return_ctx,mv)   
  }
  
@@ -125,7 +128,6 @@ function addMovietoCache(mv ){
      
         addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]))    
          
-
  }
  
 
