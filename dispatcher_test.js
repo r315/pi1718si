@@ -1,11 +1,5 @@
-
-module.exports = {
-    'searchByMovie' : searchByMovie,
-    'searchByMovieId': searchMovieById,
-    'searchByActorID' : searchByActorID
-}
-
-function searchMovieById(wrapper){
+const logger = (msg) => {console.log('Dispatcher Test: ' + msg); return msg;}
+function searchMovieById(req, resp, next){
     let mv =  {
         'title': `Title `,
         'id' : `23421`,
@@ -18,12 +12,17 @@ function searchMovieById(wrapper){
                 'character': 'someone'
             }
         ]
-    }       
-    setTimeout(() => wrapper.response(wrapper, mv), 50)
+    }
+    
+    setTimeout(() =>{
+        logger('sending dummy movie details')
+        resp.send(mv)
+    }, 50)
 }
 
-function searchByMovie(wrapper){
+function searchByMovie(req, resp, next){
     let mock_search_results = []
+    resp.totalpage = 5
     for(let i = 0; i< 10 ; i++){
         mock_search_results.push(
             {
@@ -34,12 +33,14 @@ function searchByMovie(wrapper){
                 'castitemdto' : []
             }            
         )
-    }
-    wrapper.totalpage = 5
-    setTimeout(() => wrapper.response(wrapper, mock_search_results), 50)
+    }    
+    setTimeout(() =>{
+        logger('sending 10 dummy results for 5 pages')
+        resp.send(mv)
+    }, 50)
 }
 
-function searchByActorID(wrapper){
+function searchActorById(req, resp, next){
     let actor = {
         'name' : "Brad Pitt",
         'id' : 287,
@@ -92,5 +93,28 @@ function searchByActorID(wrapper){
                 }
         ]
     }
-    setTimeout(() => wrapper.response(wrapper, actor), 50)
+    setTimeout(() =>{
+        logger('sending dummy actor details')
+        resp.send(mv)
+    }, 50)
+}
+
+/*module.exports = {
+    'searchByMovie' : searchByMovie,
+    'searchByMovieId': searchMovieById,
+    'searchByActorID' : searchByActorID
+}*/
+
+const routes = {
+    '/movies' : { 'request' : searchMovieById},
+    '/actors' : { 'request' : searchActorById},
+    '/search' : { 'request' : (req, resp, next) =>  {
+        logger('requesting data do cache')
+        next()
+    } }
+}
+
+module.exports = function(req, resp, next){
+    logger(`routing: \"${req.coimarouter}\"`)
+    routes[req.coimarouter].request(req, resp, next)
 }
