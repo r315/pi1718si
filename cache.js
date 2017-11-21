@@ -36,13 +36,13 @@ function cacheEviction(cacheobj){
 }
 
 function cacheRouter (req, res, next) {
-    coimares = res
+    //coimares = res
     switch (req.coimarouter) {
-        case '/search' : searchByMovie(req)
+        case '/search' : searchByMovie(req,res)
         break;
-        case '/movies' : searchMovieById(req)
+        case '/movies' : searchMovieById(req,res)
         break;
-        case '/actor' : searchByActorID(req)
+        case '/actors' : searchByActorID(req,res)
         break;
     }
 }
@@ -58,7 +58,7 @@ function getObjectFromCache(req,res,next){
  * used externally by the dispatcher
  * @param {*} id id of the movie to be searched
  */
-function searchMovieById(ctx){
+function searchMovieById(ctx, res){
     let innermovie
         
     if ( moviecache == undefined)
@@ -69,12 +69,12 @@ function searchMovieById(ctx){
         //moviereq_queue.push(ctx) //TODO check context on request ../movie/
       //to_return_ctx =ctx
         //to_return_call = ctx.response
-         req_.searchByMovieId(ctx.coimaterm,(data)=>reqSearchMovieById(data)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
+         req_.searchByMovieId(ctx.coimaterm,(data)=>reqSearchMovieById(data, res)   )  //TODO:a função reqsearchmovie deveria receber o callback para voltar ao dispatcher
     }else{
         logger("Movie cache hit:"+innermovie.obj.id)
             innermovie.timestamp = Math.floor(+new Date() / 1000)
         //ctx.response(ctx,innermovie.obj)
-        coimares.send(innermovie.obj)
+        res.send(innermovie.obj)
     
     }
 }
@@ -86,7 +86,7 @@ function searchMovieById(ctx){
  * used locally
  * @param {*} mv receives a Internal movie object to be added to the cache
  */
-function addMovietoCache(mv){
+function addMovietoCache(mv, res){
 
     let cache_obj = { 
         'obj' : null,
@@ -104,7 +104,7 @@ function addMovietoCache(mv){
          logger("Added to movie cache id:"+mv.id)
     }
     
-    coimares.send(mv)
+    res.send(mv)
     /*
     let todispatch = moviereq_queue
                 .filter((elem) => elem.id == mv.id)
@@ -124,9 +124,9 @@ function addMovietoCache(mv){
   *cast:contains information about the cast movie
   *used externally by the requester
   */
- function reqSearchMovieById(datamvid){
+ function reqSearchMovieById(datamvid, res){
      
-        addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]))    
+        addMovietoCache(movieDetails.createMovieDetails(datamvid["movie"],datamvid["cast"]),res)    
          
  }
  
@@ -137,20 +137,20 @@ function addMovietoCache(mv){
  * used externally by the dispatcher
  * @param {*} id id do actor pretendido
  */
-function searchByActorID(ctx){
+function searchByActorID(ctx, res){
     let inneractor 
     if(actorcache == undefined)
         actorcache = []
 
-        inneractor = actorcache.filter((act) => act.obj.id == ctx.id)[0]
+        inneractor = actorcache.filter((act) => act.obj.id == ctx.coimaterm)[0]
     if(inneractor == undefined){
         actorreq_queue.push(ctx)
-        req_.getActorById(ctx.id,(data) =>reqSearchActorByid(data))
+        req_.getActorById(ctx.coimaterm,(data) =>reqSearchActorByid(data, res))
     }else{
         /** return function on requester */
         logger ("cache hit on actor id:"+inneractor.obj.id)
         inneractor.timestamp = Math.floor(+new Date() / 1000)
-       ctx.response(ctx,inneractor.obj)
+       res.send(inneractor.obj)
     }
 }
 
@@ -159,7 +159,7 @@ function searchByActorID(ctx){
  * used locally
  * @param {*} act 
  */
-function addActortoCache(act){
+function addActortoCache(act, res){
     
     let cache_obj = {
         'obj':null,
@@ -177,12 +177,14 @@ function addActortoCache(act){
         actorcache.push(cache_obj)
     logger("Added to actor cache id:"+act.id)
     }
+    res.send(act)
+    /*
     let todispatch = actorreq_queue
                     .filter((elem) => elem.id == act.id)
     actorreq_queue = actorreq_queue.filter((elem) => elem.id != act.id)    
     todispatch.forEach((elem) => 
             elem.response(elem,act))
-    
+    */
 
 }
 
@@ -193,8 +195,8 @@ function addActortoCache(act){
  * used externally by the requester 
  * @param {*} dataaid 
  */
-function  reqSearchActorByid(dataaid){
-    addActortoCache(Actor.createActor(dataaid["actorinfo"],dataaid["roles"]))
+function  reqSearchActorByid(dataaid, res){
+    addActortoCache(Actor.createActor(dataaid["actorinfo"],dataaid["roles"]),res)
 
 }
 
@@ -211,10 +213,10 @@ term to be searched  and calls the requester , passing the function reqSearchMov
  * fucntion used to search by a moviename in the Api 
  * direct passthrough no cache 
  */
-function searchByMovie(req){
+function searchByMovie(req, res){
     //searchmovie_queue.push(ctx)
     //req.searchByMovie(ctx.query,ctx.page,(search,rquery)=> reqSearchMovie(search,rquery))
-    req_.searchByMovie(req.coimaterm,req.coimapage,(search,rquery)=> reqSearchMovie(search,rquery))
+    req_.searchByMovie(req.coimaterm,req.coimapage,(search,rquery)=> reqSearchMovie(search,rquery,res))
 }
 
 
@@ -225,13 +227,13 @@ function searchByMovie(req){
  * function that creates an array of movies and returns
  * 
  */
-function reqSearchMovie(data,rquery){
+function reqSearchMovie(data,rquery,res){
     let innermoviearr = Movie.createMovie(data)
-    coimares.coimatotalpages = JSON.parse(data).total_pages
+    res.coimatotalpages = JSON.parse(data).total_pages
     //let todispatch = searchmovie_queue.filter((selem) => selem.query = rquery)
     //searchmovie_queue = searchmovie_queue.filter((selem)=> selem.query != rquery)
     //todispatch.forEach((elem) => {elem.totalpages = totalpages; elem.response(elem,innermoviearr)})
-    coimares.send(innermoviearr)
+    res.send(innermoviearr)
 }
 
 module.exports = cacheRouter
