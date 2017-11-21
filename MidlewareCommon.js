@@ -3,12 +3,11 @@
 let fs = require('fs')
 let hb = require('handlebars')
 
-const logger = (msg) => {console.log('Dispatcher: ' + msg); return msg;}
+const logger = (msg) => {console.log('Midleware Common: ' + msg); return msg;}
 
-const TEMPLATE_FILE_SEARCH = 'templateviews/search.hbs'
 const TEMPLATE_FILE_MOVIE  = 'templateviews/movie.hbs'
 const TEMPLATE_FILE_ACTOR = 'templateviews/actor.hbs'
-const TEMPLATE_FILE_INDEX = 'templateviews/index.hbs'
+
 
 //costum data for diferent endpoints
 const routes = {
@@ -47,68 +46,6 @@ function commonRoute(req, resp, next){
         routes[req.coimarouter].view(req, resp, ...args)        
     }
     next()    
-}
-
-/**
- * Midleware for search endpoint
- * /search?name={query}
- * @param {*} req 
- * @param {*} resp 
- * @param {*} next 
- */
-function searchRoute(req, resp, next){    
-    let query = req.param('name')
-    let page = req.param('page') 
-
-    if(page == undefined || page <= 0 || isNaN(page))
-        page = '1'
-   
-    req.coimapage = page
-    req.coimarouter = req.baseUrl
-    req.coimaterm = query   
-
-     //using decorator pattern for calling view
-     const ori_send = resp.send
-     resp.send = (...args) => {
-         resp.send = ori_send
-         resp.template = TEMPLATE_FILE_SEARCH
-         createSearchView(req, resp, ...args)
-     }
-    next()
-}
-
-/**
- * 
- * Get the html template for search results page and
- * fill it with the results
- * 
- * this function is called when cache make requested data available
- * @param {*} req 
- * @param {*} resp 
- * @param {*} searchresults 
- */
-function createSearchView(req, resp, searchresults){
-    fs.readFile(resp.template, function(error,data){
-        let source = data.toString()
-        let template = hb.compile(source)
-        let dataobj = { 
-            'search_term' : req.coimaterm,
-            'search_results': [],
-            'search_previous_page' : `/search?name=${req.coimaterm}&page=${(req.coimapage > 1)? parseInt(req.coimapage) - 1: req.coimapage}` ,
-            'search_next_page' :  `/search?name=${req.coimaterm}&page=${(req.coimapage < resp.coimatotalpages)? parseInt(req.coimapage) + 1: req.comimapage}`,
-            'search_page' :  req.coimapage
-        }      
-
-        searchresults.forEach( (mv, i) => {
-            dataobj.search_results.push({
-                'result_index' : i+1, 
-                'result_title': mv.title,
-                'result_link' : `/movies/${mv.id}`
-            })
-
-        })
-        resp.send(template(dataobj))
-    })    
 }
 
 /**
@@ -167,27 +104,6 @@ function createActorView(req, resp, actor){
     })  
 }
 
-/**
- * 
- * @param {*} req 
- * @param {*} resp 
- */
-function createHomeView(req, resp){
-    fs.readFile(TEMPLATE_FILE_INDEX, function(error,readdata){
-        if(error){
-            resp.status(500).send(error.toString())           
-            logger(error.toString())
-        }
-        else{
-            let data = readdata.toString()
-            resp.status(200).send(data)
-            }            
-        })
-}
 
 
-module.exports = {
-    'createHomeView' : createHomeView,
-    'searchRoute' : searchRoute,
-    'commonRoute' : commonRoute,   
-}
+module.exports = commonRoute
