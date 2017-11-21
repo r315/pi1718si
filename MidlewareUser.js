@@ -15,6 +15,7 @@ const TEMPLATE_FILE_INDEX = 'templateviews/user.hbs'
  */
 function userRoute(req, resp, next){
     logger('hello')
+    console.log(req.cookies)
     resp.end()
 }
 
