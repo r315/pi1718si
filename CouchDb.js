@@ -10,8 +10,7 @@ const headerobj = {
     'Content-Length' : ''
 }
 let options = {
-//    hostname : `http://${serveraddress}`,
-    host : 'localhost',
+    host : serveraddress,
     port : gport,
     path: `/${database}`,
     method:'',
@@ -43,27 +42,51 @@ function reqFromDb(uri){
 }
     
 
+function setupReq(body,type){
+    const headerobj = {
+        'Content-Type' : 'application/json',
+        'Content-Length' : Buffer.byteLength(JSON.stringify(body))
+    }
+    
+            options.headers =headerobj
+            options.method = type
+       let post_req= dbreq.request(options,function(res){
+           res.setEncoding('utf8');
+           res.on('data',function(chunk){
+               console.log('Response:',chunk)
+               console.log('Status',`${res.statusCode}-${res.statusMessage}`)
+           })
+       })
+       return post_req
+}
+
 function insertDocOnDb(indoc){
         
     
-const headerobj = {
-    'Content-Type' : 'application/json',
-    'Content-Length' : Buffer.byteLength(JSON.stringify(indoc))
-}
+// const headerobj = {
+//     'Content-Type' : 'application/json',
+//     'Content-Length' : Buffer.byteLength(JSON.stringify(indoc))
+// }
 
-        options.headers =headerobj
-        options.method = 'POST'
-   let post_req= dbreq.request(options,function(res){
-       res.setEncoding('utf8');
-       res.on('data',function(chunk){
-           console.log('Response:',+chunk)
-       })
-   })
+//         options.headers =headerobj
+//         options.method = 'POST'
+//    let post_req= dbreq.request(options,function(res){
+//        res.setEncoding('utf8');
+//        res.on('data',function(chunk){
+//            console.log('Response:',+chunk)
+//        })
+//    })
+    let post_reqi = setupReq(indoc,'POST')
 
-   post_req.write(JSON.stringify(indoc))
+   post_reqi.write(JSON.stringify(indoc))
+   
+   post_reqi.on('error', err =>{
+    console.log("error on post to database",err.message)
+})
 
-   post_req.end()
-
+    //post_reqi.on('close',console.log('Done'))
+   post_reqi.end()
+    
 }
 
 
