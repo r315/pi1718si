@@ -26,7 +26,7 @@ const routes = {
 function commonRoute(req, resp, next){
 
     req.coimarouter = req.baseUrl;          //required, on calling next() this is trimmed to "".
-    [,req.coimaterm] = req.url.split('/')
+    [,req.coimaterm] = req.url.split('/')   // can be improved using path variables from express
 
     if(req.coimaterm == ''){        
         resp.status(404).send(`No Valid ID for ${req.baseUrl}/{id}`)     

@@ -20,7 +20,7 @@ const prompt = 'COIMA > '
  * Console commands
  */
 const commands = {
-    'quit' : function () {server.close(); logger('Exiting...'); process.exit()},
+    'quit' : function () {logger('Exiting...'); process.exit()},
     'help' : function() { console.log('\nhelp\tthis message\nquit\tquit application\n') }
 }
 
@@ -38,17 +38,9 @@ function commandInputHandler(buffer){
     commandOut(prompt)
 }
 
-/**
- * 
- */
-function commandInputInit(){
-    process.openStdin().addListener("data", commandInputHandler)
-    commandOut(prompt)
-}
-
-function start(port = 3000){
+function startServer(port = 3000){
     logger('Application started!')    
-    app.listen(3000, () => logger(`Started on port ${port}`))
+    app.listen(port, () => logger(`Started on port ${port}`))
 }
 
 function setCookie(req, resp, next){
@@ -64,14 +56,14 @@ function setCookie(req, resp, next){
 app.use(cookieParser())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
-app.use('/users', user)
+app.use(['/users','/users/:id'], user)
 app.use(cache)
 app.get('/', home)
 
 
 
-
-commandInputInit()
-start(process.argv[2])
+process.openStdin().addListener("data", commandInputHandler)
+commandOut(prompt)
+startServer(process.argv[2])
 
 
