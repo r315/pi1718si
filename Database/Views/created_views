@@ -1,0 +1,13 @@
+/*** get item by id ***/
+function (doc) {
+  key = doc._id
+  
+  emit(key,doc);
+}
+
+/** get item by doc name ***/
+function (doc) {
+  key = doc.movie
+  
+  emit(key,doc);
+}
