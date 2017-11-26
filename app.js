@@ -56,8 +56,8 @@ function setCookie(req, resp, next){
 app.use(cookieParser())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
-app.use(['/users','/users/:id'], user)
-app.use(cache)
+app.use('/users/:id', user)
+//app.use(cache)
 app.get('/', home)
 
 
