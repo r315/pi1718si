@@ -39,7 +39,8 @@ function commandInputHandler(buffer){
 }
 
 function startServer(port = 3000){
-    logger('Application started!')    
+    logger('Application started!')  
+    logger('Type \"help\" for available commands')  
     app.listen(port, () => logger(`Started on port ${port}`))
 }
 
