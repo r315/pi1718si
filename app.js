@@ -9,8 +9,8 @@ let search = require('./MidlewareSearch')
 let common = require('./MidlewareCommon')
 let user = require('./MidlewareUser')
 let cookieParser = require('cookie-parser')
-//let dpt = require('./dispatcher_test')
 let cache = require('./cache')
+
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -56,7 +56,7 @@ function setCookie(req, resp, next){
 app.use(cookieParser())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
-app.use('/users/:id', user)
+app.use('/users', user)
 //app.use(cache)
 app.get('/', home)
 
