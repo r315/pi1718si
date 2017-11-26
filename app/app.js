@@ -8,7 +8,6 @@ let home = require('./MidlewareHome')
 let search = require('./MidlewareSearch')
 let common = require('./MidlewareCommon')
 let user = require('./MidlewareUser')
-let cookieParser = require('cookie-parser')
 let cache = require('./cache')
 
 
@@ -54,12 +53,11 @@ function setCookie(req, resp, next){
 /**
  * Add midlewares here
  */
-app.use(cookieParser())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
-app.use(cache)
 app.get('/', home)
+app.use(cache)
 
 
 

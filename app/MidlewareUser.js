@@ -5,6 +5,7 @@ let fs = require('fs')
 let hb = require('handlebars')
 let uuid = require('uuid/v1')
 let bodyparser = require('body-parser')
+let cookieParser = require('cookie-parser')
 
 const logger = (msg) => {console.log('Midleware User: ' + msg); return msg;}
 const TEMPLATE_FILE_USER = 'templateviews/user.hbs'
@@ -83,7 +84,7 @@ function userProfile(req, resp, next){
     resp.redirect('/users/login')
 }
 
-
+router.use(cookieParser())
 router.use('/:id',userProfile)
 router.get('/login',userLogin)
 router.post('/login', bodyparser.urlencoded({ extended: false }), userLoginRequest)
