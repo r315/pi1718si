@@ -57,7 +57,7 @@ app.use(cookieParser())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
-//app.use(cache)
+app.use(cache)
 app.get('/', home)
 
 
