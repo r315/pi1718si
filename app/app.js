@@ -59,7 +59,7 @@ app.use('/users', user)
 app.get('/', home)
 app.use(cache)
 
-process.openStdin().addListener("data", commandInputHandler)
+process.openStdin().addListener('data', commandInputHandler)
 commandOut(prompt)
 startServer(process.argv[2])
 

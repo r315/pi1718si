@@ -3,7 +3,6 @@
 let router = require('express')()
 let fs = require('fs')
 let hb = require('handlebars')
-let uuid = require('uuid/v1')
 let bodyparser = require('body-parser')
 let cookieParser = require('cookie-parser')
 
@@ -78,7 +77,7 @@ function userProfile(req, resp, next){
     resp.cookie('login-info',{
         'userid' : id,
         'status':'notLogged',
-        'sessionId' : new Date().getDate() //uuid(3,'0')
+        'sessionId' : new Date().getDate()
     })
 
     resp.redirect('/users/login')
