@@ -8,7 +8,9 @@ let home = require('./MidlewareHome')
 let search = require('./MidlewareSearch')
 let common = require('./MidlewareCommon')
 let user = require('./MidlewareUser')
+let login = require('./MidlewareLogin')
 let cache = require('./cache')
+const path = require('path')
 
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
@@ -53,9 +55,15 @@ function setCookie(req, resp, next){
 /**
  * Add midlewares here
  */
+
+// View engine setup
+app.set('views', path.join(__dirname, '../templateviews'));
+app.set('view engine', 'hbs');
+
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
+app.get('/login', login)
 app.get('/', home)
 app.use(cache)
 
