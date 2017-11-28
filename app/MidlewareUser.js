@@ -1,6 +1,6 @@
 'use strict'
 
-let router = require('express')()
+let router = require('express').Router()
 let fs = require('fs')
 let hb = require('handlebars')
 let bodyparser = require('body-parser')
@@ -45,6 +45,33 @@ function userLogin(req, resp){
  */
 function userLoginRequest(req, resp){
 
+/*
+    function authenticateUser (username, password, cb) {
+        if (username !== 'palbp' || password !== 'penta') {
+            cb(new Error('Invalid credentials'), null)
+            return
+        }
+
+        cb(null, {
+            username: 'palbp',
+            email: 'palbp@cc.isel.ipl.pt'
+        })
+    }
+
+    authenticateUser(req.body.username, req.body.password, (err, user) => {
+        if (err) { next(err); return }
+
+        req.logIn(user, (error) => {
+            if (error) { next(error); return }
+            res.redirect('/')
+        })
+    })
+}
+
+*/
+
+
+
          // check credentials with database
         // add session id to logged collection
         loggedusers.push(req.cookies)
@@ -61,33 +88,28 @@ function userLoginRequest(req, resp){
  */
 function userProfile(req, resp, next){
 
-    let id = req.params.id
+    let cookie = req.cookies
 
-    if(isNaN(id)){
-        next()  //TODO discuss response to invalid paths
-        return
+    if(cookie.status == 'logged'){
+        // user already looged proceed to his home page
+       
     }
 
-    if(isLogged(id) != undefined){
-        console.log(`Profile acessed ${id}`)
-        resp.end()
-        return
+    if(cookie['login-info'] == undefined){
+        //user tried to access his user area without login first
+        let  username = req.params.id
+        resp.cookie('login-info',{'teste' : '12345'} )// createUser(username))
     }
-    
-    //user tried to access his user area without login first
-    resp.cookie('login-info',{
-        'userid' : id,
-        'status':'notLogged',
-        'sessionId' : new Date().getDate()
-    })
-
-    resp.redirect('/users/login')
+    resp.redirect('/login')
 }
 
+
+
+//TODO fixe routes /login/*
 router.use(cookieParser())
-router.use('/:id',userProfile)
-router.get('/login',userLogin)
-//router.post('/login', bodyparser.urlencoded({ extended: false }), userLoginRequest)
-router.post('/login', passport.authenticate('local'),userLoginRequest)
+router.get('/login', userLogin)
+router.use('/:id', userProfile)
+router.post('/', bodyparser.urlencoded({ extended: false }), userLoginRequest)
+//router.post('/login', userLoginRequest)
 
 module.exports = router
