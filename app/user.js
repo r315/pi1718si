@@ -17,16 +17,16 @@ function createUser(name) {
     user.name = name
 }
 
-function createUserFromCB(userInfo) {
+function createUserFromCB(user, userInfo) {
     
         let obj = JSON.parse(userInfo)
         let user = new user()
         user.name = obj.name
-        user.id = obj.id
+        user.id = obj._id
         user.docVersion = obj.docVersion
         user.status = false
 
-       JSON.parse(FavLists[]).forEach(function(elem) { 
+       JSON.parse(obj.favLists[]).forEach(function(elem) { 
             let favlist = new favlist()
             favlist.id = elem.id
             favlist.name = elem.name

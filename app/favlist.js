@@ -14,7 +14,7 @@ function createFavList(favList) {
         let favList = new favList()
         favList.name = obj.name
         favList.id = obj.id
-
+    
         return favList
         
 }
