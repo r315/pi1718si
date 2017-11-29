@@ -1,13 +1,18 @@
-/*** get item by id ***/
+/*** get item by id 
+
+Design document : login 
+index name : byusername
+
+***/
 function (doc) {
-  key = doc._id
+  key = doc.username
   
   emit(key,doc);
 }
 
-/** get item by doc name ***/
-function (doc) {
-  key = doc.movie
-  
-  emit(key,doc);
-}
+/** get item by doc name
+  Design Document : login
+
+  index name :  byid
+
+ ***/
