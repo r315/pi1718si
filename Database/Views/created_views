@@ -14,5 +14,9 @@ function (doc) {
   Design Document : login
 
   index name :  byid
-
+function (doc) {
+  key = doc.username
+  
+  emit(key,doc);
+}
  ***/
