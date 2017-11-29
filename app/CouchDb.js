@@ -1,5 +1,3 @@
-
-
 'use strict'
 
 let dbreq = require('http') 
@@ -9,7 +7,7 @@ const database ='coimadb'
 
 
     
-//function setupReq(body,type){
+
 function setupReq(reqparams){
 
     let options = {
@@ -49,7 +47,7 @@ function insertDocOnDb(indoc){
     post_reqi.write(JSON.stringify(indoc))
     post_reqi.on('error', err =>{
     console.log("error on post to database",err.message)
-})
+        })
 
     
    post_reqi.end()
@@ -83,11 +81,54 @@ function getDocbyid(id){
     })
        res.on('end',()  => {
            console.log(JSON.parse(rawData).rows[0].value)  
-         // return JSON.parse(rawData).rows[0].value 
+   
         })
     })
 }
 
+
+function getDoc(searchparam,path,cbf){
+    let rawData=''
+    let reqparams = {
+        body : "",
+        type : "GET",
+        path :`${path}?key="${searchparam}"`
+    }
+     let options = {
+        host : serveraddress,
+        port : gport,
+        path : `/${database}`,
+        method :'',
+        headers : ''
+    }
+    const headerobj = {
+        'Content-Type' : 'application/json',
+    }
+    options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
+    options.headers = headerobj
+    dbreq.get(options,(res) => {
+        res.setEncoding('utf8')
+        console.log("Started")
+        res.on('data',(chunk) => {rawData += chunk 
+    })
+       res.on('end',()  => {
+         //  console.log(JSON.parse(rawData).rows[0].value)  
+         cb(JSON.parse(rawData).rows[0].value)
+   
+        })
+    })
+}
+
+
+
+function searchbyusername(tocheckusername,cbf){
+    getDoc(tocheckusername,"/_design/login/_view/byusername",cbf)
+}
+
+
+function outfunctest(sample){
+    console.log(sample)
+}
 
 //preciso de saber o que procurar 
 // se id ?  e nome 
@@ -97,14 +138,21 @@ function updateDocOnDB(id){
     console.log(getDocbyid(id))
 }
 
-//reqFromDb("_all_dbs")
+
 var sampleDoc ={
-    "movie": "bladerunner2049",
-    "date":  "2009", 
-    "type": "movie"
+    username: "hbarroca",
+    passwd : "isel", 
+    lists : "",
+    type: "user"
 }
 
 
+
+checkusername("rigoncal",outfunctest)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
-updateDocOnDB("69314fa07586f554110474cfd300c1f9")
+//updateDocOnDB("69314fa07586f554110474cfd300c1f9")
+
+module.exports = {
+    'searchbyuser' : searchbyusername
+}
