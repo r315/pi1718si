@@ -22,6 +22,9 @@ function cacheRouter (req, res, next) {
         break;
         case '/actors' : searchByActorID(req,res)
         break;
+        default : 
+            res.status(404)
+            res.render('notfound')
     }
 
 }

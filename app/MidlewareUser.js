@@ -5,19 +5,11 @@ let fs = require('fs')
 let hb = require('handlebars')
 let bodyparser = require('body-parser')
 let cookieParser = require('cookie-parser')
-let passport = require('passport')
 
 const logger = (msg) => {console.log('Midleware User: ' + msg); return msg;}
 const TEMPLATE_FILE_USER = 'templateviews/user.hbs'
 const TEMPLATE_FILE_LOGIN = 'templateviews/login.hbs'
 const LOGIN_PATH = '/users/login'
-
-let loggedusers = []
-
-function isLogged(userid){
-    return loggedusers.find( o => o.id == userid)
-}
-
 
 /**
  * 
@@ -90,26 +82,30 @@ function userProfile(req, resp, next){
 
     let cookie = req.cookies
 
-    if(cookie.status == 'logged'){
+    if(cookie.status == 'logged' && req.params.id == cookie.username){
         // user already looged proceed to his home page
-       
+        next()       
     }
 
-    if(cookie['login-info'] == undefined){
+    if(cookie['login-info'] == undefined || req.params.id != cookie.username){
         //user tried to access his user area without login first
-        let  username = req.params.id
-        resp.cookie('login-info',{'teste' : '12345'} )// createUser(username))
+        let  username = req.params.id //newUser()
+        resp.cookie('login-info',{'username' : username} )// createUser(username))
+        resp.redirect('/login')
     }
-    resp.redirect('/login')
+    next()
 }
 
-
-
-//TODO fixe routes /login/*
 router.use(cookieParser())
-router.get('/login', userLogin)
+router.get('/', (req,resp,next) => {
+    next()
+})
+
 router.use('/:id', userProfile)
-router.post('/', bodyparser.urlencoded({ extended: false }), userLoginRequest)
+router.get('/:id/lists',(req, resp, next) => {
+    next()
+})
+
 //router.post('/login', userLoginRequest)
 
 module.exports = router

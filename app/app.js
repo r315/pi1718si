@@ -63,7 +63,7 @@ app.set('view engine', 'hbs');
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
-app.get('/login', login)
+app.use('/login', login)
 app.get('/', home)
 app.use(cache)
 
