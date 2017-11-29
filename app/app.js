@@ -10,6 +10,7 @@ let common = require('./MidlewareCommon')
 let user = require('./MidlewareUser')
 let login = require('./MidlewareLogin')
 let cache = require('./cache')
+let passport = require('passport')
 const path = require('path')
 
 
@@ -52,14 +53,19 @@ function setCookie(req, resp, next){
 }
 
 
+
+/**
+ * Initialyze view engine and midlewares
+ */
+app.set('views', path.join(__dirname, '../templateviews'))
+app.set('view engine', 'hbs')
+app.use(passport.initialize())
+//app.use(passport.session())
+
+
 /**
  * Add midlewares here
  */
-
-// View engine setup
-app.set('views', path.join(__dirname, '../templateviews'));
-app.set('view engine', 'hbs');
-
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)

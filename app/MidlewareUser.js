@@ -5,6 +5,7 @@ let fs = require('fs')
 let hb = require('handlebars')
 let bodyparser = require('body-parser')
 let cookieParser = require('cookie-parser')
+//let user = require('./user')
 
 const logger = (msg) => {console.log('Midleware User: ' + msg); return msg;}
 const COOKIE_NAME = 'login-info'
@@ -17,28 +18,31 @@ const COOKIE_NAME = 'login-info'
  */
 function userProfile(req, resp, next){
 
-    let cookie = req.cookies
+    let cookie = req.cookies[COOKIE_NAME]
+    let username = req.params.id
 
-    if(cookie.status == 'logged' && req.params.id == cookie.username){
-        // user already looged proceed to his home page
-        next()       
-    }
-
-    if(cookie['login-info'] == undefined || req.params.id != cookie[COOKIE_NAME].username
-){
-        //user tried to access his user area without login first
-        let  username = req.params.id //newUser()
-        resp.cookie(COOKIE_NAME,{'username' : username} )// createUser(username))
+    if(cookie == undefined || username != cookie.username){
+        //user tried to access his user area without login first        
+        //resp.cookie(COOKIE_NAME,user.createUser(username))
+        resp.cookie(COOKIE_NAME,{
+            'username' : username,
+            'status' : 'redirect',
+            'redirect' : req.baseUrl 
+        })
         resp.redirect('/login')
+        return
     }
-    next()
+
+    if(cookie.status == 'logged'){
+        // user already looged proceed to his home page
+        resp.render('userHome',{'username':username})
+        return  
+    }    
+    resp.redirect('/login')
 }
 
 router.use(cookieParser())
-router.get('/', (req,resp,next) => {
-    next()
-})
-
+router.get('/', (req,resp,next) => { next() })
 router.use('/:id', userProfile)
 
 module.exports = router
