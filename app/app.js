@@ -3,16 +3,17 @@
 /**
  * Modules declaration, add new midlewares modules here
  */
-let app = require('express')()
 let home = require('./MidlewareHome')
 let search = require('./MidlewareSearch')
 let common = require('./MidlewareCommon')
 let user = require('./MidlewareUser')
 let login = require('./MidlewareLogin')
 let cache = require('./cache')
-let passport = require('passport')
+const app = require('express')()
+const cookieParser = require('cookie-parser')
+const passport = require('passport')
+const session = require('express-session')
 const path = require('path')
-
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -59,9 +60,14 @@ function setCookie(req, resp, next){
  */
 app.set('views', path.join(__dirname, '../templateviews'))
 app.set('view engine', 'hbs')
+app.use(cookieParser())
+app.use(session({
+    secret: 'pi1718si',   
+    resave: false,
+    saveUninitialized: true
+}))
 app.use(passport.initialize())
-//app.use(passport.session())
-
+app.use(passport.session())
 
 /**
  * Add midlewares here
