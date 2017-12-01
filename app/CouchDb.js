@@ -86,7 +86,12 @@ function getDocbyid(id){
     })
 }
 
-
+/**
+ * Main function to search for items in teh database , internal module use in the database
+ * @param {*} searchparam Parameter to be searched
+ * @param {*} path Search path on the database
+ * @param {*} cbf Callback function to be used when request is fully received from the database
+ */
 function getDoc(searchparam,path,cbf){
     let rawData=''
     let reqparams = {
@@ -113,22 +118,61 @@ function getDoc(searchparam,path,cbf){
     })
        res.on('end',()  => {
          //  console.log(JSON.parse(rawData).rows[0].value)  
-         cb(JSON.parse(rawData).rows[0].value)
+         cbf(rawData)
    
         })
     })
 }
 
 
-
+/**
+ * Fuction used to search fro a user by name
+ * @param {*} tocheckusername username to be searched
+ * @param {*} cbf Callback function to be used when returning the data back
+ */
 function searchbyusername(tocheckusername,cbf){
-    getDoc(tocheckusername,"/_design/login/_view/byusername",cbf)
+    getDoc(tocheckusername,"/_design/login/_view/byusername",(data)=>inner_insertUser(data,cbf))
 }
 
 
-function outfunctest(sample){
-    console.log(sample)
+function inner_searchbyusername(user,cbf){
+    if(JSON.parse(user).rows.length  == 0){
+       console.log("no user")
+    }else{
+       cbf(JSON.parse(user).rows[0].value)
+    }
 }
+
+
+/**
+ * Internal function to validate internal data , before inserting the user
+ * @param {*} user username to search
+ * @param {*} cbf callback function to return back
+ */
+function inner_insertUser(user,cbf){
+    if(JSON.parse(user).rows.length  == 0){
+       console.log("no user")
+    }else{
+       cbf(JSON.parse(user).rows[0].value)
+    }
+}
+
+
+/**
+ * external function to be used  when inserting a user
+ * @param {*} userobj 
+ * @param {*} cbf 
+ */
+function insertUser(userobj,cbf){
+    searchbyusername(userobj.name,(data)=>inner_insertUser(data,cbf))
+
+}
+
+
+
+function outfunctest(sample){ 
+    console.log(sample) 
+} 
 
 //preciso de saber o que procurar 
 // se id ?  e nome 
@@ -140,7 +184,7 @@ function updateDocOnDB(id){
 
 
 var sampleDoc ={
-    username: "hbarroca",
+    name: "hbarroca",
     passwd : "isel", 
     lists : "",
     type: "user"
@@ -148,11 +192,11 @@ var sampleDoc ={
 
 
 
-checkusername("rigoncal",outfunctest)
+searchbyusername("rigoncals",outfunctest)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
 //updateDocOnDB("69314fa07586f554110474cfd300c1f9")
-
+//insertUser(sampleDoc,outfunctest)
 module.exports = {
     'searchbyuser' : searchbyusername
 }
