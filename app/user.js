@@ -8,7 +8,7 @@ function user() {
     this.id = null,
     this.docVersion = null,
     this.favLists = []
-    this.status = false
+    this.loggedIn = 0
     
 }
 
@@ -38,5 +38,6 @@ function createUserFromCB(user, userInfo) {
 }
 
 module.exports = {
-    'createUser' : createUser
+    'createUser' : createUser,
+    'createUserFromCB' : createUserFromCB
 }

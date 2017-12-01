@@ -3,6 +3,7 @@
 const fs = require('fs')
 
 function favList() {
+    
     this.id = null,
     this.name = null
     
@@ -10,13 +11,13 @@ function favList() {
 
 function createFavList(favList) {
     
-        let obj = JSON.parse(favList)
-        let favList = new favList()
-        favList.name = obj.name
-        favList.id = obj.id
+    let obj = JSON.parse(favList)
+    let favList = new favList()
+    favList.name = obj.name
+    favList.id = obj.id
     
-        return favList
-        
+    return favList
+
 }
 
 module.exports = {
