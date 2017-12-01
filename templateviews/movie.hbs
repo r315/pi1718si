@@ -29,26 +29,27 @@
       </div>
     </nav>
     <div class="container" align="center">
-      <div class="starter-template">
-         <br>	
-	<div class="row">		
-			  <section class="images inner">
-                <div class="poster">
-                  <div class="image_content">
-                    <img class="poster" src="{{poster_url}}">                    
-                  </div>
+      <div class="starter-template"><br>	
+	        <div class="row">		
+			      <section class="images inner">
+              <div class="poster">
+                <div class="image_content">
+                  <img class="poster" src="{{poster_url}}">                    
                 </div>
-              </section> 	
-		  
-      <section class="col">
-			<p style="font-size:20px; color:rgb(100, 148, 230);" align="left">
-        Nome: {{movie_title}} <br>
-        Realizador: {{movie_director}}<br>
-        </p>
-		</section>
-	</div>
-        <p class="lead">Cast</p>
-        <table class="table table-dark table-bordered">
+              </div>
+            </section>		  
+            <section class="col">
+			        <p style="font-size:20px; color:rgb(100, 148, 230);" align="left">
+                  Nome: {{movie_title}} <br>
+                  Realizador: {{movie_director}}<br>
+              </p>
+		        </section>
+            <section class="col-2" align="righth">
+              <button type="button" class="btn btn-primary">To my list</button>
+            </section>
+	        </div>
+          <p class="lead">Cast</p>
+          <table class="table table-dark table-bordered">
             <thead>
               <tr>
                 <th scope="col">#</th>
