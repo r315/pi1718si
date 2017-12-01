@@ -1,3 +1,4 @@
+
 'use strict'
 
 let dbreq = require('http') 
@@ -9,7 +10,7 @@ const database ='coimadb'
     
 
 function setupReq(reqparams){
-
+   let respdata =""
     let options = {
         host : serveraddress,
         port : gport,
@@ -26,18 +27,64 @@ function setupReq(reqparams){
     options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
     options.headers = headerobj
     options.method  = reqparams.type
-    let post_req= dbreq.request(options,function(res){
+    let post_req= dbreq.request(options
+        ,function(res){
            res.setEncoding('utf8');
            res.on('data',function(chunk){
-               console.log('Response:',chunk)
+              // console.log('Response:',chunk)
+              respdata +=chunk
                console.log('Status',`${res.statusCode}-${res.statusMessage}`)
            })
+    
        })
        return post_req
 }
 
-function insertDocOnDb(indoc){
-   let reqparams = {
+
+function insertDocOnDb(indoc,cbf){
+     let respdata =''
+     let reqparams = {
+         body : indoc,
+         type : "POST"
+     }
+     
+     let options = {
+        host : serveraddress,
+        port : gport,
+        path: `/${database}`,
+        method:'',
+        headers : ''
+    
+    }
+
+    const headerobj = {
+        'Content-Type' : 'application/json',
+        'Content-Length' : Buffer.byteLength(JSON.stringify(reqparams.body))
+    }
+    options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
+    options.headers = headerobj
+    options.method  = reqparams.type
+   let inner_req = dbreq.request(options
+        ,function(res){
+           res.setEncoding('utf8');
+          res.on('data',function(chunk){
+              respdata +=chunk
+               console.log('Status',`${res.statusCode}-${res.statusMessage}`)
+           })
+         
+           res.on('end',()=> cbf(JSON.parse(respdata).id))
+
+        })
+        inner_req.write(JSON.stringify(indoc))
+        inner_req.end()
+    
+}
+
+
+/*
+function insertDocOnDb(indoc,cbf){
+   // let respdata =''
+    let reqparams = {
         body : indoc,
         type : "POST"
     }
@@ -49,12 +96,12 @@ function insertDocOnDb(indoc){
     console.log("error on post to database",err.message)
         })
 
-    
-   post_reqi.end()
-    
+   
+    post_reqi.on('end',() => console.log(post_reqi.my_respdata))
+    post_reqi.end()
+   
 }
-
-
+ */
 function getDocbyid(id){
     let rawData=''
     let reqparams = {
@@ -118,8 +165,8 @@ function getDoc(searchparam,path,cbf){
     })
        res.on('end',()  => {
          //  console.log(JSON.parse(rawData).rows[0].value)  
-         cbf(rawData)
-   
+        cbf(rawData)
+           
         })
     })
 }
@@ -129,9 +176,12 @@ function getDoc(searchparam,path,cbf){
  * Fuction used to search fro a user by name
  * @param {*} tocheckusername username to be searched
  * @param {*} cbf Callback function to be used when returning the data back
+ * @param {*} obj option obj to be passed when necessary
  */
 function searchbyusername(tocheckusername,cbf){
-    getDoc(tocheckusername,"/_design/login/_view/byusername",(data)=>inner_insertUser(data,cbf))
+
+ getDoc(tocheckusername,"/_design/login/_view/byusername",cbf)
+
 }
 
 
@@ -149,11 +199,11 @@ function inner_searchbyusername(user,cbf){
  * @param {*} user username to search
  * @param {*} cbf callback function to return back
  */
-function inner_insertUser(user,cbf){
-    if(JSON.parse(user).rows.length  == 0){
-       console.log("no user")
+function inner_insertUser(data,user,cbf){
+    if(JSON.parse(data).rows.length  == 1){
+       console.log("user exists ") // devolvido erro 
     }else{
-       cbf(JSON.parse(user).rows[0].value)
+         insertDocOnDb(user,cbf)
     }
 }
 
@@ -164,7 +214,7 @@ function inner_insertUser(user,cbf){
  * @param {*} cbf 
  */
 function insertUser(userobj,cbf){
-    searchbyusername(userobj.name,(data)=>inner_insertUser(data,cbf))
+    searchbyusername(userobj.name,(data)=>inner_insertUser(data,userobj,cbf))
 
 }
 
@@ -184,7 +234,7 @@ function updateDocOnDB(id){
 
 
 var sampleDoc ={
-    name: "hbarroca",
+    name: "rigoncal",
     passwd : "isel", 
     lists : "",
     type: "user"
@@ -192,11 +242,12 @@ var sampleDoc ={
 
 
 
-searchbyusername("rigoncals",outfunctest)
+//searchbyusername("rigoncal",outfunctest)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
 //updateDocOnDB("69314fa07586f554110474cfd300c1f9")
-//insertUser(sampleDoc,outfunctest)
+insertUser(sampleDoc,outfunctest)
 module.exports = {
-    'searchbyuser' : searchbyusername
+    'searchbyuser' : searchbyusername,
+    'insertuser': insertUser
 }
