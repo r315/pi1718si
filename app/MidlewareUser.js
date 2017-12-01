@@ -18,8 +18,15 @@ function userProfile(req, resp, next){
         return
     }
 
-    if(req.user && req.user.name == req.params.id){        
-        resp.render('userHome',{'username': req.user.name})
+    if(req.user && req.user.name == req.params.id){
+        if(req.url != "/"){
+            next()
+            return
+        }      
+        resp.render('userHome',{
+            'username': req.params.id,
+            'lists' : `${req.baseUrl}/lists`
+        })
         return  
     }
     next()
