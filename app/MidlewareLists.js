@@ -6,7 +6,7 @@ let us = require('user')
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 
-const TEMPLATE_FILE_LISTS = 'templateviews/search.hbs'
+const TEMPLATE_FILE_LISTS = 'templateviews/lists.hbs'
 
 /**
 * Midleware for List Displaying and Handeling
@@ -23,6 +23,7 @@ function getLists(req, resp, next){
 
     let Lists = user.favLists
 
+    rep.user= user
     /* Checar o que FAZ*/
     req.coimapage = page
     req.coimarouter = req.baseUrl
@@ -35,7 +36,7 @@ function getLists(req, resp, next){
         resp.template = TEMPLATE_FILE_LISTS
         createListView(req, resp, ...args)
     }
-   next()
+    next()
 }
 
 /**
@@ -53,18 +54,18 @@ function createListView(req, resp, searchresults){
         let source = data.toString()
         let template = hb.compile(source)
         let dataobj = { 
-            'search_term' : req.coimaterm,
+            'user_name' : req.user.name,
             'search_results': [],
             'search_previous_page' : `/search?name=${req.coimaterm}&page=${(req.coimapage > 1)? parseInt(req.coimapage) - 1: req.coimapage}` ,
             'search_next_page' :  `/search?name=${req.coimaterm}&page=${(req.coimapage < resp.coimatotalpages)? parseInt(req.coimapage) + 1: req.comimapage}`,
             'search_page' :  req.coimapage
         }      
 
-        searchresults.forEach( (mv, i) => {
+        searchresults.forEach(user.favList.favorit.movie, i) => {
             dataobj.search_results.push({
                 'result_index' : i+1, 
-                'result_title': mv.title,
-                'result_link' : `/movies/${mv.id}`
+                'result_listName': user.favList.favorit.name,
+                'result_link' : `/lists/${user.favList.favorit.id}`
             })
 
         })

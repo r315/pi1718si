@@ -6,6 +6,7 @@ function favList() {
     
     this.id = null,
     this.name = null
+    this.favorits = []
     
 }
 
