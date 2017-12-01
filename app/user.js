@@ -1,32 +1,31 @@
 'use strict'
 
-const fs = require('fs')
-let favlist = require('./favlist')
+//let favlist = require('./favlist')
 
-function user() {
-    this.user = null,
-    this.id = null,
-    this.docVersion = null,
+function User() {
+    this.name = null
+    this.id = null
+    this.docVersion = null
     this.favLists = []
-    this.loggedIn = 0
-    
+    this.loggedIn = 0    
 }
 
 function createUser(name) {
-    let user = new user()
+    let user = new User()
     user.name = name
+    return user
 }
 
-function createUserFromCB(user, userInfo) {
+function createUserFromCB(username, userInfo) {
     
         let obj = JSON.parse(userInfo)
-        let user = new user()
+        let user = new User()
         user.name = obj.name
         user.id = obj._id
         user.docVersion = obj.docVersion
         user.status = false
 
-       JSON.parse(obj.favLists[]).forEach(function(elem) { 
+       JSON.parse(obj.favLists).forEach(function(elem) { 
             let favlist = new favlist()
             favlist.id = elem.id
             favlist.name = elem.name

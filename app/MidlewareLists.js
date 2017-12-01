@@ -1,42 +1,20 @@
 'use strict'
 
-let fs = require('fs')
-let hb = require('handlebars')
-let us = require('user')
+
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
-
-const TEMPLATE_FILE_LISTS = 'templateviews/lists.hbs'
 
 /**
 * Midleware for List Displaying and Handeling
 * /search?name={query}
-* @param {*} req 
-* @param {*} resp 
-* @param {*} next 
+* @param {obj} req 
+* @param {obj} resp 
+* @param {func} next 
 */
 function getLists(req, resp, next){    
-    let cookie = req.cookies[COOKIE_NAME]
-    let user = createuser(req.params.username)
-    let userInfo = ''//Function to Query User object from Couch 
-    user = createUserFromCB(user, userInfo)
-
-    let Lists = user.favLists
-
-    rep.user= user
-    /* Checar o que FAZ*/
-    req.coimapage = page
-    req.coimarouter = req.baseUrl
-    req.coimaterm = query   
-
-    //using decorator pattern for calling view
-    const ori_send = resp.send
-    resp.send = (...args) => {
-        resp.send = ori_send
-        resp.template = TEMPLATE_FILE_LISTS
-        createListView(req, resp, ...args)
-    }
-    next()
+  resp.render('lists')
+  return
+   // next()
 }
 
 /**

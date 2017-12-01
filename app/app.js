@@ -3,12 +3,11 @@
 /**
  * Modules declaration, add new midlewares modules here
  */
-let home = require('./MidlewareHome')
-let search = require('./MidlewareSearch')
-let common = require('./MidlewareCommon')
-let user = require('./MidlewareUser')
-let login = require('./MidlewareLogin')
-let cache = require('./cache')
+const search = require('./MidlewareSearch')
+const common = require('./MidlewareCommon')
+const user = require('./MidlewareUser')
+const login = require('./MidlewareLogin')
+const cache = require('./cache')
 const app = require('express')()
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
@@ -76,7 +75,7 @@ app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
 app.use('/login', login)
-app.get('/', home)
+app.get('/', (req, resp) => { resp.render('index') })
 app.use(cache)
 
 process.openStdin().addListener('data', commandInputHandler)

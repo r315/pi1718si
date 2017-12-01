@@ -3,6 +3,7 @@
 const router = require('express').Router()
 const bodyparser = require('body-parser')
 const passport = require('passport')
+const user = require('./user')
 
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
@@ -48,6 +49,9 @@ function logUser(req, resp, user){
     })
 }
 
+/**
+ * Passport serializer/deserializer
+ */
 passport.serializeUser((user, done) => {
     done(null, user.name)
 })
@@ -90,4 +94,5 @@ router.post('/', bodyparser.urlencoded({ extended: false }), (req, resp, next)=>
         logUser(req, resp, user)
     })
 })
+
 module.exports = router
