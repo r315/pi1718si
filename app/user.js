@@ -1,6 +1,6 @@
 'use strict'
 
-//let favlist = require('./favlist')
+let fl = require('./favlist')
 
 function User() {
     this.name = null
@@ -25,8 +25,8 @@ function createUserFromCB(username, userInfo) {
         user.docVersion = obj.docVersion
         user.status = false
 
-       JSON.parse(obj.favLists).forEach(function(elem) { 
-            let favlist = new favlist()
+       obj.favLists.forEach(function(elem) { 
+            let favlist = fl.createfavList()
             favlist.id = elem.id
             favlist.name = elem.name
             user.favLists.push(favlist)

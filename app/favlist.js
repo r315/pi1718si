@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 
-function favList() {
+function FavList() {
     
     this.id = null,
     this.name = null
@@ -10,17 +10,25 @@ function favList() {
     
 }
 
-function createFavList(favList) {
+function createFavListFromDB(favList) {
     
     let obj = JSON.parse(favList)
-    let favList = new favList()
-    favList.name = obj.name
-    favList.id = obj.id
+    let fL = new FavList()
+    fL.name = obj.name
+    fL.id = obj.id
     
     return favList
 
 }
 
+function createFavList() {
+    
+    let favList = new FavList()
+    return favList
+
+}
+
 module.exports = {
-    'createfavList' : createFavList
+    'createfavList' : createFavList,
+    'createfavListFromDB' : createFavList
 }
