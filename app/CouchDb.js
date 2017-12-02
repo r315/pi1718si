@@ -78,7 +78,7 @@ function updateDoconDB(indoc,cbf){
    const headerobj = {
     'Content-Type' : 'application/json',
     'Content-Length' : Buffer.byteLength(JSON.stringify(reqparams.body))
-}
+    }
 
    // if indoc tem campo id , se n~ºao tiver não pode fazer o update
    options.path = options.path+`/${indoc.id}`
@@ -99,6 +99,44 @@ function updateDoconDB(indoc,cbf){
         
 }
 
+
+function deleteDocOnDb(indoc,cbf){
+    let respdata =''
+    let reqparams = {
+        body : indoc,
+        type : 'DELETE'
+    }
+    
+    let options = {
+       host : serveraddress,
+       port : gport,
+       path: `/${database}`,
+       method:'',
+       headers : ''
+   
+   }
+
+   const headerobj = {
+       'Content-Type' : 'application/json',
+   }
+   options.path = options.path+`/${indoc._id}?rev=${indoc._rev}`
+   options.headers = headerobj
+   options.method  = reqparams.type
+  let inner_req = dbreq.request(options
+       ,function(res){
+          res.setEncoding('utf8');
+         res.on('data',function(chunk){
+             respdata +=chunk
+              console.log('DBACCESS: Status on delete:',`${res.statusCode}-${res.statusMessage}`)
+          })
+        
+          res.on('end',()=> cbf(JSON.parse(respdata)))
+
+       })
+       //inner_req.write(JSON.stringify(indoc))
+       inner_req.end()
+   
+}
 
 /**
  * Main function to search for items in teh database , internal module use in the database
@@ -287,6 +325,54 @@ function inner_updatelist(data,list,cbf){
 }
 
 
+/**
+ * function to delete an user from the Database 
+ * @param {*} userobj object of user to be deleted 
+ * @param {*} cbf callback function
+ */
+function deleteUser(userobj,cbf){
+      searchbyuserid(userobj.id,(data) => inner_deleteUser(data,userobj,cbf))
+    
+}
+
+/**
+ * internal fucntion to be used by the module when deleting and user
+ * @param {*} data retreived user form database for delete 
+ * @param {*} user user received from request to delete
+ * @param {*} cbf callback function
+ */
+function inner_deleteUser(data,user,cbf){
+        if(JSON.parse(data).rows.length == 0){
+            logger ( "ERROR On user delete , user does not exist")
+        }
+        else{
+            deleteDocOnDb(JSON.parse(data).rows[0].value,cbf)
+        }
+}
+/**
+ * Fucntion to delete a list form database 
+ * @param {*} listid id of list to be deleted
+ * @param {*} cbf 
+ */
+function deleteList(listid,cbf){
+    searchbylistid(listobjid,(data)=> inner_deletelist(data,listid,cbf))
+}
+
+/**
+ * internal fucntion  to delete favorite lists 
+ * @param {*} data data received from the request if list exists 
+ * @param {*} list list to be deleted 
+ * @param {*} cbf callback fucntion
+ */
+function inner_deletelist(data,list,cbf){
+    if(JSON.parse(data).rows.length == 0){
+        logger ( "ERROR On list delete , list does not exist")
+    }
+    else{
+        deleteDocOnDb(JSON.parse(data).rows[0].value,cbf)
+    }
+}
+
 
 /**
  *  teste function to remove 
@@ -298,28 +384,29 @@ function outfunctest(sample){
 } 
 
 
-
+/*
 var sampleDocuser ={
-    //id: "69314fa07586f554110474cfd3022ca0",
+    id: "69314fa07586f554110474cfd302d7d6",
     name: "jhondoe2",
     passwd : "updated_passwd9", 
     lists : []
 }
 
-/*
+
 var sampleList ={
-    id : "69314fa07586f554110474cfd302715a",
-    name: "sci-fi",
+   id : "69314fa07586f554110474cfd302715a",
+    name: "Sci-fi",
     movies : [],
 }
 
 var tmovie = {
-    title: "Rambo",
+    title: "nightmare ",
     id: 1
 }
-
-sampleList.movies.push(tmovie)
 */
+//sampleList.movies.push(tmovie)
+//deleteList(sampleList,outfunctest)
+//deleteUser(sampleDocuser,outfunctest)
 //insertfavlist(sampleList,outfunctest)
 //searchbylistid("69314fa07586f554110474cfd302715a",outfunctest)
 //updateList(sampleList,outfunctest)
