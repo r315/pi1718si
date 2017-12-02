@@ -266,7 +266,7 @@ function searchbylistid(listid,cbf){
  * @param {*} listobj object to be updated already modified
  * @param {*} cbf call back funtion 
  */
-function updateList(listobj,cbf){
+function updatefavlist(listobj,cbf){
     searchbylistid(listobj.id,(data)=>inner_updatelist(data,listobj,cbf))
 }
 
@@ -286,6 +286,8 @@ function inner_updatelist(data,list,cbf){
     }
 }
 
+
+
 /**
  *  teste function to remove 
  * @param {*} sample 
@@ -298,13 +300,13 @@ function outfunctest(sample){
 
 
 var sampleDocuser ={
-    id: "69314fa07586f554110474cfd3022ca0",
-    name: "potatohead",
+    //id: "69314fa07586f554110474cfd3022ca0",
+    name: "jhondoe2",
     passwd : "updated_passwd9", 
     lists : []
 }
 
-
+/*
 var sampleList ={
     id : "69314fa07586f554110474cfd302715a",
     name: "sci-fi",
@@ -317,7 +319,7 @@ var tmovie = {
 }
 
 sampleList.movies.push(tmovie)
-
+*/
 //insertfavlist(sampleList,outfunctest)
 //searchbylistid("69314fa07586f554110474cfd302715a",outfunctest)
 //updateList(sampleList,outfunctest)
@@ -325,7 +327,7 @@ sampleList.movies.push(tmovie)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
 //updateUser(sampleDoc,outfunctest)
-//insertUser(sampleDoc,outfunctest)
+//insertUser(sampleDocuser,outfunctest)
 module.exports = {
     'searchbyuser'  : searchbyusername,
     'searchbyuserid': searchbyuserid,
