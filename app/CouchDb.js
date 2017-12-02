@@ -1,6 +1,6 @@
 
 'use strict'
-
+const logger = (msg) => {console.log('DBACCESS: ' + msg); return msg;}
 let dbreq = require('http') 
 const serveraddress = 'localhost'
 const gport = 5984
@@ -8,7 +8,7 @@ const database ='coimadb'
 
 
     
-
+/* 
 function setupReq(reqparams){
    let respdata =""
     let options = {
@@ -40,7 +40,13 @@ function setupReq(reqparams){
        return post_req
 }
 
+ */
 
+ /**
+  * internal function to the module to insert a document into the database 
+  * @param {*} indoc document to be inserted 
+  * @param {*} cbf callback function to be called when insertion is done 
+  */
 function insertDocOnDb(indoc,cbf){
      let respdata =''
      let reqparams = {
@@ -69,10 +75,10 @@ function insertDocOnDb(indoc,cbf){
            res.setEncoding('utf8');
           res.on('data',function(chunk){
               respdata +=chunk
-               console.log('Status',`${res.statusCode}-${res.statusMessage}`)
+               console.log('DBACCESS: Status on insert:',`${res.statusCode}-${res.statusMessage}`)
            })
          
-           res.on('end',()=> cbf(JSON.parse(respdata).id))
+           res.on('end',()=> cbf(JSON.parse(respdata)))
 
         })
         inner_req.write(JSON.stringify(indoc))
@@ -81,27 +87,49 @@ function insertDocOnDb(indoc,cbf){
 }
 
 
-/*
-function insertDocOnDb(indoc,cbf){
-   // let respdata =''
+function updateDoconDB(indoc,cbf){
+    let respdata =''
+    //TODO:  correct this remove reqparams structure
+
     let reqparams = {
         body : indoc,
-        type : "POST"
+        type : "PUT"
     }
     
-    
-    let post_reqi = setupReq(reqparams)
-    post_reqi.write(JSON.stringify(indoc))
-    post_reqi.on('error', err =>{
-    console.log("error on post to database",err.message)
-        })
-
+    let options = {
+       host : serveraddress,
+       port : gport,
+       path: `/${database}`,
+       method:'',
+       headers : ''
    
-    post_reqi.on('end',() => console.log(post_reqi.my_respdata))
-    post_reqi.end()
-   
+   }
+   const headerobj = {
+    'Content-Type' : 'application/json',
+    'Content-Length' : Buffer.byteLength(JSON.stringify(reqparams.body))
 }
- */
+
+   // if indoc tem campo id , se n~ºao tiver não pode fazer o update
+   options.path = options.path+`/${indoc.id}`
+   options.headers = headerobj
+   options.method = reqparams.type
+   let inner_req = dbreq.request(options,
+            function(res) {
+                res.setEncoding('utf8')
+                res.on('data',function(chunk){
+                    respdata += chunk 
+                   console.log('DBACCESS: Status on update',`${res.statusCode}-${res.statusMessage}`)
+                })
+                res.on('end',()=> cbf(JSON.parse(respdata)))
+
+            })
+     inner_req.write(JSON.stringify(indoc))
+     inner_req.end()
+        
+}
+
+/*
+
 function getDocbyid(id){
     let rawData=''
     let reqparams = {
@@ -132,6 +160,9 @@ function getDocbyid(id){
         })
     })
 }
+ */
+
+
 
 /**
  * Main function to search for items in teh database , internal module use in the database
@@ -160,7 +191,7 @@ function getDoc(searchparam,path,cbf){
     options.headers = headerobj
     dbreq.get(options,(res) => {
         res.setEncoding('utf8')
-        console.log("Started")
+        logger(" Request of get Started")
         res.on('data',(chunk) => {rawData += chunk 
     })
        res.on('end',()  => {
@@ -180,19 +211,35 @@ function getDoc(searchparam,path,cbf){
  */
 function searchbyusername(tocheckusername,cbf){
 
- getDoc(tocheckusername,"/_design/login/_view/byusername",cbf)
+ getDoc(tocheckusername,'/_design/login/_view/byusername',cbf)
 
 }
 
 
+
+
 function inner_searchbyusername(user,cbf){
     if(JSON.parse(user).rows.length  == 0){
-       console.log("no user")
+       Logger('insert on database no user')
     }else{
        cbf(JSON.parse(user).rows[0].value)
     }
 }
 
+
+function searchbyuserid(tocheckid,cbf){
+
+    getDoc(tocheckid,'/_design/login/_view/byid',cbf)
+
+}
+
+function inner_searchbyuserid(userid,cbf){
+    if(JSON.parse(user).rows.length  == 0){
+       logger(' searching by user :no user')
+     }else{
+        cbf(JSON.parse(user).rows[0].value)
+     }
+}
 
 /**
  * Internal function to validate internal data , before inserting the user
@@ -201,9 +248,22 @@ function inner_searchbyusername(user,cbf){
  */
 function inner_insertUser(data,user,cbf){
     if(JSON.parse(data).rows.length  == 1){
-       console.log("user exists ") // devolvido erro 
+       logger('insert of user user exists') // devolvido erro 
     }else{
+         user.type = "user"
          insertDocOnDb(user,cbf)
+    }
+}
+
+
+
+function inner_updateUser(data,user,cbf){
+    if(JSON.parse(data).rows.length == 0){
+        logger ("ERROR on update: user does not exist")
+    }else{
+        user._rev=JSON.parse(data).rows[0].value._rev
+        user.type = "user"
+        updateDoconDB(user,cbf)
     }
 }
 
@@ -219,25 +279,24 @@ function insertUser(userobj,cbf){
 }
 
 
-
-function outfunctest(sample){ 
-    console.log(sample) 
-} 
-
-//preciso de saber o que procurar 
-// se id ?  e nome 
-//Sugestão de obj 
-//{searchfield: "",searchvalue:"",[CBFN]}
-function updateDocOnDB(id){
-    console.log(getDocbyid(id))
+function updateUser(userobj,cbf){
+    searchbyuserid(userobj.id,(data)=>inner_updateUser(data,userobj,cbf))
 }
 
 
+
+function outfunctest(sample){ 
+    //console.log(`going through test FUNCTION callback: ${sample}`) 
+    console.log(sample.id) 
+} 
+
+
+
 var sampleDoc ={
-    name: "rigoncal",
-    passwd : "isel", 
+    id: "69314fa07586f554110474cfd3022ca0",
+    name: "potatohead",
+    passwd : "updated_passwd9", 
     lists : "",
-    type: "user"
 }
 
 
@@ -245,9 +304,9 @@ var sampleDoc ={
 //searchbyusername("rigoncal",outfunctest)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
-//updateDocOnDB("69314fa07586f554110474cfd300c1f9")
-insertUser(sampleDoc,outfunctest)
+updateUser(sampleDoc,outfunctest)
+//insertUser(sampleDoc,outfunctest)
 module.exports = {
     'searchbyuser' : searchbyusername,
-    'insertuser': insertUser
+    'insertuser'   : insertUser
 }
