@@ -1,6 +1,6 @@
 'use strict'
 
-
+const us = require('./user')
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 
@@ -12,10 +12,22 @@ const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 * @param {func} next 
 */
 function getLists(req, resp, next){    
-  resp.render('lists')
-  return
-   // next()
+  
+    let user = us.createUser(req.params.id)
+    //TODO: let userInfo = ''//Function to Query User object from Couch
+    
+    //Test Code:
+    let userInfo = '{"name":"hbarroca", "_id":"1", "favLists":[{"id":"1","name":"Test"}, {"id":"2","name":"Test"}, {"id":"3","name":"Test" } ],"docVersion":"2","type":"user"}'
+    user = us.createUserFromCB(user, userInfo)
+    //
+    
+    resp.render('lists',{
+        'user_name' : user.name,
+        'list_results' : user.favLists
+    })
+    return
 }
+
 
 /**
  * 
