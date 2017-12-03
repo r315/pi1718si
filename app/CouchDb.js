@@ -7,40 +7,7 @@ const gport = 5984
 const database ='coimadb'
 
 
-    
-/* 
-function setupReq(reqparams){
-   let respdata =""
-    let options = {
-        host : serveraddress,
-        port : gport,
-        path: `/${database}`,
-        method:'',
-        headers : ''
-    
-    }
 
-    const headerobj = {
-        'Content-Type' : 'application/json',
-        'Content-Length' : Buffer.byteLength(JSON.stringify(reqparams.body))
-    }
-    options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
-    options.headers = headerobj
-    options.method  = reqparams.type
-    let post_req= dbreq.request(options
-        ,function(res){
-           res.setEncoding('utf8');
-           res.on('data',function(chunk){
-              // console.log('Response:',chunk)
-              respdata +=chunk
-               console.log('Status',`${res.statusCode}-${res.statusMessage}`)
-           })
-    
-       })
-       return post_req
-}
-
- */
 
  /**
   * internal function to the module to insert a document into the database 
@@ -86,7 +53,11 @@ function insertDocOnDb(indoc,cbf){
     
 }
 
-
+/**
+ * Function to update documents on database internal use only
+ * @param {*} indoc document to be updated
+ * @param {*} cbf callback function to be called when update is concluded 
+ */
 function updateDoconDB(indoc,cbf){
     let respdata =''
     //TODO:  correct this remove reqparams structure
@@ -127,41 +98,6 @@ function updateDoconDB(indoc,cbf){
      inner_req.end()
         
 }
-
-/*
-
-function getDocbyid(id){
-    let rawData=''
-    let reqparams = {
-        body : "",
-        type : "GET",
-        path :`/_design/login/_view/byid?key="${id}"`
-    }
-     let options = {
-        host : serveraddress,
-        port : gport,
-        path: `/${database}`,
-        method:'',
-        headers : ''
-    }
-    const headerobj = {
-        'Content-Type' : 'application/json',
-    }
-    options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
-    options.headers = headerobj
-    dbreq.get(options,(res) => {
-        res.setEncoding('utf8')
-        console.log("Started")
-        res.on('data',(chunk) => {rawData += chunk 
-    })
-       res.on('end',()  => {
-           console.log(JSON.parse(rawData).rows[0].value)  
-   
-        })
-    })
-}
- */
-
 
 
 /**
@@ -204,7 +140,7 @@ function getDoc(searchparam,path,cbf){
 
 
 /**
- * Fuction used to search fro a user by name
+ * Fuction used to search for a user by name
  * @param {*} tocheckusername username to be searched
  * @param {*} cbf Callback function to be used when returning the data back
  * @param {*} obj option obj to be passed when necessary
@@ -217,7 +153,11 @@ function searchbyusername(tocheckusername,cbf){
 
 
 
-
+/**
+ * Internal Function to module, to be used to validate if user exists on database 
+ * @param {*} user object comming from database query 
+ * @param {*} cbf callback function to be called after query terminated 
+ */
 function inner_searchbyusername(user,cbf){
     if(JSON.parse(user).rows.length  == 0){
        Logger('insert on database no user')
@@ -226,16 +166,25 @@ function inner_searchbyusername(user,cbf){
     }
 }
 
-
+/**
+ * fucntion used to search by user id instead of login 
+ * @param {*} tocheckid id of the user to be searched 
+ * @param {*} cbf call back fucntion to return 
+ */
 function searchbyuserid(tocheckid,cbf){
 
     getDoc(tocheckid,'/_design/login/_view/byid',cbf)
 
 }
 
+/**
+ * internal funcntion to the module  searchbyuserid , cvalidates teh user and returns 
+ * @param {*} userid userid that was being searched 
+ * @param {*} cbf callback fucntion to return after finding the user
+ */
 function inner_searchbyuserid(userid,cbf){
     if(JSON.parse(user).rows.length  == 0){
-       logger(' searching by user :no user')
+       logger('searching by user :no user')
      }else{
         cbf(JSON.parse(user).rows[0].value)
      }
@@ -256,10 +205,15 @@ function inner_insertUser(data,user,cbf){
 }
 
 
-
+/**
+ * internal function to the module update user to be used to validate after searching the user to update 
+ * @param {*} data reveived data after query 
+ * @param {*} user userobject to update 
+ * @param {*} cbf callback function to return after the update is done 
+ */
 function inner_updateUser(data,user,cbf){
     if(JSON.parse(data).rows.length == 0){
-        logger ("ERROR on update: user does not exist")
+        logger ("ERROR on user update: user does not exist")
     }else{
         user._rev=JSON.parse(data).rows[0].value._rev
         user.type = "user"
@@ -278,35 +232,109 @@ function insertUser(userobj,cbf){
 
 }
 
-
+/**
+ * eternal function to be used when updating a user
+ * @param {*} userobj user object to update  
+ * @param {*} cbf callback function to be used 
+ */
 function updateUser(userobj,cbf){
     searchbyuserid(userobj.id,(data)=>inner_updateUser(data,userobj,cbf))
 }
 
+/**
+ * function to be used whe inserting a list of favorits to be associated to a user 
+ * @param {*} listobj object that will be insert 
+ * @param {*} cbf callback function that will be called after processing 
+ */
+function insertfavlist(listobj,cbf){
+    listobj.type = "favlist"
+    insertDocOnDb(listobj,cbf)
+}
+
+/**
+ * Function to be used when searching by a list id 
+ * @param {*} listid id of the list to be searched 
+ * @param {*} cbf callback function
+ */
+function searchbylistid(listid,cbf){
+    getDoc(listid,'/_design/favlist/_view/byid',cbf)
+}
 
 
-function outfunctest(sample){ 
-    //console.log(`going through test FUNCTION callback: ${sample}`) 
-    console.log(sample.id) 
-} 
+/**
+ * function to update a favorite list   
+ * @param {*} listobj object to be updated already modified
+ * @param {*} cbf call back funtion 
+ */
+function updatefavlist(listobj,cbf){
+    searchbylistid(listobj.id,(data)=>inner_updatelist(data,listobj,cbf))
+}
 
-
-
-var sampleDoc ={
-    id: "69314fa07586f554110474cfd3022ca0",
-    name: "potatohead",
-    passwd : "updated_passwd9", 
-    lists : "",
+/**
+ * internal fucntion used when updating a list of movies 
+ * @param {*} data received list after searching for it , to update 
+ * @param {*} list list object that is updated 
+ * @param {*} cbf callback function when finished
+ */
+function inner_updatelist(data,list,cbf){
+    if(JSON.parse(data).rows.length == 0){
+         logger ("ERROR on list update: list does not exist")
+    }else{
+        list._rev =JSON.parse(data).rows[0].value._rev
+        list.type="favlist"
+        updateDoconDB(list,cbf)
+    }
 }
 
 
 
+/**
+ *  teste function to remove 
+ * @param {*} sample 
+ */
+function outfunctest(sample){ 
+    //console.log(`going through test FUNCTION callback: ${sample}`) 
+    console.log(sample) 
+} 
+
+
+
+var sampleDocuser ={
+    //id: "69314fa07586f554110474cfd3022ca0",
+    name: "jhondoe2",
+    passwd : "updated_passwd9", 
+    lists : []
+}
+
+/*
+var sampleList ={
+    id : "69314fa07586f554110474cfd302715a",
+    name: "sci-fi",
+    movies : [],
+}
+
+var tmovie = {
+    title: "Rambo",
+    id: 1
+}
+
+sampleList.movies.push(tmovie)
+*/
+//insertfavlist(sampleList,outfunctest)
+//searchbylistid("69314fa07586f554110474cfd302715a",outfunctest)
+//updateList(sampleList,outfunctest)
 //searchbyusername("rigoncal",outfunctest)
 //insertDocOnDb(sampleDoc)
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
-updateUser(sampleDoc,outfunctest)
-//insertUser(sampleDoc,outfunctest)
+//updateUser(sampleDoc,outfunctest)
+//insertUser(sampleDocuser,outfunctest)
 module.exports = {
-    'searchbyuser' : searchbyusername,
-    'insertuser'   : insertUser
+    'searchbyuser'  : searchbyusername,
+    'searchbyuserid': searchbyuserid,
+    'insertuser'    : insertUser,
+    'updateUser'    : updateUser,
+    'insertfavlist' : insertfavlist,
+    'updatefavlist' : updatefavlist,
+    'searchbylistid': searchbylistid
+
 }
