@@ -46,12 +46,12 @@
               </tr>
             </thead>
             <tbody>
-                {{#search_results}}
+                {{#list_results}}
                 <tr>
-                  <th scope="row">{{result_index}}</th>
-                  <td><a href="{{result_link}}">{{result_listName}}</a></td>
+                  <th scope="row">{{id}}</th>
+                  <td><a href="{{id}}">{{name}}</a></td>
                 </tr>               
-                {{/search_results}}
+                {{/list_results}}
             </tbody>
           </table>
           <ul class="pagination">
