@@ -1,0 +1,22 @@
+/*** get item by id 
+
+Design document : login 
+index name : byusername
+
+***/
+function (doc) {
+  key = doc.username
+  
+  emit(key,doc);
+}
+
+/** get item by doc name
+  Design Document : login
+
+  index name :  byid
+function (doc) {
+  key = doc.username
+  
+  emit(key,doc);
+}
+ ***/

@@ -12,7 +12,7 @@
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-
+    
   </head>
 
   <body>
@@ -27,9 +27,6 @@
           <li class="nav-item active">
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>          
-          <li>
-            <a class="nav-link" href="/login">Login <span class="sr-only">(current)</span></a>
-          </li>
         </ul>
         <form class="form-inline my-2 my-lg-0" action="/search">
           <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
@@ -38,14 +35,16 @@
       </div>
     </nav>
 
-    <div class="container" align="center">
-      <div class="starter-template">                   
-        <p class="lead">Welcome to COIMA, please make a search</p>  
-        <div class="image_content">
-                <img class="image" src="https://kirkhamamovieaday.files.wordpress.com/2012/09/cb886-alh_sports-ashx.jpg">                    
-              </div>
-      </div>      
-      </div>
+    <div class="container" align="left"> <!-- /.container -->   
+        <div class="col" align="center">            
+                <h4>Welcome {{username}}</h4>
+        </div>  
+
+         <div class="row" align="left">            
+                <a href="{{lists}}">Listas</a>
+        </div> 
     </div><!-- /.container -->   
+
   </body>
 </html>
+
