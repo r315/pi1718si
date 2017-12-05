@@ -3,13 +3,14 @@
 const router = require('express').Router()
 const bodyparser = require('body-parser')
 const passport = require('passport')
-const user = require('./user')
+const usermod = require('./user')
+const couchdb = require('./CouchDb')
 
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
 /**
  * 
- * @param {http request object} req 
+ * @param {object} req 
  * @param {object} user 
  */
 function putUserOnCookie(resp, user){
@@ -18,25 +19,10 @@ function putUserOnCookie(resp, user){
 
 /**
  * 
- * @param {http request object} req 
+ * @param {object} req 
  */
 function getUserFromCookie(req){
     return JSON.parse(req.cookies['user-data'])
-}
-
-/**
- * TODO add this functionality to cache
- * request user login to couchdb
- * on success add user to cache
- */
-let users = []
-function createUser(name){
-    let user = {
-        'name': name,
-        'email': 'aluno@cc.isel.ipl.pt'
-    }
-    users.push(user)
-    return user
 }
 
 /**
@@ -47,11 +33,24 @@ function createUser(name){
  * @param {function} cb 
  */
 function authenticateUser (username, password, cb) {
-    if (username != password) {
-        cb(new Error('Invalid credentials'), null)
-        return
-    }    
-    cb(null, createUser(username))
+
+    function validateUser(error, user){
+        if(error){
+            logger(`Error ${error.error}`)
+            cb(new Error('User not found'), null)
+            return
+        }
+        
+        usermod.addProperties(user)
+
+        if(!user.validatePassword(password)){
+            cb(new Error('Invalid password'), null)
+            return 
+        }
+        cb(null, user)
+    }
+
+    couchdb.searchbyuser(username, validateUser)
 }
 
 function logUser(req, resp, user){
@@ -89,13 +88,24 @@ router.get('/', (req, resp, next)=>{
 })
 
 router.post('/', bodyparser.urlencoded({ extended: false }), (req, resp, next)=>{    
+    let pass =  req.body.password
+    let username = req.body.username
 
-    if(req.body.newuser){        
-       logUser(req, resp, createUser(req.body.username))
+    if(req.body.newuser){
+        let newuser = usermod.createUser(username)
+        newuser.changePassword(pass)       
+        logUser(req, resp, newuser)
+        couchdb.insertuser(newuser, (error, user)=>{
+            if(error){
+                logger(`Error ${error.error}`)
+                return    
+            }
+            logger(`User \"${u.name}\" created`)
+        })
         return
     }
     
-    authenticateUser(req.body.username, req.body.password, (error, user, info)=>{
+    authenticateUser(username, pass, (error, user, info)=>{
         if(error){
             next(error)
             return
