@@ -8,6 +8,23 @@ const user = require('./user')
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
 /**
+ * 
+ * @param {http request object} req 
+ * @param {object} user 
+ */
+function putUserOnCookie(resp, user){
+    resp.cookie('user-data', JSON.stringify(user))
+}
+
+/**
+ * 
+ * @param {http request object} req 
+ */
+function getUserFromCookie(req){
+    return JSON.parse(req.cookies['user-data'])
+}
+
+/**
  * TODO add this functionality to cache
  * request user login to couchdb
  * on success add user to cache
@@ -45,6 +62,7 @@ function logUser(req, resp, user){
             return
         }
         logger(`${user.name} logged`)
+        putUserOnCookie(resp, user)
         resp.redirect('/users/' + user.name)            
     })
 }
@@ -56,16 +74,8 @@ passport.serializeUser((user, done) => {
     done(null, user.name)
 })
 
-passport.deserializeUser((username, done) => {  
-    function findUser(userName, cb){
-        let user = users.find(u=> u.name == userName)
-        if(!user){
-            cb(new Error('User does not exist'), null)
-            return
-        }
-        cb(null,user)    
-    }
-    findUser(username, done)
+passport.deserializeUser((req, username, done) => {
+    done(null,getUserFromCookie(req))
 })
 
 /**
