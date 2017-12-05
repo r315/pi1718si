@@ -10,7 +10,7 @@ const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
 /**
  * 
- * @param {http request object} req 
+ * @param {object} req 
  * @param {object} user 
  */
 function putUserOnCookie(resp, user){
@@ -19,7 +19,7 @@ function putUserOnCookie(resp, user){
 
 /**
  * 
- * @param {http request object} req 
+ * @param {object} req 
  */
 function getUserFromCookie(req){
     return JSON.parse(req.cookies['user-data'])
@@ -36,9 +36,12 @@ function authenticateUser (username, password, cb) {
 
     function validateUser(error, user){
         if(error){
-            cb(error, null)
+            logger(`Error ${error.error}`)
+            cb(new Error('User not found'), null)
             return
         }
+        
+        usermod.addProperties(user)
 
         if(!user.validatePassword(password)){
             cb(new Error('Invalid password'), null)
@@ -47,7 +50,7 @@ function authenticateUser (username, password, cb) {
         cb(null, user)
     }
 
-    couchdb.searchbyusername(username, validateUser)
+    couchdb.searchbyuser(username, validateUser)
 }
 
 function logUser(req, resp, user){
@@ -92,7 +95,11 @@ router.post('/', bodyparser.urlencoded({ extended: false }), (req, resp, next)=>
         let newuser = usermod.createUser(username)
         newuser.changePassword(pass)       
         logUser(req, resp, newuser)
-        coutch.insertUser(newuser, (u)=>{
+        couchdb.insertuser(newuser, (error, user)=>{
+            if(error){
+                logger(`Error ${error.error}`)
+                return    
+            }
             logger(`User \"${u.name}\" created`)
         })
         return

@@ -8,11 +8,20 @@ function User() {
     this.docVersion = null
     this.favLists = []
     this.loggedIn = 0
-    this.password = ""
-    this.validatePassword = function(s){return s == this.password} 
-    this.changePassword = function(p){ this.password = p} 
     return this
 }
+
+User.prototype.password = ""
+User.prototype.changePassword = changePassword
+User.prototype.validatePassword = validatePassword
+
+function changePassword(pass){
+     this.password = pass
+}
+
+function validatePassword(secret){
+    return secret == this.password
+} 
 
 function createUser(name) {
     let user = new User()
@@ -42,5 +51,9 @@ function createUserFromCB(username, userInfo) {
 
 module.exports = {
     'createUser' : createUser,
-    'createUserFromCB' : createUserFromCB
+    'createUserFromCB' : createUserFromCB,
+    'addProperties' : (user) => {
+        user.changePassword = changePassword
+        user.validatePassword = validatePassword
+    }    
 }
