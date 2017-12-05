@@ -1,4 +1,5 @@
 
+
 'use strict'
 const logger = (msg) => {console.log('DBACCESS: ' + msg); return msg;}
 let dbreq = require('http') 
@@ -58,7 +59,7 @@ function insertDocOnDb(indoc,cbf){
  * @param {*} indoc document to be updated
  * @param {*} cbf callback function to be called when update is concluded 
  */
-function updateDoconDB(indoc,cbf){
+function updateDoconDB(indoc,key,cbf){
     let respdata =''
     //TODO:  correct this remove reqparams structure
 
@@ -81,7 +82,7 @@ function updateDoconDB(indoc,cbf){
     }
 
    // if indoc tem campo id , se n~ºao tiver não pode fazer o update
-   options.path = options.path+`/${indoc.id}`
+   options.path = options.path+`/${key}`
    options.headers = headerobj
    options.method = reqparams.type
    let inner_req = dbreq.request(options,
@@ -144,13 +145,23 @@ function deleteDocOnDb(indoc,cbf){
  * @param {*} path Search path on the database
  * @param {*} cbf Callback function to be used when request is fully received from the database
  */
-function getDoc(searchparam,path,cbf){
+//function getDoc(searchparam,path,cbf){
+function getDoc(searchparam,cbf){    
     let rawData=''
+  /*
     let reqparams = {
         body : "",
         type : "GET",
         path :`${path}?key="${searchparam}"`
     }
+    
+    let reqparams = {
+        body : "",
+        type : "GET",
+        path :`/${path}`
+    }
+    */
+    let parsedresponse =''
      let options = {
         host : serveraddress,
         port : gport,
@@ -161,18 +172,23 @@ function getDoc(searchparam,path,cbf){
     const headerobj = {
         'Content-Type' : 'application/json',
     }
-    options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
+    //options.path = (reqparams.path ===undefined)?options.path : options.path+reqparams.path
+    options.path = `${options.path}/${searchparam}`
     options.headers = headerobj
     dbreq.get(options,(res) => {
         res.setEncoding('utf8')
         logger(" Request of get Started")
         res.on('data',(chunk) => {rawData += chunk 
-    })
-       res.on('end',()  => {
-         //  console.log(JSON.parse(rawData).rows[0].value)  
-        cbf(rawData)
-           
         })
+        res.on('end',()  => {
+            parsedresponse = JSON.parse(rawData)
+            if(parsedresponse._id == undefined){
+                cbf(parsedresponse,null)
+        }else{
+                cbf(null,parsedresponse)
+        }
+        })
+        
     })
 }
 
@@ -185,7 +201,7 @@ function getDoc(searchparam,path,cbf){
  */
 function searchbyusername(tocheckusername,cbf){
 
- getDoc(tocheckusername,'/_design/login/_view/byusername',cbf)
+ getDoc(tocheckusername,cbf)
 
 }
 
@@ -266,11 +282,14 @@ function inner_updateUser(data,user,cbf){
  * @param {*} cbf 
  */
 function insertUser(userobj,cbf){
-    searchbyusername(userobj.name,(data)=>inner_insertUser(data,userobj,cbf))
+   // searchbyusername(userobj.name,(data)=>inner_insertUser(data,userobj,cbf))
+   userobj.type = 'user'
+    updateDoconDB(userobj,userobj.name,cbf)
 
 }
 
 /**
+ * review
  * eternal function to be used when updating a user
  * @param {*} userobj user object to update  
  * @param {*} cbf callback function to be used 
@@ -295,7 +314,8 @@ function insertfavlist(listobj,cbf){
  * @param {*} cbf callback function
  */
 function searchbylistid(listid,cbf){
-    getDoc(listid,'/_design/favlist/_view/byid',cbf)
+    //getDoc(listid,'/_design/favlist/_view/byid',cbf)
+    getDoc(listid,cbf)
 }
 
 
@@ -378,23 +398,24 @@ function inner_deletelist(data,list,cbf){
  *  teste function to remove 
  * @param {*} sample 
  */
-function outfunctest(sample){ 
+function outfunctest(error,sample){ 
     //console.log(`going through test FUNCTION callback: ${sample}`) 
     console.log(sample) 
+    console.log(error)
 } 
 
 
-/*
+
 var sampleDocuser ={
     id: "69314fa07586f554110474cfd302d7d6",
-    name: "jhondoe2",
-    passwd : "updated_passwd9", 
+    name: "potatohead",
+    passwd : "dummy", 
     lists : []
 }
 
 
 var sampleList ={
-   id : "69314fa07586f554110474cfd302715a",
+   
     name: "Sci-fi",
     movies : [],
 }
@@ -403,18 +424,18 @@ var tmovie = {
     title: "nightmare ",
     id: 1
 }
-*/
+
 //sampleList.movies.push(tmovie)
 //deleteList(sampleList,outfunctest)
 //deleteUser(sampleDocuser,outfunctest)
 //insertfavlist(sampleList,outfunctest)
-//searchbylistid("69314fa07586f554110474cfd302715a",outfunctest)
+//searchbylistid("69314fa07586f554110474cfd303392d",outfunctest)
 //updateList(sampleList,outfunctest)
-//searchbyusername("rigoncal",outfunctest)
-//insertDocOnDb(sampleDoc)
+//searchbyusername("potatohead",outfunctest) 
+//insertDocOnDb(sampleDoc) t
 //getDocbyid("69314fa07586f554110474cfd300c1f9")
 //updateUser(sampleDoc,outfunctest)
-//insertUser(sampleDocuser,outfunctest)
+//insertUser(sampleDocuser,outfunctest) t
 module.exports = {
     'searchbyuser'  : searchbyusername,
     'searchbyuserid': searchbyuserid,
