@@ -7,7 +7,11 @@ function User() {
     this.id = null
     this.docVersion = null
     this.favLists = []
-    this.loggedIn = 0    
+    this.loggedIn = 0
+    this.password = ""
+    this.validatePassword = function(s){return s == this.password} 
+    this.changePassword = function(p){ this.password = p} 
+    return this
 }
 
 function createUser(name) {

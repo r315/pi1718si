@@ -3,7 +3,8 @@
 const router = require('express').Router()
 const bodyparser = require('body-parser')
 const passport = require('passport')
-const user = require('./user')
+const usermod = require('./user')
+const couchdb = require('./CouchDb')
 
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
@@ -25,21 +26,6 @@ function getUserFromCookie(req){
 }
 
 /**
- * TODO add this functionality to cache
- * request user login to couchdb
- * on success add user to cache
- */
-let users = []
-function createUser(name){
-    let user = {
-        'name': name,
-        'email': 'aluno@cc.isel.ipl.pt'
-    }
-    users.push(user)
-    return user
-}
-
-/**
  * Receives user credentionals, async calls cb with user object on success
  * 
  * @param {string} username 
@@ -47,11 +33,21 @@ function createUser(name){
  * @param {function} cb 
  */
 function authenticateUser (username, password, cb) {
-    if (username != password) {
-        cb(new Error('Invalid credentials'), null)
-        return
-    }    
-    cb(null, createUser(username))
+
+    function validateUser(error, user){
+        if(error){
+            cb(error, null)
+            return
+        }
+
+        if(!user.validatePassword(password)){
+            cb(new Error('Invalid password'), null)
+            return 
+        }
+        cb(null, user)
+    }
+
+    couchdb.searchbyusername(username, validateUser)
 }
 
 function logUser(req, resp, user){
@@ -89,13 +85,20 @@ router.get('/', (req, resp, next)=>{
 })
 
 router.post('/', bodyparser.urlencoded({ extended: false }), (req, resp, next)=>{    
+    let pass =  req.body.password
+    let username = req.body.username
 
-    if(req.body.newuser){        
-       logUser(req, resp, createUser(req.body.username))
+    if(req.body.newuser){
+        let newuser = usermod.createUser(username)
+        newuser.changePassword(pass)       
+        logUser(req, resp, newuser)
+        coutch.insertUser(newuser, (u)=>{
+            logger(`User \"${u.name}\" created`)
+        })
         return
     }
     
-    authenticateUser(req.body.username, req.body.password, (error, user, info)=>{
+    authenticateUser(username, pass, (error, user, info)=>{
         if(error){
             next(error)
             return
