@@ -1,7 +1,6 @@
 'use strict'
 
 const router = require('express').Router()
-const bodyparser = require('body-parser')
 const lists = require('./MidlewareLists')
 
 const logger = (msg) => {console.log('User: ' + msg); return msg;}

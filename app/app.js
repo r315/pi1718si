@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const session = require('express-session')
 const path = require('path')
+const bodyparser = require('body-parser')
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -67,6 +68,7 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(bodyparser.urlencoded({ extended: false }))
 
 /**
  * Add midlewares here
