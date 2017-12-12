@@ -74,7 +74,7 @@ app.use(passport.session())
 app.use('/search', search)
 app.use(['/movies', '/actors'], common)
 app.use('/users', user)
-app.use('/login', login)
+app.use(['/login','/logout'], login)
 app.get('/', (req, resp) => { resp.render('index') })
 app.use(cache)
 

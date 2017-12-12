@@ -27,6 +27,7 @@ function getUserFromCookie(req){
 
 /**
  * Receives user credentionals, async calls cb with user object on success
+ * TODO: some day remove user password from cookie
  * 
  * @param {string} username 
  * @param {string} password 
@@ -50,7 +51,7 @@ function authenticateUser (username, password, cb) {
         cb(null, user)
     }
 
-    couchdb.searchbyuser(username, validateUser)
+    couchdb.searchByUser(username, validateUser)
 }
 
 function logUser(req, resp, user){
@@ -81,9 +82,16 @@ passport.deserializeUser((req, username, done) => {
  * Set routes for /login
  */
 router.get('/', (req, resp, next)=>{
-    if(req.isAuthenticated())
+    if(req.isAuthenticated()){    
+        if(req.baseUrl === '/logout'){            
+            logger(`${req.user.name} logout`)
+            req.logOut()
+            resp.cookie('user-data').clearCookie()
+            resp.redirect('/login')
+            return
+        }
         resp.redirect('/users/' + req.user.name) 
-    else  
+     }else  
         resp.render('login',{'title':'Title'})
 })
 
