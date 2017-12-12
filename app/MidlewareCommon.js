@@ -57,11 +57,13 @@ function createMovieView(req, resp, movie){
     fs.readFile(resp.template, function(error,data){
         let source = data.toString()
         let template = hb.compile(source)
+
         let dataobj = {
             'movie_title' : movie.title,
             'movie_director' : movie.directordto.map((elem) => elem.name).join(', '),
             'poster_url' : movie.posterurl,             
-            'movie_cast': []           
+            'movie_cast': [],    
+            'user_home' : "/login"                   
         }
         
         movie.castitemdto.forEach((elem, i)=>{
@@ -72,6 +74,11 @@ function createMovieView(req, resp, movie){
                     'cast_link' : `/actors/${elem.id}`
                 })
         })
+
+        if(req.isAuthenticated()){
+            current_movie_id = 0
+            dataobj.user_home = `/users/${req.user.name}`  
+        }
         resp.send(template(dataobj))        
     })    
 }

@@ -26,6 +26,7 @@ function validatePassword(secret){
 function createUser(name) {
     let user = new User()
     user.name = name
+    user.current_movie_id = ''
     return user
 }
 
