@@ -76,7 +76,7 @@ function createMovieView(req, resp, movie){
         })
 
         if(req.isAuthenticated()){
-            current_movie_id = 0
+            req.user.current_movie_id = req.coimaterm
             dataobj.user_home = `/users/${req.user.name}`  
         }
         resp.send(template(dataobj))        

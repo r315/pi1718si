@@ -1,8 +1,8 @@
 'use strict'
 
-const us = require('./user')
-
+let router = require('express').Router()
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
+
 
 /**
 * Midleware for List Displaying and Handeling
@@ -11,58 +11,29 @@ const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 * @param {obj} resp 
 * @param {func} next 
 */
-function getLists(req, resp, next){    
-  
-    let user = us.createUser(req.params.id)
-    //TODO: let userInfo = ''//Function to Query User object from Couch
-    
-    //Test Code:
-    let userInfo = '{"name":"hbarroca", "_id":"1", "favLists":[{"id":"1","name":"Test"}, {"id":"2","name":"Test"}, {"id":"3","name":"Test" } ],"docVersion":"2","type":"user"}'
-    user = us.createUserFromCB(user, userInfo)
-    //
-    
+function getLists(req, resp, next){ 
     resp.render('lists',{
-        'user_name' : user.name,
-        'list_results' : user.favLists
+        'user_name' : req.user.name,
+        'list_results' : req.user.favLists
     })
     return
 }
 
 
-/**
- * 
- * Get the html template for search results page and
- * fill it with the results
- * 
- * @param {*} req 
- * @param {*} resp 
- * @param {*} searchresults 
- */
-function createListView(req, resp, searchresults){
-    /*
-    fs.readFile(resp.template, function(error,data){
-        let source = data.toString()
-        let template = hb.compile(source)
-        let dataobj = { 
-            'user_name' : req.user.name,
-            'search_results': [],
-            'search_previous_page' : `/search?name=${req.coimaterm}&page=${(req.coimapage > 1)? parseInt(req.coimapage) - 1: req.coimapage}` ,
-            'search_next_page' :  `/search?name=${req.coimaterm}&page=${(req.coimapage < resp.coimatotalpages)? parseInt(req.coimapage) + 1: req.comimapage}`,
-            'search_page' :  req.coimapage
-        }      
-
-        searchresults.forEach(user.favList.favorit.movie, i) => {
-            dataobj.search_results.push({
-                'result_index' : i+1, 
-                'result_listName': user.favList.favorit.name,
-                'result_link' : `/lists/${user.favList.favorit.id}`
-            })
-
+function addList(req, resp, next){
+   req.user.favLists.push(
+        {
+            'list_id' : '#',
+            'list_name' : req.body.listname
         })
-        resp.send(template(dataobj))
-    })
-    */    
+    resp.cookie('user-data', JSON.stringify(req.user))
+    resp.redirect(req.originalUrl)
 }
 
+router.get('/', getLists)
+router.get('/:id', getLists)
+router.use('/:id/', (req, resp, next) => {next()})
 
-module.exports = getLists
+router.post('/',addList)
+
+module.exports = router

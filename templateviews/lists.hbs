@@ -10,12 +10,11 @@
     <title>COIMA - User Lists</title>   
     
     <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </head>
-
   <body>
-
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -36,7 +35,27 @@
 
     <main role="main" class="container" align="center">
       <div class="starter-template">
-        <br>
+        <br>        
+        <!-- Small modal -->
+        <div id="new-list-modal">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".new-list-modal">New List</button>   
+          <div class="modal fade new-list-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+            <div class="modal-dialog modal-sm" role="document">
+              <div class="modal-content">      
+                <form class="form-new-list" method="POST">
+                  <div class="modal-body">
+                    <p>Enter new list name</p>
+                    <input class="form-control input-sm" type="text" name="listname" >		   
+                    <div class="modal-footer">
+                      <button class="btn btn-default">Create</button>
+		                </div>
+                  </div> 
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Small modal -->
         <br>
         <table class="table table-bordered">
             <thead>
@@ -47,9 +66,9 @@
             </thead>
             <tbody>
                 {{#list_results}}
-                <tr>
-                  <th scope="row">{{id}}</th>
-                  <td><a href="{{id}}">{{name}}</a></td>
+                <tr>               
+                  <td><a href="{{list_id}}">{{list_name}}</a></td>
+                   <td align="right"><button type="submit" class="btn btn-danger">Delete</button></td>
                 </tr>               
                 {{/list_results}}
             </tbody>

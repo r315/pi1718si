@@ -7,7 +7,6 @@ function User() {
     this.id = null
     this.docVersion = null
     this.favLists = []
-    this.loggedIn = 0
     return this
 }
 

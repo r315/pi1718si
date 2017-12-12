@@ -1,7 +1,7 @@
 'use strict'
 
 const router = require('express').Router()
-const bodyparser = require('body-parser')
+
 const passport = require('passport')
 const usermod = require('./user')
 const couchdb = require('./CouchDb')
@@ -95,7 +95,7 @@ router.get('/', (req, resp, next)=>{
         resp.render('login',{'title':'Title'})
 })
 
-router.post('/', bodyparser.urlencoded({ extended: false }), (req, resp, next)=>{    
+router.post('/', (req, resp, next)=>{    
     let pass =  req.body.password
     let username = req.body.username
 
