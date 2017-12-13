@@ -10,16 +10,13 @@
     <title>COIMA - User Lists</title>   
     
     <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
+    <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">      
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
@@ -32,10 +29,10 @@
         </form>
       </div>
     </nav>
-
-    <main role="main" class="container" align="center">
-      <div class="starter-template">
-        <br>        
+    <!-- /.container --> 
+    <div class="container">
+      <br>
+      <div class="starter-template">            
         <!-- Small modal -->
         <div id="new-list-modal">
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".new-list-modal">New List</button>   
@@ -56,29 +53,28 @@
           </div>
         </div>
         <!-- Small modal -->
-        <br>
         <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Lists for "{{user_name}}"</th>                
-              </tr>
-            </thead>
-            <tbody>
-                {{#list_results}}
-                <tr>               
-                  <td><a href="{{list_id}}">{{list_name}}</a></td>
-                   <td align="right"><button type="submit" class="btn btn-danger">Delete</button></td>
-                </tr>               
-                {{/list_results}}
-            </tbody>
-          </table>
-          <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="{{search_previous_page}}">Previous</a></li>
-            <li class="page-item"><a class="page-link" >{{search_page}}</a></li>
-            <li class="page-item"><a class="page-link" href="{{search_next_page}}">Next</a></li>
-          </ul>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Lists for "{{user_name}}"</th>                
+            </tr>
+          </thead>
+          <tbody>
+            {{#list_results}}
+            <tr>               
+              <td><a href="{{list_id}}">{{list_name}}</a></td>
+              <td align="right"><button type="submit" class="btn btn-danger">Delete</button></td>
+            </tr>               
+            {{/list_results}}
+          </tbody>
+        </table>
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="{{search_previous_page}}">Previous</a></li>
+          <li class="page-item"><a class="page-link" >{{search_page}}</a></li>
+          <li class="page-item"><a class="page-link" href="{{search_next_page}}">Next</a></li>
+        </ul>
       </div>      
-    </main><!-- /.container -->   
+    </div><!-- /.container -->   
   </body>
 </html>
