@@ -63,7 +63,9 @@ function createMovieView(req, resp, movie){
             'movie_director' : movie.directordto.map((elem) => elem.name).join(', '),
             'poster_url' : movie.posterurl,             
             'movie_cast': [],    
-            'user_home' : "/login"                   
+            'user_home' : "/login", 
+            'show_lists' : 'false',
+            'user_lists' : []                  
         }
         
         movie.castitemdto.forEach((elem, i)=>{
@@ -77,7 +79,9 @@ function createMovieView(req, resp, movie){
 
         if(req.isAuthenticated()){
             req.user.current_movie_id = req.coimaterm
-            dataobj.user_home = `/users/${req.user.name}`  
+            dataobj.user_home = `/users/${req.user.name}`
+            dataobj.show_lists = 'true'
+            dataobj.user_lists = req.user.favLists  
         }
         resp.send(template(dataobj))        
     })    

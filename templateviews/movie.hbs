@@ -11,7 +11,7 @@
     
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
   </head>
 
   <body>   
@@ -44,10 +44,19 @@
                   Realizador: {{movie_director}}<br>
               </p>
 		        </section>
-            <section class="col-2" align="righth">
-              <form action="{{user_home}}">
-              <button type="submit" class="btn btn-primary">To my list</button>
-              </form>
+            <section class="col-2" align="right">           
+            <button type="button" onClick="toggleList()" class="btn btn-primary" >Add to list</button>
+            <div class="col-md-2" align="center" id="fav-list" hidden="true" isvisible="{{show_lists}}">                
+                <form method="POST">
+                <ul class="nav nav-pills nav-stacked">
+                {{#user_lists}}
+                <li class="nav-item">
+                  <a class="nav-link" href="#">{{list_name}}</a>
+                </li>
+                {{/user_lists}}                
+                </ul>
+                </form>
+            </div>
             </section>
 	        </div>
           <p class="lead">Cast</p>
@@ -70,5 +79,16 @@
           
       </div>      
     </main><!-- /.container -->   
-  </body>
+  </body>  
+    <script>   
+      function toggleList() {
+        elem = document.getElementById('fav-list');  
+        if(elem.getAttribute('isvisible') == "false")
+            return
+        if(elem.hidden == false)
+          elem.hidden = true
+        else
+          elem.hidden = false
+      }
+    </script>
 </html>
