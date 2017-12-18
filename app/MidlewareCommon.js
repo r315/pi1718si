@@ -65,7 +65,8 @@ function createMovieView(req, resp, movie){
             'movie_cast': [],    
             'user_home' : "/login", 
             'show_lists' : 'false',
-            'user_lists' : []                  
+            'user_lists' : [],
+            'enable_lists' : 'disabled'              
         }
         
         movie.castitemdto.forEach((elem, i)=>{
@@ -81,7 +82,11 @@ function createMovieView(req, resp, movie){
             req.user.current_movie_id = req.coimaterm
             dataobj.user_home = `/users/${req.user.name}`
             dataobj.show_lists = 'true'
-            dataobj.user_lists = req.user.favLists  
+            dataobj.user_lists = (req.user.favLists.length == 0) ?  [{
+                'list_id' : '#',
+                'list_name' : 'No lists'
+            }] : req.user.favLists
+            dataobj.enable_lists = ''
         }
         resp.send(template(dataobj))        
     })    
@@ -114,7 +119,6 @@ function createActorView(req, resp, actor){
         resp.send(template(dataobj))
     })  
 }
-
 
 
 module.exports = commonRoute

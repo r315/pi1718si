@@ -63,8 +63,10 @@
           <tbody>
             {{#list_results}}
             <tr>               
-              <td><a href="{{list_id}}">{{list_name}}</a></td>
-              <td align="right"><button type="submit" class="btn btn-danger">Delete</button></td>
+              <td><a href="{{list_path}}">{{list_name}}</a></td>
+              <td align="right">
+                <button class="btn btn-danger" onclick="deleteList('{{list_id}}')">Delete</button>
+              </td>
             </tr>               
             {{/list_results}}
           </tbody>
@@ -76,5 +78,13 @@
         </ul>
       </div>      
     </div><!-- /.container -->   
+    <script>
+      function deleteList(id){
+        let xhr = new XMLHttpRequest()
+        xhr.open("DELETE", 'lists/' + id , true)
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+        xhr.send(null)
+      }
+    </script>
   </body>
 </html>

@@ -45,7 +45,7 @@
               </p>
 		        </section>
             <section class="col-2" align="right">           
-            <button type="button" onClick="toggleList()" class="btn btn-primary" >Add to list</button>
+            <button type="button" onClick="toggleList()" class="btn btn-primary" {{enable_lists}}>Add to list</button>
             <div class="col-md-2" align="center" id="fav-list" hidden="true" isvisible="{{show_lists}}">                
                 <form method="POST">
                 <ul class="nav nav-pills nav-stacked">
@@ -80,9 +80,9 @@
       </div>      
     </main><!-- /.container -->   
   </body>  
-    <script>   
+    <script>
       function toggleList() {
-        elem = document.getElementById('fav-list');  
+        elem = document.getElementById('fav-list')  
         if(elem.getAttribute('isvisible') == "false")
             return
         if(elem.hidden == false)

@@ -457,7 +457,7 @@ sampleList.movies.push(movie2)
 module.exports = {
     'searchByUser'  : searchbyusername,
     'insertuser'    : insertUser,
-    //'updateUser'    : updateUser,
+    'updateUser'    : (obj, cb) => { cb({})/*Not implemented yet */}, //updateUser,
     'insertfavlist' : insertfavlist,
     'updatefavlist' : updatefavlist,
     'searchbylistid': searchbylistid
