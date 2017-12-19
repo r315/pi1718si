@@ -4,7 +4,7 @@
  * Modules declaration, add new midlewares modules here
  */
 const search = require('./MidlewareSearch')
-const common = require('./MidlewareCommon')
+const actor = require('./MidlewareActor')
 const user = require('./MidlewareUser')
 const login = require('./MidlewareLogin')
 const movie = require('./MidlewareMovie')
@@ -75,7 +75,7 @@ app.use(bodyparser.urlencoded({ extended: false }))
  * Add midlewares here
  */
 app.use('/search', search)
-app.use('/actors', common)
+app.use('/actors/:id', actor)
 app.get('/movies/:id', movie)
 app.use('/users', user)
 app.use(['/login','/logout'], login)
