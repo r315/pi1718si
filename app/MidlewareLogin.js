@@ -108,7 +108,7 @@ router.post('/', (req, resp, next)=>{
                 logger(`Error ${error.error}`)
                 return    
             }
-            logger(`User \"${u.name}\" created`)
+            logger(`User \"${username}\" created`)
         })
         return
     }

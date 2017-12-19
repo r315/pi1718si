@@ -47,7 +47,7 @@ function endpointActor(req, resp, next){
         resp.render('actor',dataobj)          
     }
 
-    logger(`Requesting movie ${req.params.id}`)
+    logger(`Requesting actor ${req.params.id}`)
     //using decorator pattern for calling view
     const ori_send = resp.send
     resp.send = cb
