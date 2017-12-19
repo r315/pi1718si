@@ -406,7 +406,6 @@ function inner_deletelist(data,list,cbf){
     }
 }
 
-
 /**
  *  teste function to remove 
  * @param {*} sample 
@@ -415,8 +414,7 @@ function outfunctest(error,sample){
     //console.log(`going through test FUNCTION callback: ${sample}`) 
     console.log('message:'+JSON.stringify(sample)) 
     console.log('ERROR:'+JSON.stringify(error))
-} 
-
+}
 
 function searchMovieById(movieId, cb){
     let rawData = ''
@@ -463,7 +461,7 @@ function putMovie(movie, cb){
     let t = dbreq.request(options ,function(res){
                     res.setEncoding('utf8');
                     res.on('data',function(chunk){
-                        respdata +=chunk
+                        respdata += chunk
                         console.log('DBACCESS: Status on insert:',`${res.statusCode}-${res.statusMessage}`)
                     })
                     res.on('end',()=> cb(null, JSON.parse(respdata)))
@@ -473,19 +471,6 @@ function putMovie(movie, cb){
                
 }
 
-searchMovieById('123', (error, movie) => {
-    logger('ok')
-})
-
-/*
-putMovie({
-    'name' : 'movie name',
-    'id' : '123'
-}        , (error, movie) => {
-    logger('ok')
-})
-
-*/
 var sampleDocuser ={
     
     name: "potatohead",
