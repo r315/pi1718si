@@ -46,7 +46,7 @@ function insertDocOnDb(indoc,cbf){
                console.log('DBACCESS: Status on insert:',`${res.statusCode}-${res.statusMessage}`)
            })
          
-           res.on('end',()=> cbf(JSON.parse(respdata)))
+           res.on('end',()=> cbf(null, JSON.parse(respdata)))
 
         })
         inner_req.write(JSON.stringify(indoc))
