@@ -418,7 +418,74 @@ function outfunctest(error,sample){
 } 
 
 
+function searchMovieById(movieId, cb){
+    let rawData = ''
+    
+     let options = {
+        host : serveraddress,
+        port : gport,
+        path : `/${database}/movies/${movieId}`,
+        method :'GET',
+        headers : {'Content-Type' : 'application/json'}
+    }
+   
+    dbreq.get(options,(res) => {
+        res.setEncoding('utf8')
+        logger(" Request of get Started")
+        res.on('data',(chunk) => {rawData += chunk})
+        res.on('end',()  => {
+            let parsedresponse = JSON.parse(rawData)
+            if(parsedresponse.error){
+                cb(parsedresponse.error,null)
+            }else{
+                cb(null,parsedresponse)
+            }
+        })        
+    })
+}
 
+function putMovie(movie, cb){
+
+    let data = JSON.stringify(movie)   
+    
+    let options = {
+        host : serveraddress,
+        port : gport,
+        path : `/${database}/movies/${movie.id}`,
+        method :'PUT',
+        headers : {
+                'Content-Type' : 'application/json',
+                'Content-Length' : Buffer.byteLength(data)
+            }
+    }
+    
+    let respdata = ''
+    let t = dbreq.request(options ,function(res){
+                    res.setEncoding('utf8');
+                    res.on('data',function(chunk){
+                        respdata +=chunk
+                        console.log('DBACCESS: Status on insert:',`${res.statusCode}-${res.statusMessage}`)
+                    })
+                    res.on('end',()=> cb(null, JSON.parse(respdata)))
+            })
+    t.write(data)
+    t.end()
+               
+}
+
+searchMovieById('123', (error, movie) => {
+    logger('ok')
+})
+
+/*
+putMovie({
+    'name' : 'movie name',
+    'id' : '123'
+}        , (error, movie) => {
+    logger('ok')
+})
+
+*/
 var sampleDocuser ={
     
     name: "potatohead",
@@ -442,8 +509,8 @@ var movie2 = {
     title : "Rambo",
     id:2
 }
-sampleList.movies.push(tmovie)
-sampleList.movies.push(movie2)
+//sampleList.movies.push(tmovie)
+//sampleList.movies.push(movie2)
 //deleteList(sampleList,outfunctest)
 //deleteUser(sampleDocuser,outfunctest)
 //insertfavlist(sampleList,outfunctest) T
@@ -460,6 +527,9 @@ module.exports = {
     'updateUser'    : (obj, cb) => { cb({})/*Not implemented yet */}, //updateUser,
     'insertfavlist' : insertfavlist,
     'updatefavlist' : updatefavlist,
-    'searchbylistid': searchbylistid
+    'searchbylistid': searchbylistid,
+
+    'searchMovieById' : searchMovieById,
+    'putMovie' : putMovie
 
 }
