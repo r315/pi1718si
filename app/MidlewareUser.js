@@ -33,6 +33,6 @@ function userProfile(req, resp, next){
 }
 router.get('/', (req,resp,next) => { next() })
 router.use('/:id', userProfile)
-router.use('/:id/lists',lists)
+router.use('/:id/lists/',lists)
 
 module.exports = router

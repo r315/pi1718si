@@ -1,28 +1,26 @@
 'use strict'
 
-let router = require('express').Router()
-let userstorage = require('./CouchDb')
+const router = require('express').Router()
+//const userstorage = require('./CouchDb')
+
+const userstorage = require('./CouchDB_Mock')
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 
-
 /**
-* Midleware for List Displaying and Handeling
-* /search?name={query}
 * @param {obj} req 
 * @param {obj} resp 
 * @param {func} next 
 */
-function getLists(req, resp, next){ 
+function getLists(req, resp){ 
     req.user.favLists.forEach( (l) =>{
-        l.list_path = `users/${req.user.name}/lists/${l.list_id}` 
+        l.list_path = `${req.baseUrl}/${l.list_id}` 
     })
 
-    resp.render('lists',{
+    resp.render('userLists',{
         'user_name' : req.user.name,
         'list_results' : req.user.favLists
-    })
-    return
+    }) 
 }
 /**
  * 
@@ -30,35 +28,89 @@ function getLists(req, resp, next){
  * @param {*} resp 
  * @param {*} next 
  */
-function newFavList(req, resp, next){
+function postList(req, resp){
+    logger("Creating list: " + req.body.listname)
     let newlist = {
         'list_id' : '#',
         'list_name' : req.body.listname,        
     }
 
-    userstorage.insertfavlist(newlist,(data)=>{
+    userstorage.insertfavlist(newlist,(error, data)=>{
         newlist.list_id = data.id        
         req.user.favLists.push(newlist)
         resp.cookie('user-data', JSON.stringify(req.user))
         userstorage.updateUser(req.user, 
-            ()=> resp.redirect(req.originalUrl) )              // redirect to user lists page displaying the new created list
+            ()=> resp.redirect(req.originalUrl) )  // redirect to user lists page displaying the new created list
     })
 }
 
-function removeList(req, resp, next){
-    logger("Deleting list: " + req.params.id)
-    req.user.favLists = req.user.favLists.filter( (elem) => { return elem.list_id !== req.params.id})
-    resp.cookie('user-data', JSON.stringify(req.user))
-    resp.status(200)
-    resp.method = "GET"
-    resp.redirect(req.baseUrl)
+/**
+ * 
+ * @param {*} req 
+ * @param {*} resp 
+ * @param {*} next 
+ */
+function deleteList(req, resp){
+    logger(`Deleting list: ${req.params.listId}`)
+    req.user.favLists = req.user.favLists.filter( (elem) => { return elem.list_id !== req.params.listId})
+    resp.cookie('user-data', JSON.stringify(req.user))    
+    resp.end()
+}
+
+/**
+ * Helper function that returns a list object 
+ * for a given id
+ */
+function getListObjFromId(lists, id){
+    return lists.filter((elem) => { return elem.list_id === id})[0]
+}
+
+function getListItems(req, resp, next){
+    let list = getListObjFromId(req.user.favLists, req.params.listId)
+    
+    if(list == undefined){
+        logger(`getListItems: no list found!`)
+        next()
+        return
+    }
+
+    userstorage.searchbylistid(list.list_id, (error, items) =>{
+        items.forEach( (item) =>{
+            item.item_path = `/movies/${item.item_id}` 
+        })
+        resp.render('list',{
+            'list_id' : list.list_id,
+            'list_name' : list.list_name,
+            'list_items' : items
+        }) 
+    })    
+}
+
+function putListItem(req, resp){
+    logger(`Adding to list:  ${req.params.listId}`)
+    userstorage.searchbylistid(req.params.listId,(error, items) =>{
+        items.push({
+            'item_name' : req.body.movie_title,
+            'item_id' : req.params.movieId
+        })            
+        userstorage.updatefavlist(req.params.listId, items, (error, list) => resp.end())
+    })    
+}
+
+function deleteListItem(req, resp){
+    logger(`Deleting item: ${req.params.movieId} from list: ${req.params.listId}`)
+    userstorage.searchbylistid(req.params.listId,(error, items) =>{
+        let newitems = items.filter( (elem) => { return elem.item_id !== req.params.movieId})
+        userstorage.updatefavlist(req.params.listId, newitems, (error, list) => resp.end())
+    })
 }
 
 router.get('/', getLists)
-router.get('/:id', getLists)
-router.use('/:id/', (req, resp, next) => {next()})
+router.get('/:listId/', getListItems)
 
-router.post('/',newFavList)
-router.delete('/:id', removeList)
+router.post('/',postList)
+router.put('/:listId/:movieId',putListItem)
+router.delete('/:listId', deleteList)
+router.delete('/:listId/:movieId', deleteListItem)
 
 module.exports = router

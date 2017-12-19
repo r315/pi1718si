@@ -78,8 +78,7 @@ function createMovieView(req, resp, movie){
                 })
         })
 
-        if(req.isAuthenticated()){
-            req.user.current_movie_id = req.coimaterm
+        if(req.isAuthenticated()){            
             dataobj.user_home = `/users/${req.user.name}`
             dataobj.show_lists = 'true'
             dataobj.user_lists = (req.user.favLists.length == 0) ?  [{
@@ -87,6 +86,8 @@ function createMovieView(req, resp, movie){
                 'list_name' : 'No lists'
             }] : req.user.favLists
             dataobj.enable_lists = ''
+            dataobj.user_lists_path = `/users/${req.user.name}/lists`
+            dataobj.movie_id = req.coimaterm
         }
         resp.send(template(dataobj))        
     })    
