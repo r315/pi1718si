@@ -4,7 +4,7 @@ const fs = require('fs')
 
 function FavList() {
     
-    this.id = null,
+    //this.id = null,
     this.name = null
     this.favorits = []
     
@@ -21,14 +21,15 @@ function createFavListFromDB(favList) {
 
 }
 
-function createFavList() {
+function createFavList(name) {
     
     let favList = new FavList()
+    favList.name = name
     return favList
 
 }
 
 module.exports = {
-    'createfavList' : createFavList,
-    'createfavListFromDB' : createFavList
+    'create' : createFavList,
+    'createFromDB' : createFavList
 }
