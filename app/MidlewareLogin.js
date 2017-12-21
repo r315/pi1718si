@@ -9,7 +9,7 @@ const couchdb = require('./CouchDb')
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
 /**
- * 
+ * Save logged user data into user cookie
  * @param {object} req 
  * @param {object} user 
  */
@@ -18,11 +18,13 @@ function putUserOnCookie(resp, user){
 }
 
 /**
- * 
+ * Get logged user data from cookie
  * @param {object} req 
  */
 function getUserFromCookie(req){
-    return JSON.parse(req.cookies['user-data'])
+    let user = JSON.parse(req.cookies['user-data'])
+    user.updateCookieData = putUserOnCookie
+    return user
 }
 
 /**
@@ -36,8 +38,8 @@ function getUserFromCookie(req){
 function authenticateUser (username, password, cb) {
 
     function validateUser(error, user){
-        if(error){
-            logger(`Error ${error.error}`)
+        if(error || user.error){
+            logger(`Error ${error? error.error : user.error}`)
             cb(new Error('User not found'), null)
             return
         }
@@ -81,6 +83,10 @@ passport.deserializeUser((req, username, done) => {
 /**
  * Set routes for /login
  */
+
+ /**
+  *  endpoint for user login page
+  */
 router.get('/', (req, resp, next)=>{
     if(req.isAuthenticated()){    
         if(req.baseUrl === '/logout'){            
@@ -95,6 +101,9 @@ router.get('/', (req, resp, next)=>{
         resp.render('login',{'title':'Title'})
 })
 
+ /**
+  *  post endpoint for user logon
+  */
 router.post('/', (req, resp, next)=>{    
     let pass =  req.body.password
     let username = req.body.username
@@ -102,18 +111,18 @@ router.post('/', (req, resp, next)=>{
     if(req.body.newuser){
         let newuser = usermod.createUser(username)
         newuser.changePassword(pass)       
-        logUser(req, resp, newuser)
-        couchdb.insertuser(newuser, (error, user)=>{
+        couchdb.insertUser(newuser, (error, user)=>{
             if(error){
                 logger(`Error ${error.error}`)
                 return    
             }
             logger(`User \"${username}\" created`)
+            logUser(req, resp, newuser)
         })
         return
     }
     
-    authenticateUser(username, pass, (error, user, info)=>{
+    authenticateUser(username, pass, (error, user)=>{
         if(error){
             next(error)
             return

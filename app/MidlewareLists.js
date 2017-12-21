@@ -1,9 +1,8 @@
 'use strict'
 
-const favlist = require('./favlist')
 const router = require('express').Router()
+const favlist = require('./favlist')
 const userstorage = require('./CouchDb')
-//const userstorage = require('./CouchDB_Mock')
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 
@@ -13,14 +12,19 @@ const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 * @param {func} next 
 */
 function getLists(req, resp){
+    let dataobj =   {
+        'user_name' : req.user.name,
+        'list_results' : []
+    }
+
     req.user.favLists.forEach( (elem) =>{
-        elem.list_path = `${req.baseUrl}/${elem.list_id}`
+        dataobj.list_results.push({            
+            'list_name' : elem.name,
+            'list_path' : `${req.baseUrl}/${elem.id}`
+        })        
     })
 
-    resp.render('userLists',{
-        'user_name' : req.user.name,
-        'list_results' : req.user.favLists
-    }) 
+    resp.render('userLists', dataobj) 
 }
 /**
  * 
@@ -29,24 +33,26 @@ function getLists(req, resp){
  * @param {*} next 
  */
 function postList(req, resp){
-    logger("Creating list: " + req.body.listname)
+    let user = req.user
+    logger(`Creating list: \"${req.body.listname} for user ${user.name}`)
+    
     let newlist = favlist.create(req.body.listname)
+    newlist.id = user.favLists.length
 
-    userstorage.insertfavlist(newlist,(error, data)=>{
-        if(error) {
-            resp.send(error)
-            return
-        }        
-        newlist.id = data.id        
-        req.user.favLists.push({
-            'list_name' : newlist.name,
-            'list_id' : newlist.id
+    user.favLists.push(newlist)
+    user.updateCookieData(resp, user)
+
+    userstorage.getUser(user.name, (error, cuser) => {
+        cuser.favLists = user.favLists
+        userstorage.updateUser(cuser, (error, cuser)=>{
+            if(error) {
+                resp.send(error)
+                return
+            }        
+            resp.cookie('user-data', JSON.stringify(user))        
+            resp.redirect(req.originalUrl) // redirect to user lists page displaying the new created list        
         })
-        resp.cookie('user-data', JSON.stringify(req.user))
-        userstorage.updateUser(req.user, 
-            ()=> resp.redirect(req.originalUrl) )  // redirect to user lists page displaying the new created list
-        logger("Creating list: ERROR User Update not implemented on DB")
-    })
+    })   
 }
 
 /**
@@ -57,9 +63,21 @@ function postList(req, resp){
  */
 function deleteList(req, resp){
     logger(`Deleting list: ${req.params.listId}`)
-    req.user.favLists = req.user.favLists.filter( (elem) => { return elem.list_id !== req.params.listId})
-    resp.cookie('user-data', JSON.stringify(req.user))    
-    resp.end()
+    userstorage.getUser(req.user.name, (error, cuser)=>{
+        if(error) {
+            resp.send(error)
+            return
+        }      
+        cuser.favLists = req.user.favLists.filter( (elem) => { return elem.list_id !== req.params.listId})
+        userstorage.updateUser(cuser, (error, cuser)=>{
+            if(error) {
+                resp.send(error)
+                return
+            }      
+            req.user.updateCookieData(resp, req.user)
+            resp.end()
+        })
+    })
 }
 
 /**
