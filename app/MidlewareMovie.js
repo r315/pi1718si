@@ -52,10 +52,19 @@ function endpointMovie(req, resp, next){
             if(req.isAuthenticated()){            
                 dataobj.user_home = `/users/${req.user.name}`
                 dataobj.show_lists = 'true'
-                dataobj.user_lists = (req.user.favLists.length == 0) ?  [{
-                    'list_id' : '#',
-                    'list_name' : 'No lists'
-                }] : req.user.favLists
+                if(req.user.favLists.length == 0){
+                    dataobj.user_lists = [{
+                        'list_id' : '#',
+                        'list_name' : 'No lists'
+                    }]
+                }else{
+                    req.user.favLists.forEach( list =>{
+                        dataobj.user_lists.push({
+                            'list_id' : list.id,
+                            'list_name' : list.name
+                        })
+                    })
+                }
                 dataobj.enable_lists = ''
                 dataobj.user_lists_path = `/users/${req.user.name}/lists`
                 dataobj.movie_id = req.coimaterm

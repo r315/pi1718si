@@ -37,7 +37,7 @@ function postList(req, resp){
     logger(`Creating list: \"${req.body.listname} for user ${user.name}`)
     
     let newlist = favlist.create(req.body.listname)
-    newlist.id = user.favLists.length
+    newlist.id = `${user.favLists.length}`
 
     user.favLists.push(newlist)
     user.updateCookieData(resp, user)
@@ -68,7 +68,8 @@ function deleteList(req, resp){
             resp.send(error)
             return
         }      
-        cuser.favLists = req.user.favLists.filter( (elem) => { return elem.list_id !== req.params.listId})
+        cuser.favLists = req.user.favLists.filter( (elem) => { return elem.id !== req.params.listId})
+        req.user.favLists = cuser.favLists
         userstorage.updateUser(cuser, (error, cuser)=>{
             if(error) {
                 resp.send(error)
@@ -85,9 +86,44 @@ function deleteList(req, resp){
  * having the given id
  */
 function getListObjFromId(lists, id){
-    return lists.filter((elem) => { return elem.list_id === id})[0]
+    return lists.filter((elem) => { return elem.id === id})[0]
 }
 
+
+/**
+ * Make a async request for each movie id
+ * 
+ * @param {array} moviesid array containing only movie id's 
+ * @param {function} endcb  callback for when all movies are received from database 
+ */
+function getAllItems(moviesid, endcb){
+let counter = moviesid.length
+let movies = []
+    if(counter == 0){
+        endcb([])
+        return
+    }
+    moviesid.forEach( (id) => {
+        userstorage.getMovie(id, (error, cmovie) => {
+            if(error){
+                logger(error)
+                endcb([])
+                return
+            }
+            movies.push(cmovie)
+            counter-- 
+            if(counter == 0){
+                endcb(movies)
+            }
+        })
+    })
+}
+/**
+ * 
+ * @param {*} req 
+ * @param {*} resp 
+ * @param {*} next 
+ */
 function getListItems(req, resp, next){
     let favlist = getListObjFromId(req.user.favLists, req.params.listId)
     
@@ -97,49 +133,74 @@ function getListItems(req, resp, next){
         return
     }
 
-    userstorage.searchbylistid(favlist.id, (error, favmovielist) =>{
-
-        favmovielist.favorits.forEach( (item) =>{
-            item.item_path = `/movies/${item.item_id}` 
-        })
-        resp.render('list',{
-            'list_id' : favlist.id,
-            'list_name' : favlist.name,
-            'list_items' : favmovielist.favList
-        }) 
-    })    
+    getAllItems(favlist.movies,(movies) => {
+            let dataobj = {
+                'list_id' : favlist.id,
+                'list_name' : favlist.name,
+                'list_items' : []
+            }
+            movies.forEach( (movie) => {
+                dataobj.list_items.push({
+                    'item_name' : movie.name,
+                    'item_path' : `/movies/${movie.id}`
+                })
+            }) 
+            resp.render('list',dataobj) 
+    })
 }
-
+/**
+ * Adds a movie to user favorit list
+ * duplicates are allowed
+ * @param {*} req 
+ * @param {*} resp 
+ */
 function putListItem(req, resp){
-    logger(`Adding to list:  ${req.params.listId}`)   
-    
-    function putMovieOnList(movie, listId){
-        userstorage.searchbylistid(listId,(error, items) =>{
-            items.favorits.push(movie.id)
-            userstorage.updatefavlist(items, (error, list) => resp.end())
-        })  
+    let user = req.user
+    let listid = req.params.listId
+    let movie = {
+        'id' : req.params.movieId,
+        'name' : req.body.movie_title
     }
 
+    let dataobj = {}
 
-    userstorage.searchMovieById(req.params.movieId, (error, movie) =>{
+    logger(`Adding ${movie.id} to list ${listid}`)
+    
+    function dataCollect(){
+        if(dataobj.cuser && dataobj.cmovie){
+            user.updateCookieData(resp, user)
+            resp.end()
+            return
+        }          
+    }
+
+    userstorage.createMovie(movie, (error, cmovie) => {
         if(error){
-            movie = {
-                'name' : req.body.movie_title,
-                'id' : req.params.movieId
-            }           
-            userstorage.putMovie(movie, (error, nmovie) => {
-                if(error){
-                    resp.send(error)
-                    return
-                }
-                putMovieOnList(movie, req.params.listId)
-            })
+            resp.send(error)
             return
         }
-        putMovieOnList(movie, req.params.listId)       
-    })      
+        dataobj.cmovie = cmovie
+        dataCollect()
+    })
+        
+    userstorage.getUser(user.name, (error, dbuser) =>{
+        if(error){
+            resp.send(error)
+            return
+        }
+        user.favLists[listid].movies.push(movie.id)
+        dbuser.favLists = user.favLists
+        userstorage.updateUser(dbuser,(error, cuser) => {
+            dataobj.cuser = cuser
+            dataCollect()
+        })
+    })
 }
-
+/**
+ * 
+ * @param {*} req 
+ * @param {*} resp 
+ */
 function deleteListItem(req, resp){
     logger(`Deleting item: ${req.params.movieId} from list: ${req.params.listId}`)
     userstorage.searchbylistid(req.params.listId,(error, items) =>{
