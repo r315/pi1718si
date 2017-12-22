@@ -30,6 +30,15 @@ function getDocument(docid, cb){
       })
 }
 
+function deleteDocument(doc, cb){
+    options.setUri(doc.id)
+    options.headers['If-Match'] = doc.form['_rev']
+    request.delete(options, function(error, resp, body){        
+        console.log('DBACCESS: Status on delete:',`${resp.statusCode}-${resp.statusMessage}`)
+        cb(error,JSON.parse(body))
+      })
+}
+
 function createUser(user, cb){    
     createDocument({
         'id' : `${usersdb}/${user.name}`,
@@ -37,8 +46,11 @@ function createUser(user, cb){
     }, cb)
 }
 
-function getUser(username, cb){    
-    getDocument(`${usersdb}/${username}`, cb)
+function removeUser(user, cb){
+    deleteDocument({
+        'id' : `${usersdb}/${user.name}`,
+        'form' : user
+    }, cb)
 }
 
 function createMovie(movie, cb){    
@@ -48,25 +60,42 @@ function createMovie(movie, cb){
     }, cb)
 }
 
-function getMovie(movieid, cb){    
-    getDocument(`${moviesdb}/${movieid}`, cb)
+function removeMovie(movie, cb){
+    deleteDocument({
+        'id' : `${moviesdb}/${movie.id}`,
+        'form' : movie
+    }, cb)
+}        
+
+function createDataBase(name){
+    let doc = {
+        'id':usersdb
+    }
+    createDocument(doc, (error, doc) => {
+        if(error || doc.error){
+            logger( `Error ${error ? error : doc.reason}`)    
+            return
+        }
+        logger( `${name} created!`)    
+    })
 }
 
 function createDb(){
-    createDocument({'id':usersdb}, (error, doc) => logger(error ? error : `${doc.id} created!`))
-    createDocument({'id':moviesdb}, (error, doc) => logger(error ? error : `${doc.id} created!`))
+    createDataBase(usersdb)
+    createDataBase(moviesdb)
 }
 
 module.exports = {
     'createDb' : createDb,
     'createUser' : createUser,    
-    'getUser' : getUser,    
+    'getUser' : function (username, cb){getDocument(`${usersdb}/${username}`, cb)},
     'updateUser' : createUser,
+    'deleteUser' : removeUser,
 
     'createMovie' : createMovie,
-    'getMovie' : getMovie,
+    'getMovie' : function getMovie(movieid, cb){ getDocument(`${moviesdb}/${movieid}`, cb)},
     'updateMovie' : createMovie,
-
-    'searchByUser' : getUser,
+    'deleteMovie' : removeMovie,
+    
     'insertUser' : createUser
 }
