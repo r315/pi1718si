@@ -3,7 +3,7 @@
 const router = require('express').Router()
 
 const passport = require('passport')
-const usermod = require('./user')
+const usermodule = require('./user')
 const couchdb = require('./CouchDb')
 
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
@@ -44,7 +44,7 @@ function authenticateUser (username, password, cb) {
             return
         }
         
-        usermod.addProperties(user)
+        usermodule.addProperties(user)
 
         if(!user.validatePassword(password)){
             cb(new Error('Invalid password'), null)
@@ -53,7 +53,7 @@ function authenticateUser (username, password, cb) {
         cb(null, user)
     }
 
-    couchdb.searchByUser(username, validateUser)
+    couchdb.getUser(username, validateUser)
 }
 
 function logUser(req, resp, user){
@@ -109,11 +109,13 @@ router.post('/', (req, resp, next)=>{
     let username = req.body.username
 
     if(req.body.newuser){
-        let newuser = usermod.createUser(username)
+        let newuser = usermodule.createUser(username)
         newuser.changePassword(pass)       
         couchdb.insertUser(newuser, (error, user)=>{
-            if(error){
-                logger(`Error ${error.error}`)
+            if(error || user.error){
+                error = error ? error.error : user.reason
+                logger(`Error ${error}`)
+                resp.send(error)
                 return    
             }
             logger(`User \"${username}\" created`)

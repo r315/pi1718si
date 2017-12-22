@@ -5,18 +5,7 @@ const fs = require('fs')
 function FavList() {    
     this.id = null,     // id is the index of the list inside user favList
     this.name = null
-    this.favorits = []    
-}
-
-function createFavListFromDB(favList) {
-    
-    let obj = JSON.parse(favList)
-    let fL = new FavList()
-    fL.name = obj.name
-    fL.id = obj.id
-    
-    return favList
-
+    this.movies = []    
 }
 
 function createFavList(name) {    
@@ -26,6 +15,5 @@ function createFavList(name) {
 }
 
 module.exports = {
-    'create' : createFavList,
-    'createFromDB' : createFavList
+    'create' : createFavList
 }
