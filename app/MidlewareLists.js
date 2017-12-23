@@ -40,7 +40,7 @@ function postList(req, resp){
     newlist.id = `${user.favLists.length}`
 
     user.favLists.push(newlist)
-    user.updateCookieData(resp, user)
+    user.updateCookieData(resp)
 
     userstorage.getUser(user.name, (error, cuser) => {
         cuser.favLists = user.favLists
@@ -75,7 +75,7 @@ function deleteList(req, resp){
                 resp.send(error)
                 return
             }      
-            req.user.updateCookieData(resp, req.user)
+            req.user.updateCookieData(resp)
             resp.end()
         })
     })
@@ -141,6 +141,7 @@ function getListItems(req, resp, next){
             }
             movies.forEach( (movie) => {
                 dataobj.list_items.push({
+                    'item_id' : movie.id,
                     'item_name' : movie.name,
                     'item_path' : `/movies/${movie.id}`
                 })
@@ -168,7 +169,7 @@ function putListItem(req, resp){
     
     function dataCollect(){
         if(dataobj.cuser && dataobj.cmovie){
-            user.updateCookieData(resp, user)
+            user.updateCookieData(resp)
             resp.end()
             return
         }          
@@ -202,11 +203,23 @@ function putListItem(req, resp){
  * @param {*} resp 
  */
 function deleteListItem(req, resp){
-    logger(`Deleting item: ${req.params.movieId} from list: ${req.params.listId}`)
-    userstorage.searchbylistid(req.params.listId,(error, items) =>{
-        let newitems = items.filter( (elem) => { return elem.item_id !== req.params.movieId})
-        userstorage.updatefavlist(req.params.listId, newitems, (error, list) => resp.end())
+    logger(`Deleting item: ${req.originalUrl}`)
+    let user = req.user
+    let movieId = req.params.movieId
+    let movieslist = user.favLists[req.params.listId].movies
+    // if movie is duplicated all will be removed
+    movieslist = movieslist.filter((elem) => { return elem !== movieId})
+    userstorage.getUser(user.name, (error, dbuser) => {
+        dbuser.favLists[req.params.listId].movies = movieslist
+        userstorage.updateUser(dbuser,(error, u) =>{
+            logger(error ? u.reason : 'User Updated!')
+            user.favLists[req.params.listId].movies = movieslist
+            user.updateCookieData(resp)
+            resp.end()
+        })
     })
+
+    
 }
 
 router.get('/', getLists)
@@ -214,7 +227,7 @@ router.get('/:listId/', getListItems)
 
 router.post('/',postList)
 router.put('/:listId/:movieId',putListItem)
-router.delete('/:listId', deleteList)
 router.delete('/:listId/:movieId', deleteListItem)
+router.delete('/:listId', deleteList)
 
 module.exports = router

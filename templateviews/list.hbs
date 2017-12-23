@@ -45,7 +45,7 @@
             <tr>              
               <td><a href="{{item_path}}">{{item_name}}</a></td>
               <td align="right">
-                <button class="btn btn-danger" onclick="deleteItem('/{{item_id}}')">Remove</button>
+                <button class="btn btn-danger" onclick="deleteItem('{{item_id}}')">Remove</button>
               </td>
             </tr>               
             {{/list_items}}
@@ -61,7 +61,7 @@
     <script>
       function deleteItem(path){
         let xhr = new XMLHttpRequest()
-        let url = document.URL + path
+        let url = `${document.URL}/${path}`
         console.log("DELETE " + url) 
         xhr.open("DELETE", url, true)
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")

@@ -9,25 +9,6 @@ const couchdb = require('./CouchDb')
 const logger = (msg) => {console.log('Login: ' + msg); return msg;}
 
 /**
- * Save logged user data into user cookie
- * @param {object} req 
- * @param {object} user 
- */
-function putUserOnCookie(resp, user){
-    resp.cookie('user-data', JSON.stringify(user))
-}
-
-/**
- * Get logged user data from cookie
- * @param {object} req 
- */
-function getUserFromCookie(req){
-    let user = JSON.parse(req.cookies['user-data'])
-    user.updateCookieData = putUserOnCookie
-    return user
-}
-
-/**
  * Receives user credentionals, async calls cb with user object on success
  * TODO: some day remove user password from cookie
  * 
@@ -59,13 +40,13 @@ function authenticateUser (username, password, cb) {
 function logUser(req, resp, user){
     req.logIn(user, function(error){
         if (error) { 
-            logger(`Fail to login ${user.name}`)
-            next(error); 
+            logger(`Fail to login ${user.name} ${error}`)
+            resp.send(error)
             return
         }
         logger(`${user.name} logged`)
-        putUserOnCookie(resp, user)
-        resp.redirect('/users/' + user.name)            
+        resp.cookie('user-data', JSON.stringify(user))
+        resp.redirect(`/users/${user.name}`)            
     })
 }
 
@@ -77,7 +58,11 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((req, username, done) => {
-    done(null,getUserFromCookie(req))
+    let user = JSON.parse(req.cookies['user-data'])
+    user.updateCookieData = function(resp){
+        resp.cookie('user-data', JSON.stringify(this))
+    }
+    done(null, user)
 })
 
 /**

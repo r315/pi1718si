@@ -48,14 +48,6 @@ function startServer(port = 3000){
     app.listen(port, () => logger(`Started on port ${port}`))
 }
 
-function setCookie(req, resp, next){
-    
-    res.cookie(cookie_name , 'cookie_value').send('Cookie is set');
-    next()
-}
-
-
-
 /**
  * Initialyze view engine and midlewares
  */
