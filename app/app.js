@@ -19,6 +19,7 @@ const bodyparser = require('body-parser')
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
 const prompt = 'COIMA > '
+const VIEWS_PATH = '../views'
 
 /**
  * Console commands
@@ -51,7 +52,7 @@ function startServer(port = 3000){
 /**
  * Initialyze view engine and midlewares
  */
-app.set('views', path.join(__dirname, '../templateviews'))
+app.set('views', path.join(__dirname, VIEWS_PATH))
 app.set('view engine', 'hbs')
 app.use(cookieParser())
 app.use(session({
