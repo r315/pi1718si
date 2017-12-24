@@ -1,0 +1,34 @@
+## Coima Api
+
+<p>
+The coima API make available the following end points
+
+/                                &emsp;Home page
+/search?name={query}             Movie search
+/movies/{movie id}               Details of a movie
+/actors/{actor id}               Details of an actor
+/login                           User login page
+/users/{username}                User home page containing link for user lists of favorites movies and posted comments
+/users/{username}/list           User list of favorite management  
+/users/{username}/list/{list id} Movies in user favorite list
+</p>
+
+-implementação express, passport, cookie parser, body parser
+ onde sao associados
+
+- endpoints 
+    rotas
+
+- couchdb modelo de dados como são guardados acedidos os dados
+
+- pedidos externos, como são feitos/processaods/server data
+
+- cache como funciona?
+
+- extrutura de directorias
+
+- Testes
+
+- 3 fase possivel solução
+
+
