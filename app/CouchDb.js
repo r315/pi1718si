@@ -105,7 +105,7 @@ function createDb(){
 })()
 
 module.exports = {
-    'createDb' : createDb,
+    'initdb' : createDb,
     'createUser' : createUser,    
     'getUser' : function (username, cb){getDocument(`${usersdb}/${username}`, cb)},
     'updateUser' : createUser,

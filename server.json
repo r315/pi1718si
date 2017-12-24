@@ -1,1 +1,1 @@
-{"couchdb":"http://localhost:5984", "api":"http://api.themoviedb.org/3","key":"a05eacfb6a397de0be6aed1a2c4ca73c","page":1,"path":"configuration","base_url":"http://image.tmdb.org/t/p/","logo_sizes":["w45","w92","w154","w185","w300","w500","original"]}
+{"couchdb":"http://77.54.119.227:5984", "api":"http://api.themoviedb.org/3","key":"a05eacfb6a397de0be6aed1a2c4ca73c","page":1,"path":"configuration","base_url":"http://image.tmdb.org/t/p/","logo_sizes":["w45","w92","w154","w185","w300","w500","original"]}

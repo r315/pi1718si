@@ -15,6 +15,7 @@ const passport = require('passport')
 const session = require('express-session')
 const path = require('path')
 const bodyparser = require('body-parser')
+const couchdb = require('./CouchDb')
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
@@ -26,7 +27,8 @@ const VIEWS_PATH = '../views'
  */
 const commands = {
     'quit' : function () {logger('Exiting...'); process.exit()},
-    'help' : function() { console.log('\nhelp\tthis message\nquit\tquit application\n') }
+    'help' : function() { console.log('\nhelp\tthis message\nquit\tquit application\n') },
+    'initdb' : function() { console.log('Initialising database'); couchdb.initdb() }
 }
 
 /**

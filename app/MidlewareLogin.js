@@ -100,6 +100,7 @@ router.post('/', (req, resp, next)=>{
             if(error || user.error){
                 error = error ? error.error : user.reason
                 logger(`Error ${error}`)
+                logger('Is databases created?')
                 resp.send(error)
                 return    
             }
