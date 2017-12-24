@@ -43,7 +43,13 @@ function commandInputHandler(buffer){
     commandOut(prompt)
 }
 
-function startServer(port = 3000){
+function startServer(port){
+    if(port === undefined){
+        port = process.env.PORT
+        if(port == undefined){
+            port = 3000
+        }
+    }
     logger('Application started!')  
     logger('Type \"help\" for available commands')  
     app.listen(port, () => logger(`Started on port ${port}`))
