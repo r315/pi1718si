@@ -1,0 +1,5 @@
+.vscode
+server.json
+.vscode/launch.json
+node_modules
+*.gliffy

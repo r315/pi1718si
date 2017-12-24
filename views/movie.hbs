@@ -11,7 +11,8 @@
     
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
   </head>
 
   <body>   
@@ -28,7 +29,7 @@
         </form>
       </div>
     </nav>
-    <div class="container" align="center">
+    <main role="main" class="container" align="center">
       <div class="starter-template"><br>	
 	        <div class="row">		
 			      <section class="images inner">
@@ -44,9 +45,23 @@
                   Realizador: {{movie_director}}<br>
               </p>
 		        </section>
-            <section class="col-2" align="righth">
-              <button type="button" class="btn btn-primary">To my list</button>
+            <!-- lists -->
+            <section class="col-2" align="right">     
+              <div class="col-md-4 center-block">
+                <button align="middle" onclick="toggleList()" class="btn btn-primary" {{enable_lists}}>Add to list</button>
+              </div>      
+              <br>            
+              <div id="fav-list" hidden="true"  isvisible="{{show_lists}}" style="height:200px; border:1px solid #ccc; overflow:auto;">
+                <ul class="nav nav-pills nav-stacked">
+                {{#user_lists}}
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="addToList('{{list_id}}')" >{{list_name}}</a>
+                </li>
+                {{/user_lists}}                
+                </ul>                
+              </div>
             </section>
+            <!-- /lists -->
 	        </div>
           <p class="lead">Cast</p>
           <table class="table table-dark table-bordered">
@@ -68,5 +83,30 @@
           
       </div>      
     </main><!-- /.container -->   
-  </body>
+  </body>  
+    <script>
+      function toggleList() {
+        elem = document.getElementById('fav-list')  
+        if(elem.getAttribute('isvisible') == "false")
+            return
+        if(elem.hidden == false)
+          elem.hidden = true
+        else
+          elem.hidden = false
+      }
+
+      function addToList(list_id) {
+        let xhr = new XMLHttpRequest()
+        let url = `{{user_lists_path}}/${list_id}/${document.URL.split('/').pop()}`        
+        console.log("PUT " + url) 
+        xhr.open("PUT", url , true)
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+        /*xhr.onreadystatechange = function() {//Call a function when the state changes.
+          if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+             location.reload()
+          }
+        }*/
+        xhr.send("movie_title={{movie_title}}")
+      }
+    </script>
 </html>

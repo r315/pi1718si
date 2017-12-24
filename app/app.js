@@ -4,19 +4,22 @@
  * Modules declaration, add new midlewares modules here
  */
 const search = require('./MidlewareSearch')
-const common = require('./MidlewareCommon')
+const actor = require('./MidlewareActor')
 const user = require('./MidlewareUser')
 const login = require('./MidlewareLogin')
+const movie = require('./MidlewareMovie')
 const cache = require('./cache')
 const app = require('express')()
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const session = require('express-session')
 const path = require('path')
+const bodyparser = require('body-parser')
 
 const logger = (msg) => {console.log('App: ' + msg); return msg;}
 const commandOut = (msg) => process.stdout.write(msg)
 const prompt = 'COIMA > '
+const VIEWS_PATH = '../views'
 
 /**
  * Console commands
@@ -46,18 +49,10 @@ function startServer(port = 3000){
     app.listen(port, () => logger(`Started on port ${port}`))
 }
 
-function setCookie(req, resp, next){
-    
-    res.cookie(cookie_name , 'cookie_value').send('Cookie is set');
-    next()
-}
-
-
-
 /**
  * Initialyze view engine and midlewares
  */
-app.set('views', path.join(__dirname, '../templateviews'))
+app.set('views', path.join(__dirname, VIEWS_PATH))
 app.set('view engine', 'hbs')
 app.use(cookieParser())
 app.use(session({
@@ -67,14 +62,16 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(bodyparser.urlencoded({ extended: false }))
 
 /**
  * Add midlewares here
  */
 app.use('/search', search)
-app.use(['/movies', '/actors'], common)
+app.use('/actors/:id', actor)
+app.get('/movies/:id', movie)
 app.use('/users', user)
-app.use('/login', login)
+app.use(['/login','/logout'], login)
 app.get('/', (req, resp) => { resp.render('index') })
 app.use(cache)
 

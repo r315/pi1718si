@@ -7,16 +7,17 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
 
-    <title>COIMA - User Lists</title>   
+    <title>COIMA - Index</title>   
     
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    
   </head>
 
   <body>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">      
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -25,7 +26,10 @@
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-          </li>        
+          </li>
+          <li>
+            <a class="nav-link" href="/logout">Logout <span class="sr-only">(current)</span></a>
+          </li>           
         </ul>
         <form class="form-inline my-2 my-lg-0" action="/search">
           <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
@@ -34,32 +38,16 @@
       </div>
     </nav>
 
-    <main role="main" class="container" align="center">
-      <div class="starter-template">
-        <br>
-        <br>
-        <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Lists for "{{user_name}}"</th>                
-              </tr>
-            </thead>
-            <tbody>
-                {{#list_results}}
-                <tr>
-                  <th scope="row">{{id}}</th>
-                  <td><a href="{{id}}">{{name}}</a></td>
-                </tr>               
-                {{/list_results}}
-            </tbody>
-          </table>
-          <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="{{search_previous_page}}">Previous</a></li>
-            <li class="page-item"><a class="page-link" >{{search_page}}</a></li>
-            <li class="page-item"><a class="page-link" href="{{search_next_page}}">Next</a></li>
-          </ul>
-      </div>      
-    </main><!-- /.container -->   
+    <div class="container" align="left"> <!-- /.container -->   
+        <div class="col" align="center">            
+                <h4>Welcome {{username}}</h4>
+        </div>  
+
+         <div class="row" align="left">            
+                <a href="{{lists}}">My lists</a>
+        </div> 
+    </div><!-- /.container -->   
+
   </body>
 </html>
+

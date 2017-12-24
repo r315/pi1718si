@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>COIMA - List Content</title>   
+    
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
+  </head>
+  <body>
+    <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">      
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+          </li>                  
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="/search">
+          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+      </div>
+    </nav>
+    <!-- /.container --> 
+    <div class="container">
+      <br>
+      <div class="starter-template">       
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Movies on "{{list_name}}" List</th>                
+            </tr>
+          </thead>
+          <tbody>
+            {{#list_items}}
+            <tr>              
+              <td><a href="{{item_path}}">{{item_name}}</a></td>
+              <td align="right">
+                <button class="btn btn-danger" onclick="deleteItem('{{item_id}}')">Remove</button>
+              </td>
+            </tr>               
+            {{/list_items}}
+          </tbody>
+        </table>
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="{{search_previous_page}}">Previous</a></li>
+          <li class="page-item"><a class="page-link" >{{search_page}}</a></li>
+          <li class="page-item"><a class="page-link" href="{{search_next_page}}">Next</a></li>
+        </ul>
+      </div>      
+    </div><!-- /.container -->   
+    <script>
+      function deleteItem(path){
+        let xhr = new XMLHttpRequest()
+        let url = `${document.URL}/${path}`
+        console.log("DELETE " + url) 
+        xhr.open("DELETE", url, true)
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+        xhr.onreadystatechange = function() {//Call a function when the state changes.
+          if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+              location.reload()
+          }
+        }
+        xhr.send()
+      }
+    </script>
+  </body>
+</html>
