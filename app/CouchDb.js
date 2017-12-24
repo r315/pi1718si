@@ -1,9 +1,11 @@
 'use strict'
 const request = require('request')
+const fs = require('fs')
 
 const logger = (msg) => {console.log('DBACCESS: ' + msg); return msg;}
 
-const serveraddress = 'http://localhost:5984'
+const CONFIG_FILE = 'server.json'
+let serveraddress = ''
 const usersdb = 'users'
 const moviesdb = 'movies'
 
@@ -84,6 +86,23 @@ function createDb(){
     createDataBase(usersdb)
     createDataBase(moviesdb)
 }
+
+
+(function init(){    
+    try{
+
+        let confdata = JSON.parse(fs.readFileSync(CONFIG_FILE,'utf8'))
+        serveraddress = confdata.couchdb
+
+        if (serveraddress == undefined){
+            logger(`Error no server adddress found on ${CONFIG_FILE}`)
+            throw new Error('Fail to get couch server address')
+        }
+    }catch(err){
+        logger(`Unable to read configuration from \"${CONFIG_FILE}\"`)  
+        process.exit()
+    }   
+})()
 
 module.exports = {
     'createDb' : createDb,
