@@ -8,6 +8,7 @@ const CONFIG_FILE = 'server.json'
 let serveraddress = ''
 const usersdb = 'users'
 const moviesdb = 'movies'
+const commendsdb = 'comments'
 
 let options = {
         headers: {
@@ -85,6 +86,7 @@ function createDataBase(name){
 function createDb(){
     createDataBase(usersdb)
     createDataBase(moviesdb)
+    createDataBase(commentsdb)
 }
 
 

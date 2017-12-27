@@ -31,4 +31,4 @@ The coima API make available the following end points
 
 - 3 fase possivel solução
 
-
+- operaçoes crude
