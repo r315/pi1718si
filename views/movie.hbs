@@ -1,112 +1,213 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="favicon.ico">
 
-    <title>COIMA - Movie Details</title>   
-    
-    <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
-  </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="favicon.ico">
 
-  <body>   
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">     
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-          </li>        
-        </ul>
-        <form class="form-inline my-2 my-lg-0" action="/search">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+  <title>COIMA - Movie Details</title>
+
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+    crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home
+            <span class="sr-only">(current)</span>
+          </a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0" action="/search">
+        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="name">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+  <main role="main" class="container" align="center">
+    <div class="starter-template">
+      <br>
+      <div class="row">
+        <!-- movie -->
+        <section class="images inner">
+          <div class="poster">
+            <div class="image_content">
+              <img class="poster" src="{{poster_url}}">
+            </div>
+          </div>
+        </section>
+        <section class="col">
+          <p style="font-size:20px; color:rgb(100, 148, 230);" align="left">
+            Nome: {{movie_title}}
+            <br> Realizador: {{movie_director}}
+            <br>
+          </p>
+        </section>
+        <!-- lists -->
+        <section class="col-2">
+          <div class="col-md-4 center-block">
+            <button align="middle" onclick="toggleList()" class="btn btn-primary" {{enable_lists}}>Add to list</button>
+          </div>
+          <br>
+          <div id="fav-list" hidden="true" isvisible="{{show_lists}}" style="height:200px; border:1px solid #ccc; overflow:auto;">
+            <ul class="nav flex-column">
+              {{#user_lists}}
+              <li class="nav-item">
+                <a class="nav-link" href="#" onclick="addToList('{{list_id}}')">{{list_name}}</a>
+              </li>
+              {{/user_lists}}
+            </ul>
+          </div>
+        </section>
+        <!-- /lists -->
       </div>
-    </nav>
-    <main role="main" class="container" align="center">
-      <div class="starter-template"><br>	
-	        <div class="row">		
-			      <section class="images inner">
-              <div class="poster">
-                <div class="image_content">
-                  <img class="poster" src="{{poster_url}}">                    
-                </div>
-              </div>
-            </section>		  
-            <section class="col">
-			        <p style="font-size:20px; color:rgb(100, 148, 230);" align="left">
-                  Nome: {{movie_title}} <br>
-                  Realizador: {{movie_director}}<br>
-              </p>
-		        </section>
-            <!-- lists -->
-            <section class="col-2" align="right">     
-              <div class="col-md-4 center-block">
-                <button align="middle" onclick="toggleList()" class="btn btn-primary" {{enable_lists}}>Add to list</button>
-              </div>      
-              <br>            
-              <div id="fav-list" hidden="true"  isvisible="{{show_lists}}" style="height:200px; border:1px solid #ccc; overflow:auto;">
-                <ul class="nav nav-pills nav-stacked">
-                {{#user_lists}}
-                <li class="nav-item">
-                  <a class="nav-link" href="#" onclick="addToList('{{list_id}}')" >{{list_name}}</a>
-                </li>
-                {{/user_lists}}                
-                </ul>                
-              </div>
-            </section>
-            <!-- /lists -->
-	        </div>
-          <p class="lead">Cast</p>
-          <table class="table table-dark table-bordered">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Role{{search_term}}</th>                
-              </tr>
-            </thead>
-            <tbody>
-                {{#movie_cast}}
-                <tr>
-                  <th scope="row">{{cast_index}}</th>
-                  <td><a href="{{cast_link}}">{{cast_name}}</a></td>
-                </tr>               
-                {{/movie_cast}}
-            </tbody>
-          </table>
-          
-      </div>      
-    </main><!-- /.container -->   
-  </body>  
-    <script>
-      function toggleList() {
-        elem = document.getElementById('fav-list')  
-        if(elem.getAttribute('isvisible') == "false")
-            return
-        if(elem.hidden == false)
-          elem.hidden = true
-        else
-          elem.hidden = false
+      <!-- /movie -->
+      <!-- Cast -->
+      <br>
+      <p class="lead" align="center">Cast</p>
+      <section class="col" style="height:300px; border:1px solid #ccc; overflow:auto;">
+        <table class="table table-dark table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Role{{search_term}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#movie_cast}}
+            <tr>
+              <th scope="row">{{cast_index}}</th>
+              <td>
+                <a href="{{cast_link}}">{{cast_name}}</a>
+              </td>
+            </tr>
+            {{/movie_cast}}
+          </tbody>
+        </table>
+      </section>
+      <!-- /Cast -->
+      <!-- Comments -->
+      <div>
+        <br>
+        <p class="lead" align="center">Comments</p>
+        <a href="#"> Add Comment</a>
+        <hr>
+        <ul class="nav flex-column" id="ul-comments"></ul>
+      </div>
+      <!-- /comments -->
+    </div>
+    <!-- /starter-template -->
+  </main>
+  <!-- /.container -->
+</body>
+<script>
+  function toggleList() {
+    elem = document.getElementById('fav-list')
+    if (elem.getAttribute('isvisible') == "false")
+      return
+    if (elem.hidden == false)
+      elem.hidden = true
+    else
+      elem.hidden = false
+  }
+  /**
+  * Adds the current movie to the selected list
+  */
+  function addToList(list_id) {
+    let xhr = new XMLHttpRequest()
+    let url = `{{user_lists_path}}/${list_id}/${document.URL.split('/').pop()}`
+    console.log("PUT " + url)
+    xhr.open("PUT", url, true)
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+    xhr.onreadystatechange = function() {//Call a function when the state changes.
+      if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+         alert("Movie Added!")
       }
+    }
+    xhr.send("movie_title={{movie_title}}")
+  }
 
-      function addToList(list_id) {
-        let xhr = new XMLHttpRequest()
-        let url = `{{user_lists_path}}/${list_id}/${document.URL.split('/').pop()}`        
-        console.log("PUT " + url) 
-        xhr.open("PUT", url , true)
+  /**
+  * helper for creating elemements
+  */
+  function newElem(tag, text){
+    let elem = document.createElement(tag)
+    elem.appendChild(document.createTextNode(text))
+    return elem
+  }
+
+  /**
+  * dynamicly insert a comment and his reply's to the page
+  */
+  function insertComent(container, comment){
+    
+    let li = document.createElement("li")    
+
+    li.class = "nav-item"     
+    li.appendChild(newElem("a",comment.username))    
+    li.appendChild(document.createElement("br"))
+    li.appendChild(newElem("a", comment.text))
+    li.appendChild(document.createElement("br"))
+
+    let ar = newElem("a","Reply")
+    ar.class = "nav"
+    ar.href = "#"
+    li.appendChild(ar)
+
+    let div = document.createElement("div")
+    div.class = "nav"
+    div.id = comment.id
+    div.appendChild(li)
+    container.appendChild(div)    
+    container.appendChild(document.createElement("hr"))
+/*
+    <div class="nav" id="comment id">
+      <li class="nav-item">
+        <a>User</a>
+          <br>
+          <a>The quick brown fox jumps over the lazy dog</a>          
+          <!-- coment to comment here-->
+          <br>                    
+          <a class="nav" href="#">Reply</a>
+      </li>
+    </div>
+*/
+  }
+
+  /**
+  * function to be called when the user scrolls the page, if page is at the bottom
+  * a request for one more comment is made 
+  */ 
+  window.onscroll = function(ev) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        let xhr = new XMLHttpRequest()        
+        xhr.open("GET", `{{user_home}}/comments`, true)
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-        /*xhr.onreadystatechange = function() {//Call a function when the state changes.
-          if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-             location.reload()
-          }
-        }*/
-        xhr.send("movie_title={{movie_title}}")
-      }
-    </script>
+        xhr.onreadystatechange = 
+              function() {
+                if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                  let comments = JSON.parse(xhr.response)
+                  let container = document.getElementById("ul-comments")
+                  comments.forEach(com =>{
+                    insertComent(container, com)
+                  })                  
+                }
+              }
+      xhr.send()
+    }
+  }  
+
+</script>
+
 </html>
