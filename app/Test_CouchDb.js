@@ -53,7 +53,13 @@ function endTests(){
     couch.deleteUser(user, (error, cuser) => console.log(error ? error : cuser))
 }
 
-couch.createDb()
+//couch.createDb()
+
+let comment = { "username" : "user 10", "text" : "The quick brown fox jumps over the lazy dog"}
+
+couch.postComment(comment, (error, cmnt) =>{
+    console.log(error ? cmnt.reason : cmnt)
+})
 
 
 /*

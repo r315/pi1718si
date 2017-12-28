@@ -20,7 +20,7 @@ let options = {
 function createDocument(doc, cb){
     options.setUri(doc.id)
     request.put(options, function(error, resp, body){        
-        console.log('DBACCESS: Status on put:',`${resp.statusCode}-${resp.statusMessage}`)
+        logger(`Status on put: ${resp.statusCode}-${resp.statusMessage}`)
         cb(error,JSON.parse(body))
       }).form(JSON.stringify(doc.form))
 }
@@ -28,7 +28,7 @@ function createDocument(doc, cb){
 function getDocument(docid, cb){
     options.setUri(docid)
     request.get(options, function(error, resp, body){        
-        console.log('DBACCESS: Status on get:',`${resp.statusCode}-${resp.statusMessage}`)
+        logger(`Status on get: ${resp.statusCode}-${resp.statusMessage}`)
         cb(error,JSON.parse(body))
       })
 }
@@ -37,7 +37,7 @@ function deleteDocument(doc, cb){
     options.setUri(doc.id)
     options.headers['If-Match'] = doc.form['_rev']
     request.delete(options, function(error, resp, body){        
-        console.log('DBACCESS: Status on delete:',`${resp.statusCode}-${resp.statusMessage}`)
+        logger(`Status on delete: ${resp.statusCode}-${resp.statusMessage}`)
         cb(error,JSON.parse(body))
       })
 }
@@ -89,6 +89,21 @@ function createDb(){
     createDataBase(commentsdb)
 }
 
+function postComment(comment, cb){
+        options.setUri(commendsdb)
+        options.body = JSON.stringify(comment)
+        options.method = 'POST'
+        request(options, function(error, resp, body){        
+            logger(` Status on post comment: ${resp.statusCode}-${resp.statusMessage}`)
+            let cmnt = JSON.parse(body)
+            if(error || cmnt.error)
+                cb(error, cmnt)
+            else{
+                comment.id = cmnt.id
+                cb(error, comment) 
+            }
+      })
+}
 
 (function init(){    
     try{
@@ -118,5 +133,7 @@ module.exports = {
     'updateMovie' : createMovie,
     'deleteMovie' : removeMovie,
     
-    'insertUser' : createUser
+    'insertUser' : createUser,
+
+    'postComment' : postComment
 }
