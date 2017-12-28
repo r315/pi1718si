@@ -2,6 +2,7 @@
 
 const router = require('express').Router()
 const lists = require('./MidlewareLists')
+const comments = require('./MidlewareComments')
 
 const logger = (msg) => {console.log('User: ' + msg); return msg;}
 
@@ -25,14 +26,17 @@ function userProfile(req, resp, next){
         }      
         resp.render('userHome',{
             'username': req.params.id,
-            'lists' : `${req.baseUrl}/lists`
+            'lists' : `${req.baseUrl}/lists`,
+            'comments' : `${req.baseUrl}/comments`
         })
         return  
     }
     next()
 }
+
 router.get('/', (req,resp,next) => { next() })
 router.use('/:id', userProfile)
-router.use('/:id/lists/',lists)
+router.use('/:id/lists/', lists)
+router.use('/:id/comments/', comments)
 
 module.exports = router
