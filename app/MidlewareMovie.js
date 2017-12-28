@@ -1,5 +1,8 @@
 'use strict'
 
+const router = require('express').Router()
+const comments = require('./MidlewareComments')
+
 const logger = (msg) => {console.log('Midleware Movie: ' + msg); return msg;}
 
 
@@ -13,7 +16,7 @@ const logger = (msg) => {console.log('Midleware Movie: ' + msg); return msg;}
  */
 function endpointMovie(req, resp, next){
 
-    req.coimarouter = '/movies'
+    req.coimarouter = req.baseUrl
     req.coimaterm = req.params.id
 
     if(req.coimaterm == ''){        
@@ -80,5 +83,6 @@ function endpointMovie(req, resp, next){
     resp.send = cb
     next()    
 }
-
-module.exports = endpointMovie
+router.use('/:id/comments/', comments)
+router.get('/:id/', endpointMovie)
+module.exports = router 

@@ -101,7 +101,7 @@
       <div>
         <br>
         <p class="lead" align="center">Comments</p>
-        <a href="#"> Add Comment</a>
+        <button class="btn" onclick="postComment()"> Add Comment</button>
         <hr>
         <ul class="nav flex-column" id="ul-comments"></ul>
       </div>
@@ -112,6 +112,9 @@
   <!-- /.container -->
 </body>
 <script>
+  /**
+  * hides or make visible user lists if logged 
+  */
   function toggleList() {
     elem = document.getElementById('fav-list')
     if (elem.getAttribute('isvisible') == "false")
@@ -150,39 +153,73 @@
   /**
   * dynamicly insert a comment and his reply's to the page
   */
-  function insertComent(container, comment){
-    
-    let li = document.createElement("li")    
-
-    li.class = "nav-item"     
-    li.appendChild(newElem("a",comment.username))    
-    li.appendChild(document.createElement("br"))
-    li.appendChild(newElem("a", comment.text))
-    li.appendChild(document.createElement("br"))
-
-    let ar = newElem("a","Reply")
-    ar.class = "nav"
-    ar.href = "#"
-    li.appendChild(ar)
-
-    let div = document.createElement("div")
-    div.class = "nav"
-    div.id = comment.id
-    div.appendChild(li)
-    container.appendChild(div)    
-    container.appendChild(document.createElement("hr"))
+  function insertComent(container, comments){
 /*
     <div class="nav" id="comment id">
       <li class="nav-item">
         <a>User</a>
           <br>
           <a>The quick brown fox jumps over the lazy dog</a>          
-          <!-- coment to comment here-->
           <br>                    
           <a class="nav" href="#">Reply</a>
+          <!-- coment to comment here-->
       </li>
     </div>
-*/
+*/    
+    comments.forEach( function(comment){
+              let li = document.createElement("li")    
+
+              li.class = "nav-item"     
+              li.appendChild(newElem("a",comment.username))    
+              li.appendChild(document.createElement("br"))
+              li.appendChild(newElem("a", comment.text))
+              li.appendChild(document.createElement("br"))
+
+              let ar = newElem("a","Reply")
+              ar.class = "nav"
+              ar.href = `{{user_home}}/comments/${comment.id}`
+              li.appendChild(ar)
+
+              if(comment.reply){
+                let ul = document.createElement("ul")
+                insertComent(ul,comment.reply)
+                 li.appendChild(ul)     
+              }
+
+              let div = document.createElement("div")
+              div.class = "nav"
+              div.id = comment.id
+              div.appendChild(li)
+              container.appendChild(div)    
+              container.appendChild(document.createElement("hr"))
+    })
+  }
+
+  /**
+  * Add a comment to the movie
+  */
+  function postComment(e){
+    let xhr = new XMLHttpRequest()
+    let url = `{{user_home}}/comments`
+    let comment = {
+                "id" : "",
+                "username" : "Some user ",
+                "text" : "The quick brown fox jumps over the lazy dog"
+         }
+    console.log("PUT" + url)
+    console.log(comment)
+    xhr.open("PUT", url, true)      // POST dos not send body ??
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+          let rsp = JSON.parse(xhr.response)
+         // comment.id = rsp.id
+         // let container = document.getElementById("ul-comments").firstElementChild
+          
+          
+      }
+    }
+    xhr.send(JSON.stringify(comment))
   }
 
   /**
@@ -192,16 +229,12 @@
   window.onscroll = function(ev) {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
         let xhr = new XMLHttpRequest()        
-        xhr.open("GET", `{{user_home}}/comments`, true)
+        xhr.open("GET", `${document.URL}/comments`, true)
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-        xhr.onreadystatechange = 
-              function() {
+        xhr.onreadystatechange = function() {
                 if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
                   let comments = JSON.parse(xhr.response)
-                  let container = document.getElementById("ul-comments")
-                  comments.forEach(com =>{
-                    insertComent(container, com)
-                  })                  
+                  insertComent(document.getElementById("ul-comments"), comments)                                   
                 }
               }
       xhr.send()
