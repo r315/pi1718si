@@ -16,7 +16,7 @@ function getLists(req, resp){
 
     let page = req.params.pageIndex ? parseInt(req.params.pageIndex) : 0
     page = page < 0 ? 1 : page
-
+    // TODO: Fix bug for next page
     let dataobj = {
         'user_name' : req.user.name,
         'list_results' : [],

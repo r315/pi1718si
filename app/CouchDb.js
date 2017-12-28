@@ -12,7 +12,7 @@ const commendsdb = 'comments'
 
 let options = {
         headers: {
-            'Content-Type' : 'application/json'            
+            'Content-Type' : 'application/json'   // only set if json is sent as string on body         
         },
         'setUri' : function(path){this.uri =`${serveraddress}/${path}`}
     }
@@ -89,6 +89,13 @@ function createDb(){
     createDataBase(commentsdb)
 }
 
+/**
+ * This function uses POST method to insert a comment to database
+ * so that an id can be obtained insted of give one
+ * 
+ * @param {object} comment 
+ * @param {function} cb 
+ */
 function postComment(comment, cb){
         options.setUri(commendsdb)
         options.body = JSON.stringify(comment)

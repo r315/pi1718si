@@ -77,7 +77,7 @@ app.use(bodyparser.urlencoded({ extended: false }))
  */
 app.use('/search', search)
 app.use('/actors/:id', actor)
-app.get('/movies/:id', movie)
+app.use('/movies/', movie)
 app.use('/users', user)
 app.use(['/login','/logout'], login)
 app.get('/', (req, resp) => { 
