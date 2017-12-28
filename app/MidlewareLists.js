@@ -5,6 +5,7 @@ const favlist = require('./favlist')
 const userstorage = require('./CouchDb')
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
+const PAGE_LIMIT = 5
 
 /**
 * @param {obj} req 
@@ -12,12 +13,21 @@ const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 * @param {func} next 
 */
 function getLists(req, resp){
-    let dataobj =   {
+
+    let page = req.params.pageIndex ? parseInt(req.params.pageIndex) : 0
+    page = page < 0 ? 1 : page
+
+    let dataobj = {
         'user_name' : req.user.name,
-        'list_results' : []
+        'list_results' : [],
+        'current_page' : page,
+        'next_page' : `/users/${req.user.name}/lists/page/${page + 1}`,
+        'previous_page' : `/users/${req.user.name}/lists/page/${page == 0 ? page : page - 1}`
     }
 
-    req.user.favLists.forEach( (elem) =>{
+    let lists = req.user.favLists.slice(page * PAGE_LIMIT, (page * PAGE_LIMIT) + PAGE_LIMIT)
+
+    lists.forEach( (elem) =>{
         dataobj.list_results.push({            
             'list_name' : elem.name,
             'list_path' : `${req.baseUrl}/${elem.id}`
@@ -223,6 +233,7 @@ function deleteListItem(req, resp){
 }
 
 router.get('/', getLists)
+router.get('/page/:pageIndex', getLists)
 router.get('/:listId/', getListItems)
 
 router.post('/',postList)
