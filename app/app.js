@@ -80,7 +80,12 @@ app.use('/actors/:id', actor)
 app.get('/movies/:id', movie)
 app.use('/users', user)
 app.use(['/login','/logout'], login)
-app.get('/', (req, resp) => { resp.render('index') })
+app.get('/', (req, resp) => { 
+    if(req.isAuthenticated()){
+        resp.redirect(`/users/${req.user.name}`)
+        return
+    }
+    resp.render('index') })
 app.use(cache)
 
 process.openStdin().addListener('data', commandInputHandler)
