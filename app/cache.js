@@ -23,6 +23,7 @@ function cacheRouter (req, res, next) {
         case '/actors' : searchByActorID(req,res)
         break;
         default : 
+            logger(`Fail to serve: ${req.originalUrl}`)
             res.status(404)
             res.render('notfound')
     }
