@@ -129,8 +129,12 @@ function getComments(stat, end, cb){
             return
         }
 
-        let comments = []
-        data.rows.forEach(r => comments.push(r.value))
+        let comments = []        
+        data.rows.forEach(r =>{
+         r.value.id = r.value._id   // use id instead of _id
+         delete r.value._id         //bah remove duplicated id
+         comments.push(r.value)
+        })   
         cb(null, comments)
     }
     getDocument(`${commendsdb}/_design/filters/_view/paging`, extractComments)

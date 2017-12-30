@@ -239,7 +239,6 @@
     div.class = "nav"
     div.id = comment.id
     div.appendChild(newCommenElem(comment))
-    div.appendChild(document.createElement("hr"))
 
     let container = document.getElementById("ul-comments")
     if(container.firstChild == undefined ){
@@ -249,6 +248,7 @@
       console.log("Adding comment")
       container.insertBefore(div, container.childNodes[0])
     }
+    container.appendChild(document.createElement("hr"))
   }
 
  /**
