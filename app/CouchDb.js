@@ -32,10 +32,11 @@ const respFinish = function(error, body, cb){
 
 function createDocument(doc, cb){
     options.setUri(doc.id)
+    options.body = JSON.stringify(doc.form)
     request.put(options, function(error, resp, body){        
         logger(`PUT ${doc.id} ${resp.statusCode}-${resp.statusMessage}`)
         respFinish(error,body,cb)
-      }).form(JSON.stringify(doc.form))
+    })
 }
 
 function getDocument(docid, cb){
@@ -139,7 +140,7 @@ function createDb(){
  * @param {object} comment 
  * @param {function} cb 
  */
-function postComment(movieid, comment, cb){
+function postComment(comment, cb){
         options.setUri(commendsdb)
         options.body = JSON.stringify(comment)
         options.method = 'POST'
@@ -161,26 +162,16 @@ function postComment(movieid, comment, cb){
  * @param {*} end 
  * @param {*} cb 
  */
-function getComments(movieid, stat, end, cb){
-    function extractComments(error, data){
+function getComments(cmntid, stat, end, cb){   
+    getDocument(`${commendsdb}/${cmntid}`, (error, cmnt) => {
         if(error){
             cb(error, null)
             return
         }
-        if(data.error){
-            cb(data.reason, null)
-            return
-        }
-
-        let comments = []        
-        data.rows.forEach(r =>{
-         r.value.id = r.value._id   // use id instead of _id
-         delete r.value._id         //bah remove duplicated id
-         comments.push(r.value)
-        })   
-        cb(null, comments)
-    }
-    getDocument(`${commendsdb}/_design/filters/_view/paging`, extractComments)
+        cmnt.id = cmnt._id
+        delete cmnt._id     // remove duplicated propertie
+        cb(null, cmnt)
+    })
 }
 
 (function init(){    
