@@ -102,7 +102,7 @@
       <div>
         <br>
         <p class="lead" align="center">Comments</p>
-        <button data-toggle="modal" data-target=".new-list-modal" class="btn btn-default">Add Comment</button>
+        <button data-toggle="modal" data-target=".new-list-modal" class="btn btn-default" {{enable_lists}} >Add Comment</button>
         <hr>
         <ul class="nav flex-column" id="ul-comments"></ul>
       </div>
@@ -181,7 +181,7 @@
 
       let ar = newElem("a","Reply")
       ar.class = "nav"
-      ar.href = ""
+      ar.href = ""  //TODO: Add link for comment reply
       li.appendChild(ar) 
       return li
 }
@@ -287,7 +287,8 @@
         }          
       }
     }
-    xhr.send(JSON.stringify(comment))
+    // send object on body    
+    xhr.send(JSON.stringify({"movie_id" : `${document.URL.split('/').pop()}`, "movie_title" : "{{movie_title}}", "movie_comment" : comment}))
   }
 
   /**

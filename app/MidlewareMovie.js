@@ -85,10 +85,6 @@ function endpointMovie(req, resp, next){
     next()    
 }
 
-router.use('/:id/comments/', (req,resp,next) => { 
-    req.movieid = req.params.id                     // make id available to nest router
-    comments(req, resp, next) 
-    })
-
+router.use('/:id/comments/', comments)
 router.get('/:id/', endpointMovie)
 module.exports = router 
