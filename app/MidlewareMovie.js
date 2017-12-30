@@ -78,12 +78,17 @@ function endpointMovie(req, resp, next){
             return       
     }
 
-    logger(`Requesting movie ${req.params.id}`)
+    logger(`Requesting movie with id ${req.params.id}`)
     //using decorator pattern for calling view
     const ori_send = resp.send
     resp.send = cb
     next()    
 }
-router.use('/:id/comments/', comments)
+
+router.use('/:id/comments/', (req,resp,next) => { 
+    req.movieid = req.params.id                     // make id available to nest router
+    comments(req, resp, next) 
+    })
+
 router.get('/:id/', endpointMovie)
 module.exports = router 

@@ -4,16 +4,16 @@ const router = require('express').Router()
 const couchdb = require('./CouchDb')
 const bodyparser = require('body-parser')
 
+const logger = (msg) => {console.log('Midleware Comments: ' + msg); return msg;}
 
 function postComment(comment, cb){
     couchdb.postComment(comment, cb)
 }
 
-const logger = (msg) => {console.log('Comments: ' + msg); return msg;}
 
-router.get('/', (req,resp) => { 
+router.get('/', (req, resp) => { 
     logger(req.baseUrl)
-    couchdb.getComments(0,5,(error, cmnts)=>{       
+    couchdb.getComments(req.movieid, 0, 5, (error, cmnts)=>{       
         resp.send(error ? error : cmnts)
     })   
 })
@@ -25,6 +25,9 @@ router.get('/', (req,resp) => {
 router.post('/', bodyparser.json(), (req, resp) => {
     couchdb.postComment(req.body, (error, comment) => {
         resp.send(error ? error : comment)  // return comment with id
+        couchdb.getMovie(req.movieid, (error, cmovie) =>{
+            
+        })
     })    
 })
 
