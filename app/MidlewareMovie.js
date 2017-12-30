@@ -55,6 +55,7 @@ function endpointMovie(req, resp, next){
             if(req.isAuthenticated()){            
                 dataobj.user_home = `/users/${req.user.name}`
                 dataobj.show_lists = 'true'
+                dataobj.user_name = req.user.name
                 if(req.user.favLists.length == 0){
                     dataobj.user_lists = [{
                         'list_id' : '#',

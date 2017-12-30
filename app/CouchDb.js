@@ -112,6 +112,30 @@ function postComment(comment, cb){
       })
 }
 
+/**
+ * TODO: paging, fix post order
+ * @param {*} stat 
+ * @param {*} end 
+ * @param {*} cb 
+ */
+function getComments(stat, end, cb){
+    function extractComments(error, data){
+        if(error){
+            cb(error, null)
+            return
+        }
+        if(data.error){
+            cb(data.reason, null)
+            return
+        }
+
+        let comments = []
+        data.rows.forEach(r => comments.push(r.value))
+        cb(null, comments)
+    }
+    getDocument(`${commendsdb}/_design/filters/_view/paging`, extractComments)
+}
+
 (function init(){    
     try{
 
@@ -142,5 +166,6 @@ module.exports = {
     
     'insertUser' : createUser,
 
-    'postComment' : postComment
+    'postComment' : postComment,
+    'getComments' : getComments
 }

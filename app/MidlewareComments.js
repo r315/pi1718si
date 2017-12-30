@@ -2,6 +2,7 @@
 
 const router = require('express').Router()
 const couchdb = require('./CouchDb')
+const bodyparser = require('body-parser')
 
 
 function postComment(comment, cb){
@@ -9,25 +10,21 @@ function postComment(comment, cb){
 }
 
 const logger = (msg) => {console.log('Comments: ' + msg); return msg;}
-let id = 1
-
 
 router.get('/', (req,resp) => { 
     logger(req.baseUrl)
-    resp.send(JSON.stringify([
-            {
-                "id" : id,
-                "username" : "user " + id,
-                "text" : "The quick brown fox jumps over the lazy dog"
-            }
-        ])   
-    )
-    id++    
+    couchdb.getComments(0,5,(error, cmnts)=>{       
+        resp.send(error ? error : cmnts)
+    })   
 })
 
-router.put('/', (req, resp) => {
+/**
+ * comments are received as string representing an object
+ * so body parser must apply the correct encoding
+ */
+router.post('/', bodyparser.json(), (req, resp) => {
     couchdb.postComment(req.body, (error, comment) => {
-        resp.send(error ? error : comment)
+        resp.send(error ? error : comment)  // return comment with id
     })    
 })
 

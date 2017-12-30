@@ -13,6 +13,7 @@
   <!-- Bootstrap CDN -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
     crossorigin="anonymous">
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
     crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
@@ -101,11 +102,28 @@
       <div>
         <br>
         <p class="lead" align="center">Comments</p>
-        <button class="btn" onclick="postComment()"> Add Comment</button>
+        <button data-toggle="modal" data-target=".new-list-modal" class="btn btn-default">Add Comment</button>
         <hr>
         <ul class="nav flex-column" id="ul-comments"></ul>
       </div>
       <!-- /comments -->
+ <!-- Small modal -->
+        <div id="new-list-modal">
+          <div class="modal fade new-list-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+            <div class="modal-dialog modal-sm" role="document">
+              <div class="modal-content">              
+                  <div class="modal-body">
+                    <p>Enter your comment</p>
+                    <textarea class="form-control" type="text" rows="3" id="comment-body" ></textarea>
+                    <div class="modal-footer">
+                      <button class="btn btn-default" data-toggle="modal" data-target=".new-list-modal" onclick="postComment()">Post</button>
+		                </div>
+                  </div>                
+              </div>
+            </div>
+          </div>
+        </div>
+ <!-- /Small modal -->
     </div>
     <!-- /starter-template -->
   </main>
@@ -150,11 +168,29 @@
     return elem
   }
 
+   /**
+  * helper for creating coment elemements
+  */
+  function newCommenElem(comment){
+      let li = document.createElement("li")
+      li.class = "nav-item"     
+      li.appendChild(newElem("a",comment.username))    
+      li.appendChild(document.createElement("br"))
+      li.appendChild(newElem("a", comment.text))
+      li.appendChild(document.createElement("br"))
+
+      let ar = newElem("a","Reply")
+      ar.class = "nav"
+      ar.href = ""
+      li.appendChild(ar) 
+      return li
+}
+
   /**
   * dynamicly insert a comment and his reply's to the page
   */
-  function insertComent(container, comments){
-/*
+  function insertComents(container, comments){
+/*Template of comment element
     <div class="nav" id="comment id">
       <li class="nav-item">
         <a>User</a>
@@ -162,23 +198,13 @@
           <a>The quick brown fox jumps over the lazy dog</a>          
           <br>                    
           <a class="nav" href="#">Reply</a>
-          <!-- coment to comment here-->
+          <!-- comment to comment here-->
       </li>
+      <hr>
     </div>
 */    
     comments.forEach( function(comment){
-              let li = document.createElement("li")    
-
-              li.class = "nav-item"     
-              li.appendChild(newElem("a",comment.username))    
-              li.appendChild(document.createElement("br"))
-              li.appendChild(newElem("a", comment.text))
-              li.appendChild(document.createElement("br"))
-
-              let ar = newElem("a","Reply")
-              ar.class = "nav"
-              ar.href = `{{user_home}}/comments/${comment.id}`
-              li.appendChild(ar)
+              let li = newCommenElem(comment)             
 
               if(comment.reply){
                 let ul = document.createElement("ul")
@@ -196,27 +222,69 @@
   }
 
   /**
+  * test for Add a comment to the movie
+  */
+  function postComment1(){  
+    let textarea = document.getElementById("comment-body")
+    if(textarea.value == "") return  
+    let comment = {
+                    "id" : "",
+                    "username" : "{{user_name}}",
+                    "text" : textarea.value
+                  }
+    textarea.value = ""
+    console.log("Posting comment")
+    console.log(comment)
+    let div = document.createElement("div")
+    div.class = "nav"
+    div.id = comment.id
+    div.appendChild(newCommenElem(comment))
+    div.appendChild(document.createElement("hr"))
+
+    let container = document.getElementById("ul-comments")
+    if(container.firstChild == undefined ){
+      console.log("First comment")
+      container.appendChild(div)
+    }else{
+      console.log("Adding comment")
+      container.insertBefore(div, container.childNodes[0])
+    }
+  }
+
+ /**
   * Add a comment to the movie
   */
-  function postComment(e){
+  function postComment(){    
+    let textarea = document.getElementById("comment-body") 
+    if(textarea.value == "") return   
+    let comment = {                    
+                    username : "{{user_name}}",
+                    text : textarea.value
+                  }
+    textarea.value = ""
     let xhr = new XMLHttpRequest()
     let url = `{{user_home}}/comments`
-    let comment = {
-                "id" : "",
-                "username" : "Some user ",
-                "text" : "The quick brown fox jumps over the lazy dog"
-         }
-    console.log("PUT" + url)
+    console.log("POST" + url)
     console.log(comment)
-    xhr.open("PUT", url, true)      // POST dos not send body ??
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+    xhr.open("POST", url, true)
+    xhr.setRequestHeader("Content-Type", "application/json")
     xhr.onreadystatechange = function() {
       if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-          let rsp = JSON.parse(xhr.response)
-         // comment.id = rsp.id
-         // let container = document.getElementById("ul-comments").firstElementChild
-          
-          
+        let container = document.getElementById("ul-comments")
+        let resp = JSON.parse(xhr.response)
+        comment.id = resp.id              // id is generated by db so must be added to comment
+        let div = document.createElement("div")
+        div.class = "nav"
+        div.id = comment.id
+        div.appendChild(newCommenElem(comment))
+        div.appendChild(document.createElement("hr"))
+        if(container.firstChild == undefined ){
+          console.log("Congrats you are the first to comment!")
+          container.appendChild(div)
+        }else{
+          console.log("Adding comment")
+          container.insertBefore(div, container.childNodes[0])
+        }          
       }
     }
     xhr.send(JSON.stringify(comment))
@@ -234,12 +302,31 @@
         xhr.onreadystatechange = function() {
                 if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
                   let comments = JSON.parse(xhr.response)
-                  insertComent(document.getElementById("ul-comments"), comments)                                   
+                  insertComents(document.getElementById("ul-comments"), comments)                                   
                 }
               }
       xhr.send()
     }
   }  
+
+  /**
+  *  get last posted comments
+  */
+  let initComments = function(){
+      let xhr = new XMLHttpRequest()        
+      xhr.open("GET", `${document.URL}/comments`, true)     // get comments, no need for login
+      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+      xhr.onreadystatechange = function() {
+              if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                let comments = JSON.parse(xhr.response)
+                insertComents(document.getElementById("ul-comments"), comments)                                   
+              }
+            }
+      xhr.send()
+  }
+  initComments()
+
+  
 
 </script>
 
