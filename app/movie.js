@@ -1,14 +1,14 @@
 'use strict'
-const fs =  require('fs')
 
 function movie() {
-    this.title = null,
-    this.id = null,
-    this.releaseDate = null, 
-    this.voteAverage = null,
+    this.title = null
+    this.id = null
+    this.releaseDate = null 
+    this.voteAverage = null
     this.poster_path = null
-    this.totalpage =null
-    
+    this.totalpage = null 
+    this.comments = []
+    return this   
 }
 
 function createMovie(tocreateMovie){
@@ -24,13 +24,6 @@ function createMovie(tocreateMovie){
     return arrmov
 }
 
-/*
-fs.readFile('teste_jason_moviesearch.txt',function (err,data) {
-    if(err) throw err
-    createMovie(data)
-         
-})
-*/
 
 module.exports = {
     'movie':movie,

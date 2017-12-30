@@ -3,6 +3,7 @@
 const router = require('express').Router()
 const favlist = require('./favlist')
 const userstorage = require('./CouchDb')
+const Movie = require('./movie').movie
 
 const logger = (msg) => {console.log('Midleware Lists: ' + msg); return msg;}
 const PAGE_LIMIT = 5
@@ -152,7 +153,7 @@ function getListItems(req, resp, next){
             movies.forEach( (movie) => {
                 dataobj.list_items.push({
                     'item_id' : movie.id,
-                    'item_name' : movie.name,
+                    'item_name' : movie.title,
                     'item_path' : `/movies/${movie.id}`
                 })
             }) 
@@ -160,7 +161,8 @@ function getListItems(req, resp, next){
     })
 }
 /**
- * Adds a movie to user favorit list
+ * Adds a movie to user favorit list, this action takes
+ * two access to database
  * duplicates are allowed
  * @param {*} req 
  * @param {*} resp 
@@ -168,11 +170,10 @@ function getListItems(req, resp, next){
 function putListItem(req, resp){
     let user = req.user
     let listid = req.params.listId
-    let movie = {
-        'id' : req.params.movieId,
-        'name' : req.body.movie_title
-    }
-
+    let movie = new Movie()
+    movie.id = req.params.movieId
+    movie.title = req.body.movie_title 
+   
     let dataobj = {}
 
     logger(`Adding ${movie.id} to list ${listid}`)
@@ -185,15 +186,17 @@ function putListItem(req, resp){
         }          
     }
 
-    userstorage.createMovie(movie, (error, cmovie) => {
-        if(error){
+    //try to get movie from db, on fail create one
+    userstorage.createOnGetMovie(movie, (error, existingmovie)=>{
+        if(error){              //on error try to create
             resp.send(error)
             return
         }
-        dataobj.cmovie = cmovie
+        dataobj.cmovie = existingmovie
         dataCollect()
     })
-        
+   
+    //get user, add movie id to user list and update user object    
     userstorage.getUser(user.name, (error, dbuser) =>{
         if(error){
             resp.send(error)

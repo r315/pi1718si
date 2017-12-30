@@ -17,19 +17,32 @@ let options = {
         'setUri' : function(path){this.uri =`${serveraddress}/${path}`}
     }
 
+const respFinish = function(error, body, cb){
+    if(error){
+        cb(error,null)
+        return
+    }
+    let doc = JSON.parse(body)
+    if(doc.error){
+        cb(doc,null)
+        return
+    }
+    cb(null,doc)
+}
+
 function createDocument(doc, cb){
     options.setUri(doc.id)
     request.put(options, function(error, resp, body){        
-        logger(`Status on put: ${resp.statusCode}-${resp.statusMessage}`)
-        cb(error,JSON.parse(body))
+        logger(`PUT ${doc.id} ${resp.statusCode}-${resp.statusMessage}`)
+        respFinish(error,body,cb)
       }).form(JSON.stringify(doc.form))
 }
 
 function getDocument(docid, cb){
     options.setUri(docid)
     request.get(options, function(error, resp, body){        
-        logger(`Status on get: ${resp.statusCode}-${resp.statusMessage}`)
-        cb(error,JSON.parse(body))
+        logger(`GET ${docid} ${resp.statusCode}-${resp.statusMessage}`)
+        respFinish(error,body,cb)
       })
 }
 
@@ -37,8 +50,8 @@ function deleteDocument(doc, cb){
     options.setUri(doc.id)
     options.headers['If-Match'] = doc.form['_rev']
     request.delete(options, function(error, resp, body){        
-        logger(`Status on delete: ${resp.statusCode}-${resp.statusMessage}`)
-        cb(error,JSON.parse(body))
+        logger(`DELETE ${doc.id} ${resp.statusCode}-${resp.statusMessage}`)
+        respFinish(error,body,cb)
       })
 }
 
@@ -63,12 +76,42 @@ function createMovie(movie, cb){
     }, cb)
 }
 
+function getMovie(movieid, cb){ 
+    getDocument(`${moviesdb}/${movieid}`, cb)
+}
+
 function removeMovie(movie, cb){
     deleteDocument({
         'id' : `${moviesdb}/${movie.id}`,
         'form' : movie
     }, cb)
-}        
+} 
+/**
+ * Trys to get a movie from db, if unsuccessful
+ * creates one
+ * @param {object} movie 
+ * @param {function} cb 
+ */
+function createOnGetMovie(movie, cb){
+     // create movie
+     function createMov(mv){
+        createMovie(mv, (error, cmovie) => {
+            if(error){              // if error something is wrong...
+                cb(error, null)
+                return
+            }
+           cb(null,cmovie)
+        })
+    }
+
+    getMovie(movie.id, (error, existingmovie)=>{
+        if(error){              //on error try to create
+            createMov(movie)
+            return
+        }
+        cb(null,existingmovie)
+    })
+}
 
 function createDataBase(name){
     let doc = {
@@ -96,7 +139,7 @@ function createDb(){
  * @param {object} comment 
  * @param {function} cb 
  */
-function postComment(comment, cb){
+function postComment(movieid, comment, cb){
         options.setUri(commendsdb)
         options.body = JSON.stringify(comment)
         options.method = 'POST'
@@ -118,7 +161,7 @@ function postComment(comment, cb){
  * @param {*} end 
  * @param {*} cb 
  */
-function getComments(stat, end, cb){
+function getComments(movieid, stat, end, cb){
     function extractComments(error, data){
         if(error){
             cb(error, null)
@@ -164,9 +207,10 @@ module.exports = {
     'deleteUser' : removeUser,
 
     'createMovie' : createMovie,
-    'getMovie' : function getMovie(movieid, cb){ getDocument(`${moviesdb}/${movieid}`, cb)},
+    'getMovie' : getMovie,
     'updateMovie' : createMovie,
     'deleteMovie' : removeMovie,
+    'createOnGetMovie' : createOnGetMovie,
     
     'insertUser' : createUser,
 
