@@ -26,6 +26,7 @@ function createMovieDetails (movieInfo, movieCredits) {
     md.originaltitle = obj.original_title
     md.poster_path = obj.poster_path
     md.posterurl = ""
+    md.overview = obj.overview
     JSON.parse(movieCredits).crew.forEach( function(elem) { 
         if(elem.job=='Director') { 
             let ac = new castCrew()
@@ -42,8 +43,7 @@ function createMovieDetails (movieInfo, movieCredits) {
         ac.character = elem.character
         md.castitemdto.push(ac)
      })
-    return md
-    
+    return md    
 }
 
 

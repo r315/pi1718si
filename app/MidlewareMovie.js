@@ -35,7 +35,8 @@ function endpointMovie(req, resp, next){
         let dataobj = {
             'movie_title' : movie.title,
             'movie_director' : movie.directordto.map((elem) => elem.name).join(', '),
-            'poster_url' : movie.posterurl,             
+            'poster_url' : movie.posterurl,
+            'movie_overview' : movie.overview,             
             'movie_cast': [],    
             'user_home' : "/login", 
             'show_lists' : 'false',
