@@ -8,7 +8,18 @@ const CONFIG_FILE = 'server.json'
 let serveraddress = ''
 const usersdb = 'users'
 const moviesdb = 'movies'
-const commendsdb = 'comments'
+const commentsdb = 'comments'
+
+const couchdbview = {
+    'id' : `${commentsdb}/_design/filters`,
+    'form' : {
+                "language": "javascript",
+                "views": { 
+                            "paging": { "map": "function(doc) {\n  emit(null, doc);\n}" },
+                            "user": { "map": "function(doc) {\n  emit(doc.username, doc);\n}" }
+                        }
+            }
+}
 
 let options = {
         headers: {
@@ -117,14 +128,14 @@ function createOnGetMovie(movie, cb){
 
 function createDataBase(name){
     let doc = {
-        'id':usersdb
+        'id':name
     }
     createDocument(doc, (error, doc) => {
-        if(error || doc.error){
-            logger( `Error ${error ? error : doc.reason}`)    
+        if(error){
+            logger( `Error: ${error.error}, Reason: ${error.reason}`)    
             return
         }
-        logger( `${name} created!`)    
+        logger( `database \"${name}\" created!`)
     })
 }
 
@@ -132,6 +143,8 @@ function createDb(){
     createDataBase(usersdb)
     createDataBase(moviesdb)
     createDataBase(commentsdb)
+    createDocument(couchdbview, (error, view) => {
+        logger(error ? `Error: ${error.error}, Reason: ${error.reason}` : `{ok:\"${view.ok}\",id:\"${view.id}\", rev: \"${view.rev}}\"` )})
 }
 
 /**
@@ -142,7 +155,7 @@ function createDb(){
  * @param {function} cb 
  */
 function postComment(comment, cb){
-        options.setUri(commendsdb)
+        options.setUri(commentsdb)
         options.body = JSON.stringify(comment)
         options.method = 'POST'
         request(options, function(error, resp, body){        
@@ -164,7 +177,7 @@ function postComment(comment, cb){
  * @param {*} cb 
  */
 function getComments(cmntid, stat, end, cb){   
-    getDocument(`${commendsdb}/${cmntid}`, (error, cmnt) => {
+    getDocument(`${commentsdb}/${cmntid}`, (error, cmnt) => {
         if(error){
             cb(error, null)
             return

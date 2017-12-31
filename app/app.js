@@ -27,7 +27,11 @@ const VIEWS_PATH = '../views'
  */
 const commands = {
     'quit' : function () {logger('Exiting...'); process.exit()},
-    'help' : function() { console.log('\nhelp\tthis message\nquit\tquit application\n') },
+    'help' : function() { console.log(
+                                        '\nhelp\tthis message',
+                                        '\nquit\tquit application',
+                                        '\ninitdb\t initialize couchdb'
+                                    )},
     'initdb' : function() { console.log('Initialising database'); couchdb.initdb() }
 }
 
@@ -91,5 +95,3 @@ app.use(cache)
 process.openStdin().addListener('data', commandInputHandler)
 commandOut(prompt)
 startServer(process.argv[2])
-
-
