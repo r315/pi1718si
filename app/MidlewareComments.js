@@ -6,7 +6,9 @@ const bodyparser = require('body-parser')
 const Movie = require('./movie').movie
 
 const logger = (msg) => {console.log('Midleware Comments: ' + msg); return msg;}
-
+/**
+ * TODO: ensure isertion order, paging/stop reply when there are no more comments
+ */
 router.get('/', (req, resp) => { 
     let movieid = req.baseUrl.split('/')[2]  //  /movies/{id}/comments    
     let comments = []
@@ -56,7 +58,7 @@ router.post('/', bodyparser.json(), (req, resp) => {
                 resp.send(error)
                 return
             }
-            cmovie.comments.push(comment.id)
+            cmovie.comments.push(comment.id)            
             couchdb.updateMovie(cmovie, (error, cmovie)=>{                
                 resp.send(error ? error.reason : comment)  // return comment with id
             })            

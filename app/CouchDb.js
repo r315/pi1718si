@@ -101,9 +101,8 @@ function createOnGetMovie(movie, cb){
                 cb(error, null)
                 return
             }
-            cmovie._rev = cmovie.rev    // fix for allow update 
-            delete cmovie.rev
-           cb(null,cmovie)
+            movie._rev = cmovie.rev    // fix for allow update            
+            cb(null,movie)
         })
     }
 
